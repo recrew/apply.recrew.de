@@ -1,7 +1,7 @@
 {
   "short_name": "apply.recrew.de",
   "name": "apply.recrew.de",
-  "start_url": "https://sroehrl.github.io/svelte-flowbite-boilerplate/",
+  "start_url": "https://sroehrl.github.io/apply.recrew.de/",
   "icons": [
     {
       "src": "icon-512x512.png",
