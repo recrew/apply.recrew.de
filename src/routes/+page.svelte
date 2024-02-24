@@ -1,17 +1,19 @@
-<script>
+<script lang="ts">
     import {Button, Checkbox, Dropzone, Heading, Input, Label, Select, Textarea} from "flowbite-svelte";
+    import {goto} from "$app/navigation";
     import {
         NewspaperSolid, UserCircleSolid,
     } from "flowbite-svelte-icons";
     import Botr from "$lib/components/Botr.svelte";
-    import QrCode from "svelte-qrcode"
+
+    import {formDataPost} from "$lib/api";
 
     let preview = null;
     let form;
     let valid = false;
 
     let candidate= {
-        fistname:'',
+        firstname:'',
         lastname:'',
         email:'',
         mobile:'',
@@ -74,8 +76,16 @@
         reader.readAsDataURL(candidate.photo);
     }
 
-    const submit = (event) => {
-        console.log(candidate)
+    const submit = async () => {
+        valid = false;
+        try{
+            const res = await formDataPost('/hr/application', candidate)
+            goto('/thank-you')
+
+        }
+        catch (e){
+            alert(e)
+        }
     }
 
 
@@ -115,17 +125,15 @@
                     Werde ein Teil unserer Crew und bewirb dich noch heute bei uns! Wir freuen uns auf deine (Schnell)
                     Bewerbung.
                 </p>
-                <Heading tag="h5">Lust mit deinen Freunden zu arbeiten?</Heading>
-                <p></p>
-                <QrCode value="https://sroehrl/github.com/" class="mt-3"/>
+
             </div>
-            <div class="col-span-3 lg:col-span-2 rounded-lg border border-gray-500 shadow shadow-gray-400 py-3 px-4">
+            <div class="col-span-3 lg:col-span-2 rounded-lg shadow shadow-primary-400 py-3 px-4">
                 <Heading tag="h3">Schnellbewerbung</Heading>
                 <form bind:this={form} on:submit|preventDefault={submit} class="mt-4">
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <div>
                             <Label for="first_name" class="mb-2">Vorname</Label>
-                            <Input bind:value={candidate.fistname} type="text" id="first_name" placeholder="Max" required />
+                            <Input bind:value={candidate.firstname} type="text" id="first_name" placeholder="Max" required />
                         </div>
                         <div>
                             <Label for="last_name" class="mb-2">Nachname</Label>

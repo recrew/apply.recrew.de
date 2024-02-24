@@ -50,7 +50,7 @@ onMount(() => {
         <p class="dark:text-white">Generiert</p>
         <div class="grid grid-cols-3 grid-rows-3 w-[60px]">
             {#each solution as item,i}
-                <div class="border h-[20px] {item.value?'bg-neutral-300':'bg-neutral-100'}">
+                <div class="border h-[20px] {item.value?'bg-neutral-400':'bg-neutral-100'}">
                 </div>
             {/each}
         </div>
@@ -60,7 +60,7 @@ onMount(() => {
         <p class="dark:text-white">Deine Kopie</p>
         <div class="grid grid-cols-3 grid-rows-3 w-[60px]">
             {#each boxes as item,i}
-                <div class="border h-[20px] {item.value?'bg-neutral-300':'bg-neutral-100'}"
+                <div class="border h-[20px] {item.value?'bg-neutral-400':'bg-neutral-100'}"
                      role="button"
                      tabindex="0"
                      on:keypress={() => onClick(i)}

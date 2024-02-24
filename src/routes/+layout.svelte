@@ -28,8 +28,8 @@
     </NavBrand>
     <NavHamburger on:click={toggle} />
     <NavUl {hidden}>
-        <NavLi href="{base}/docs" active={$page.url.pathname.endsWith('docs')}>DOCS</NavLi>
-        <NavLi href="https://github.com/sroehrl/svelte-flowbite-boilerplate#readme" >
+<!--        <NavLi href="{base}/docs" active={$page.url.pathname.endsWith('docs')}>DOCS</NavLi>-->
+        <NavLi href="https://github.com/https://github.com/recrew" >
             <GithubSolid/>
         </NavLi>
     </NavUl>
