@@ -1,5 +1,5 @@
 export default {
-    primary: "#8E8DBE",
+    primary: "#82cff2",
     secondary: "#A9E4EF",
     mint: "#3AB795",
     moss: "#8B9556",

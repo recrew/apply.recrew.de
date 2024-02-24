@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Button, Checkbox, Dropzone, Heading, Input, Label, Select, Textarea} from "flowbite-svelte";
+    import {Button, Checkbox, Dropzone, Heading, Helper, Input, Label, Select, Textarea} from "flowbite-svelte";
     import {goto} from "$app/navigation";
     import {
         NewspaperSolid, UserCircleSolid,
@@ -7,6 +7,8 @@
     import Botr from "$lib/components/Botr.svelte";
 
     import {formDataPost} from "$lib/api";
+    import {page} from "$app/stores";
+    import {modalStore} from "$lib/stores/modal";
 
     let preview = null;
     let form;
@@ -17,8 +19,8 @@
         lastname:'',
         email:'',
         mobile:'',
-        region:'',
-        application_field:'Service',
+        region: $page.url.searchParams.get('region') || '',
+        application_field: $page.url.searchParams.get('application') || 'Service',
         letter_motivation:'',
         photo: null,
         reCapRes:'',
@@ -43,14 +45,13 @@
         { value: 'Backoffice', name: 'Backoffice' },
     ].sort((a,b) => a.name.localeCompare(b.name));
 
-    const dropHandle = (event) => {
+    const dropHandle = (event: DragEvent) => {
         candidate.photo = null;
         event.preventDefault();
         if (event.dataTransfer.items) {
             [...event.dataTransfer.items].forEach((item, i) => {
                 if (item.kind === 'file') {
-                    const file = item.getAsFile();
-                    candidate.photo = file;
+                    candidate.photo = item.getAsFile();
                 }
             });
         } else {
@@ -84,7 +85,8 @@
 
         }
         catch (e){
-            alert(e)
+            $modalStore.content = "Es ist ein Fehler aufgetreten: " + e;
+            $modalStore.toggle()
         }
     }
 
@@ -114,9 +116,8 @@
         </div>
         <div class="grid grid-cols-3 gap-3">
             <div class="col-span-3 lg:col-span-1 dark:text-white">
-                <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">
-
-                    <NewspaperSolid class="w-6 h-6 inline"/>
+                <div class="hidden md:flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">
+                    <img class="w-10 h-10 inline" src="/apple-touch-icon.png" alt="CR">
                 </div>
                 <p class="font-semibold mb-2">
                     Täglich neue Jobs und Aufgaben als Teil einer familiären Crew meistern:
@@ -128,7 +129,7 @@
 
             </div>
             <div class="col-span-3 lg:col-span-2 rounded-lg shadow shadow-primary-400 py-3 px-4">
-                <Heading tag="h3">Schnellbewerbung</Heading>
+                <Heading class="text-neutral-600" tag="h3">Schnellbewerbung</Heading>
                 <form bind:this={form} on:submit|preventDefault={submit} class="mt-4">
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <div>
@@ -155,6 +156,7 @@
                             <div>
                                 <Label for="letter_motivation" class="mb-2">Du willst ins Team weil...</Label>
                                 <Textarea bind:value={candidate.letter_motivation} rows="6" id="letter_motivation" required />
+                                <Helper class="mt-2" color="green">{candidate.letter_motivation.length}/700</Helper>
                             </div>
                         </div>
                         <div class="mt-2">
@@ -164,12 +166,12 @@
                                       }}
                                       on:change={handleChange}>
                                 {#if !candidate.photo}
-                                    <UserCircleSolid class="w-12 h-12 dark:text-white"/>
-                                    <Heading tag="h4">Bild hochladen</Heading>
+                                    <UserCircleSolid class="w-12 h-12 text-primary-800/70 dark:text-white"/>
+                                    <Heading class="text-neutral-600" tag="h4">Bild hochladen</Heading>
                                     <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Klicken</span> oder drag & drop</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">PNG oder JPG</p>
                                 {:else}
-                                    <img src={preview} alt="">
+                                    <img class="max-h-full max-w-full" src={preview} alt="profile-pic">
                                 {/if}
 
                             </Dropzone>
