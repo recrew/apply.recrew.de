@@ -62,5 +62,5 @@ export const formDataPost = async (url:string, postData:any) => {
     if(call.status >= 200 && call.status <= 299){
         return await call.json();
     }
-    throw Error(call.statusText)
+    throw Error(call.status + ' - ' + call.statusText + ' - ' + JSON.stringify(await call.json()))
 }

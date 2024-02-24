@@ -142,6 +142,10 @@
                             <Input bind:value={candidate.lastname} type="text" id="last_name" placeholder="Mustermann" required />
                         </div>
                         <div>
+                            <Label for="email" class="mb-2">E-Mail</Label>
+                            <Input bind:value={candidate.email} type="email" id="email" placeholder="max.mustermann@googlemail.com" required />
+                        </div>
+                        <div>
                             <Label for="mobile" class="mb-2">Handynummer</Label>
                             <Input bind:value={candidate.mobile} type="text" id="mobile" placeholder="+49 161 123456" required />
                         </div>
@@ -149,17 +153,16 @@
                             <Label for="region" class="mb-2">Region</Label>
                             <Select bind:value={candidate.region} id="region" required items={regions} />
                         </div>
-                        <div class="space-y-6">
-                            <div>
-                                <Label for="application_field" class="mb-2">Einsatzbereich</Label>
-                                <Select bind:value={candidate.application_field} id="application_field" required items={application_fields} />
-                            </div>
-                            <div>
-                                <Label for="letter_motivation" class="mb-2">Du willst ins Team weil...</Label>
-                                <Textarea bind:value={candidate.letter_motivation} rows="6" id="letter_motivation" required />
-                                <Helper class="mt-2" color="green">{candidate.letter_motivation.length}/700</Helper>
-                            </div>
+                        <div>
+                            <Label for="application_field" class="mb-2">Einsatzbereich</Label>
+                            <Select bind:value={candidate.application_field} id="application_field" required items={application_fields} />
                         </div>
+                        <div>
+                            <Label for="letter_motivation" class="mb-2">Du willst ins Team weil...</Label>
+                            <Textarea minlength="100" maxlength="700" bind:value={candidate.letter_motivation} rows="9" id="letter_motivation" required />
+                            <Helper class="mt-1" color={(candidate.letter_motivation.length < 100 || candidate.letter_motivation.length > 700)  ? 'red' : 'green'}>{candidate.letter_motivation.length}/700</Helper>
+                        </div>
+
                         <div class="mt-2">
                             <Dropzone on:drop={dropHandle}
                                       on:dragover={(event) => {
@@ -181,7 +184,7 @@
                     </div>
                     <div class="grid gap-3">
                         <Botr bind:valid/>
-                        <Checkbox required>Ich bin mit der Verarbeitung meiner Daten einverstanden <span class="text-xs pl-2">(<a class="visited:text-blue-600 hover:text-blue-600 text-blue-500" href="https://www.recrew.info/kopie-von-dsgvo">Datenschutzerklärung</a>)</span></Checkbox>
+                        <Checkbox required>Ich bin mit der Verarbeitung meiner Daten einverstanden <span class="text-xs pl-2">(<a class="visited:text-blue-600 hover:text-blue-600 text-blue-500" rel="nofollow noopener" target="_blank" href="https://www.recrew.info/kopie-von-dsgvo">Datenschutzerklärung</a>)</span></Checkbox>
                         <Button disabled={!valid} type="submit">BEWERBEN</Button>
 
                     </div>
