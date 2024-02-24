@@ -9,6 +9,7 @@
     import {formDataPost} from "$lib/api";
     import {page} from "$app/stores";
     import {modalStore} from "$lib/stores/modal";
+    import {base} from "$app/paths";
 
     let preview = null;
     let form;
@@ -117,7 +118,7 @@
         <div class="grid grid-cols-3 gap-3">
             <div class="col-span-3 lg:col-span-1 dark:text-white">
                 <div class="hidden md:flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">
-                    <img class="w-10 h-10 inline" src="%sveltekit.assets%/apple-touch-icon.png" alt="CR">
+                    <img class="w-10 h-10 inline" src="{$page.url.origin}/apple-touch-icon.png" alt="CR">
                 </div>
                 <p class="font-semibold mb-2">
                     Täglich neue Jobs und Aufgaben als Teil einer familiären Crew meistern:
