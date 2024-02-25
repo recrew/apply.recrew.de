@@ -10,6 +10,7 @@
     import {page} from "$app/stores";
     import {modalStore} from "$lib/stores/modal";
     import {base} from "$app/paths";
+    import {onMount} from "svelte";
 
     let preview = null;
     let form;
@@ -80,6 +81,9 @@
 
     const submit = async () => {
         valid = false;
+        if(!candidate.photo){
+            delete candidate.photo
+        }
         try{
             const res = await formDataPost('/hr/application', candidate)
             goto('/thank-you')
@@ -89,7 +93,9 @@
             $modalStore.content = "Es ist ein Fehler aufgetreten: " + e;
             $modalStore.toggle()
         }
+        valid = true;
     }
+
 
 
 </script>
@@ -147,7 +153,7 @@
                         </div>
                         <div>
                             <Label for="mobile" class="mb-2">Handynummer</Label>
-                            <Input bind:value={candidate.mobile} type="text" id="mobile" placeholder="+49 161 123456" required />
+                            <Input bind:value={candidate.mobile} pattern={'[\\+]\\d{1,3}\\s*\\d{3,4}\\s*\\d{7}'} type="text" id="mobile" placeholder="+49 161 123456" required />
                         </div>
                         <div>
                             <Label for="region" class="mb-2">Region</Label>
