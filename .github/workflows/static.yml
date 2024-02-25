@@ -33,10 +33,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 18.x
-    - name: create env file
-      run: |
-        touch .env
-        echo PUBLIC_API_PATH=https://api.celest.services/api >> .env
+#    - name: create env file
+#      run: |
+#        touch .env
+#        echo PUBLIC_API_PATH=https://api.celest.services/api >> .env
     - name: npm install and npm test
       run: |
         npm i
