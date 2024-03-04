@@ -1,0 +1,38 @@
+<script lang="ts">
+    import Box from "$lib/components/Box.svelte";
+    import {Input, Label, Select, Toggle} from "flowbite-svelte";
+    import {onMount} from "svelte";
+    import {get} from "$lib/api";
+    export let employee: any
+    let insurances: any[] = []
+    onMount(async() => {
+        insurances = (await get('/hr/reference/Krankenkassen')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name))
+    })
+</script>
+
+<Box title="Krankenversicherung">
+    <div class="mt-2">
+        <Toggle bind:checked={employee.healthInsurance.isPublic}>Gesetzlich versichert?</Toggle>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-2">
+        <div>
+            <Label for="insurance-name" class="mb-2">{employee.healthInsurance.isPublic ? '' : 'Private '} Krankenversicherung</Label>
+            {#if employee.healthInsurance.isPublic}
+                <Select bind:value={employee.healthInsurance.insuranceName} id="insurance-name" items={insurances} />
+            {:else}
+                <Input type="text" bind:value={employee.healthInsurance.insuranceName} id="insurance-name"/>
+            {/if}
+
+        </div>
+        <div>
+            <Label for="insurance-number" class="mb-2">Versicherungsnummer</Label>
+            <Input type="number" bind:value={employee.healthInsurance.insuranceNumber} id="insurance-number"/>
+        </div>
+    </div>
+    {#if employee.healthInsurance.isPublic}
+        <div class="mt-2">
+            <Label for="insurance-place" class="mb-2">Ort gesetzliche VK</Label>
+            <Input type="text" bind:value={employee.healthInsurance.insurancePlace} id="insurance-place"/>
+        </div>
+    {/if}
+</Box>
