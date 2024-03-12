@@ -86,7 +86,7 @@
         }
         try{
             const res = await formDataPost('/hr/application', candidate)
-            goto('/thank-you')
+            goto(base + '/thank-you')
 
         }
         catch (e){

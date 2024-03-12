@@ -14,7 +14,7 @@
         countries = (await get('/hr/reference/Staaten')).map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name));
     })
 </script>
-<Box title="Adresse">
+<div title="Adresse">
     {#if employee.address}
     <div class="grid grid-cols-3 gap-3 mt-2">
         <div class="col-span-2 ">
@@ -39,4 +39,4 @@
         </div>
     </div>
     {/if}
-</Box>
+</div>

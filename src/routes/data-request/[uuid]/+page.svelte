@@ -1,18 +1,22 @@
 <script lang="ts">
     import {onMount} from "svelte";
-    import {get} from "$lib/api";
+    import {get, formDataPost} from "$lib/api";
     import {page} from "$app/stores";
-    import {Alert, Avatar, Heading, Hr, P, Spinner} from "flowbite-svelte";
+    import {Alert, Button, Heading, Hr, P, Spinner} from "flowbite-svelte";
     import {InfoCircleSolid} from "flowbite-svelte-icons";
-    import BaseData from "$lib/partials/BaseData.svelte";
-    import AddressData from "$lib/partials/AddressData.svelte";
     import TaxData from "$lib/partials/TaxData.svelte";
     import HealthInsuranceData from "$lib/partials/HealthInsuranceData.svelte";
     import BankData from "$lib/partials/BankData.svelte";
     import QualificationData from "$lib/partials/QualificationData.svelte";
+    import BaseData from "$lib/partials/BaseData.svelte";
 
     let error = false;
     let employee:any;
+
+    const update = async () => {
+        await formDataPost('/hr/application', employee)
+        console.log({employee})
+    }
 
     onMount(() => {
         get('/hr/applicant/' + $page.params.uuid + '/data-sheet').then((res) => {
@@ -37,25 +41,22 @@
         </p>
     {/if}
     {#if employee && !error}
-        <Heading class="dark:text-white text-neutral-700" tag="h1">Hallo, {employee.name}</Heading>
-        <P class="my-5">
-            Schön, dass du dich für RECREW bewirbst. Im nächsten Schritt brauchen wir die nötigen Daten, um den Papierkram erledigen zu können.
-        </P>
-        <div class="flex gap-5">
-            {#if employee.avatarFile}
-                <Avatar src={employee.avatarFile} rounded size="xl" />
-            {/if}
+        <form on:submit|preventDefault={() => update()}>
+            <Heading class="dark:text-white text-neutral-700" tag="h1">Hallo, {employee.name}</Heading>
+            <P class="my-5">
+                Schön, dass du dich für RECREW bewirbst. Im nächsten Schritt brauchen wir die nötigen Daten, um den Papierkram erledigen zu können.
+            </P>
             <BaseData bind:employee/>
-        </div>
-        <div class="grid md:grid-cols-2 gap-3 mt-2">
-            <AddressData bind:employee/>
-            <BankData bind:employee/>
-            <TaxData bind:employee/>
-            <HealthInsuranceData bind:employee/>
-        </div>
-        <Hr/>
-        <QualificationData bind:employee/>
+            <QualificationData bind:employee/>
 
+            <TaxData bind:employee/>
+            <Hr/>
+            <BankData bind:employee/>
+            <HealthInsuranceData bind:employee/>
+            <div class="grid mt-3">
+                <Button type="submit">Speichern</Button>
+            </div>
+        </form>
     {:else}
         <Spinner /> <span class="dark:text-white text-lg pl-3">Loading ...</span>
     {/if}

@@ -1,0 +1,220 @@
+{
+  ".svelte-kit/generated/server/internal.js": {
+    "file": "internal.js",
+    "src": ".svelte-kit/generated/server/internal.js",
+    "isEntry": true,
+    "imports": [
+      "_internal.js",
+      "_paths.js"
+    ]
+  },
+  "_Frame.js": {
+    "file": "chunks/Frame.js",
+    "imports": [
+      "_utils.js",
+      "_ssr.js",
+      "_names.js"
+    ]
+  },
+  "_GithubSolid.js": {
+    "file": "chunks/GithubSolid.js",
+    "imports": [
+      "_utils.js",
+      "_ssr.js"
+    ]
+  },
+  "_Heading.js": {
+    "file": "chunks/Heading.js",
+    "imports": [
+      "_utils.js",
+      "_ssr.js",
+      "_names.js"
+    ]
+  },
+  "_TwitterSolid.js": {
+    "file": "chunks/TwitterSolid.js",
+    "imports": [
+      "_utils.js",
+      "_ssr.js",
+      "_Frame.js"
+    ]
+  },
+  "_UserCircleSolid.js": {
+    "file": "chunks/UserCircleSolid.js",
+    "imports": [
+      "_utils.js",
+      "_ssr.js",
+      "_names.js"
+    ]
+  },
+  "_api.js": {
+    "file": "chunks/api.js",
+    "imports": [
+      "_index.js"
+    ]
+  },
+  "_client.js": {
+    "file": "chunks/client.js",
+    "imports": [
+      "_exports.js"
+    ]
+  },
+  "_exports.js": {
+    "file": "chunks/exports.js"
+  },
+  "_index.js": {
+    "file": "chunks/index.js",
+    "imports": [
+      "_utils.js"
+    ]
+  },
+  "_internal.js": {
+    "file": "chunks/internal.js",
+    "imports": [
+      "_ssr.js",
+      "_paths.js"
+    ]
+  },
+  "_modal.js": {
+    "file": "chunks/modal.js",
+    "imports": [
+      "_index.js"
+    ]
+  },
+  "_names.js": {
+    "file": "chunks/names.js"
+  },
+  "_paths.js": {
+    "file": "chunks/paths.js"
+  },
+  "_ssr.js": {
+    "file": "chunks/ssr.js",
+    "imports": [
+      "_utils.js"
+    ]
+  },
+  "_stores.js": {
+    "file": "chunks/stores.js",
+    "imports": [
+      "_ssr.js",
+      "_client.js"
+    ]
+  },
+  "_utils.js": {
+    "file": "chunks/utils.js"
+  },
+  "node_modules/@sveltejs/kit/src/runtime/components/error.svelte": {
+    "file": "entries/fallbacks/error.svelte.js",
+    "src": "node_modules/@sveltejs/kit/src/runtime/components/error.svelte",
+    "isEntry": true,
+    "imports": [
+      "_utils.js",
+      "_ssr.js",
+      "_stores.js"
+    ]
+  },
+  "node_modules/@sveltejs/kit/src/runtime/server/index.js": {
+    "file": "index.js",
+    "src": "node_modules/@sveltejs/kit/src/runtime/server/index.js",
+    "isEntry": true,
+    "imports": [
+      "_paths.js",
+      "_exports.js",
+      "_index.js",
+      "_internal.js"
+    ]
+  },
+  "src/lib/i18n/de.json": {
+    "file": "chunks/de.js",
+    "src": "src/lib/i18n/de.json",
+    "isDynamicEntry": true
+  },
+  "src/routes/+layout.svelte": {
+    "file": "entries/pages/_layout.svelte.js",
+    "src": "src/routes/+layout.svelte",
+    "isEntry": true,
+    "imports": [
+      "_ssr.js",
+      "_utils.js",
+      "_Frame.js",
+      "_index.js",
+      "_GithubSolid.js",
+      "_names.js",
+      "_client.js",
+      "_paths.js",
+      "_modal.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_layout.DIzjqj9n.css"
+    ]
+  },
+  "src/routes/+layout.ts": {
+    "file": "entries/pages/_layout.ts.js",
+    "src": "src/routes/+layout.ts",
+    "isEntry": true,
+    "imports": [
+      "_index.js"
+    ],
+    "dynamicImports": [
+      "src/lib/i18n/de.json"
+    ]
+  },
+  "src/routes/+page.svelte": {
+    "file": "entries/pages/_page.svelte.js",
+    "src": "src/routes/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_utils.js",
+      "_ssr.js",
+      "_UserCircleSolid.js",
+      "_Heading.js",
+      "_client.js",
+      "_api.js",
+      "_stores.js",
+      "_modal.js",
+      "_paths.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.DymJcYVG.css"
+    ]
+  },
+  "src/routes/data-request/[uuid]/+page.svelte": {
+    "file": "entries/pages/data-request/_uuid_/_page.svelte.js",
+    "src": "src/routes/data-request/[uuid]/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_utils.js",
+      "_ssr.js",
+      "_api.js",
+      "_stores.js"
+    ]
+  },
+  "src/routes/docs/+page.svelte": {
+    "file": "entries/pages/docs/_page.svelte.js",
+    "src": "src/routes/docs/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_ssr.js",
+      "_utils.js",
+      "_Frame.js",
+      "_GithubSolid.js",
+      "_TwitterSolid.js",
+      "_index.js",
+      "_Heading.js",
+      "_UserCircleSolid.js",
+      "_names.js",
+      "_modal.js"
+    ]
+  },
+  "src/routes/thank-you/+page.svelte": {
+    "file": "entries/pages/thank-you/_page.svelte.js",
+    "src": "src/routes/thank-you/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_ssr.js",
+      "_TwitterSolid.js",
+      "_Heading.js",
+      "_utils.js"
+    ]
+  }
+}
