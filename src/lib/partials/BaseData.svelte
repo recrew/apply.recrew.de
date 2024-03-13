@@ -16,7 +16,6 @@
     import Box from "$lib/components/Box.svelte";
     import AddressData from "$lib/partials/AddressData.svelte";
     import Tesseract from "$lib/components/Tesseract.svelte";
-    import {loadConfigFromFile} from "vite";
 
     export let employee: any
 

@@ -19,7 +19,7 @@
     }
 
     onMount(() => {
-        get('/hr/applicant/' + $page.params.uuid + '/data-sheet').then((res) => {
+        get('/hr/applicant/' + $page.url.searchParams.get('sheet') + '/data-sheet').then((res) => {
             employee = res
             console.log({employee})
         }).catch((e) => {

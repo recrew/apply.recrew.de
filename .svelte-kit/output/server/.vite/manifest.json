@@ -189,6 +189,11 @@
       "_stores.js"
     ]
   },
+  "src/routes/data-request/[uuid]/+page.ts": {
+    "file": "entries/pages/data-request/_uuid_/_page.ts.js",
+    "src": "src/routes/data-request/[uuid]/+page.ts",
+    "isEntry": true
+  },
   "src/routes/docs/+page.svelte": {
     "file": "entries/pages/docs/_page.svelte.js",
     "src": "src/routes/docs/+page.svelte",

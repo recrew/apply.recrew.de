@@ -13,7 +13,7 @@ export const server_loads = [];
 
 export const dictionary = {
 		"/": [2],
-		"/data-request/[uuid]": [3],
+		"/data-request": [3],
 		"/docs": [4],
 		"/thank-you": [5]
 	};

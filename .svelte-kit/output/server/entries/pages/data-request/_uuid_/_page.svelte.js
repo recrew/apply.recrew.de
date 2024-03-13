@@ -4,7 +4,6 @@ import "../../../../chunks/api.js";
 import { p as page } from "../../../../chunks/stores.js";
 import { twMerge } from "tailwind-merge";
 import "tesseract.js";
-import "vite";
 const Spinner = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["color", "bg", "customColor", "size", "currentFill", "currentColor"]);
   let { color = "primary" } = $$props;

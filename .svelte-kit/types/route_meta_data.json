@@ -3,7 +3,7 @@
 		"src/routes/+layout.ts",
 		"src/routes/+layout.ts"
 	],
-	"/data-request/[uuid]": [
+	"/data-request": [
 		"src/routes/+layout.ts"
 	],
 	"/docs": [
