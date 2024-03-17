@@ -50,16 +50,20 @@
     $: {
         if(avatarFiles && avatarFiles.length > 0){
             employee.avatarFile = avatarFiles[0]
-            // console.log(avatarFiles)
         }
     }
     const generateBlob = () => {
-        return ''
-        // return URL.createObjectURL(employee.avatarFile)
+        if(typeof employee.avatarFile === 'string'){
+            return 'https://recrew-employees.s3.eu-north-1.amazonaws.com/' + employee.avatarFile
+        }
+        return URL.createObjectURL(employee.avatarFile)
     }
     onMount(async () => {
         if(employee.images.length < 1){
             employee.images = [{documentNumber: '', imageTag: 'id-card', file: null}]
+        }
+        if(employee.dateOfBirth.value){
+            employee.dateOfBirth.value = employee.dateOfBirth.value.split(' ')[0]
         }
         items = await get('/hr/reference/Staatsangehoerigkeiten')
         items = items.map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name))
@@ -106,7 +110,7 @@
         </div>
         <div>
             <Label for="familyStatus" class="mb-2">Familienstand</Label>
-            <Select bind:value={employee.familyStatus} id="familyStatus">
+            <Select bind:value={employee.cv.familyStatus} id="familyStatus">
                 <option value="single">ledig</option>
                 <option value="married">verheiratet</option>
                 <option value="registered_partnership">eingetragene Lebenspartnerschaft</option>
@@ -117,12 +121,12 @@
         </div>
         <div>
             <Label for="nationality" class="mb-2">Staatsanghörigkeit</Label>
-            <Select bind:value={employee.nationality} id="nationality" {items} required />
+            <Select bind:value={employee.cv.nationality} id="nationality" {items} required />
         </div>
 
 
     </div>
-    {#if employee.nationality && !isEu(employee.nationality)}
+    {#if employee.cv.nationality && !isEu(employee.cv.nationality)}
         <Alert class="mt-3" border color="red">
             <Heading tag="h4">Staatsangehörigkeit außerhalb EWR</Heading>
             <P class="dark:text-white">Die Bearbeitung geht schneller, wenn du erforderliche Dokumente (Aufenthaltserlaubnis, Arbeitserlaubnis, etc) schon bereit stellst. Aber keine Sorge, du kannst diese Nachweise auch später nachreichen.</P>
@@ -138,14 +142,14 @@
                 </Listgroup>
             </div>
         </Alert>
-    {:else if employee.nationality}
+    {:else if employee.cv.nationality}
         <div class="grid grid-cols-2 gap-3 mt-2">
             <div>
                 <Tesseract options={idOptions} on:ocr={ev => idReader(ev.detail)}/>
             </div>
-            {#if employee.images[0].file}
+            {#if employee.images[0]?.file}
             <div>
-                <Label for="id" class="mb-2">{employee.images[0].type === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer</Label>
+                <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer</Label>
                 <Input bind:value={employee.images[0].documentNumber} type="text" id="id" required />
                 <Helper class="mt-2" color="green">
                     Bitte maschinell gescanntes Ergebnis überprüfen!

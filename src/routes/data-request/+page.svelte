@@ -9,13 +9,19 @@
     import BankData from "$lib/partials/BankData.svelte";
     import QualificationData from "$lib/partials/QualificationData.svelte";
     import BaseData from "$lib/partials/BaseData.svelte";
+    import {modalStore} from "$lib/stores/modal";
 
     let error = false;
     let employee:any;
 
     const update = async () => {
-        await formDataPost('/hr/application', employee)
-        console.log({employee})
+        await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', employee)
+        $modalStore.registerConfig({
+            content: 'Du kannst diese Seite nun schließen.',
+            title: 'Erfolgreich gespeichert',
+        })
+        $modalStore.toggle()
+
     }
 
     onMount(() => {

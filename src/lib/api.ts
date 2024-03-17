@@ -64,8 +64,11 @@ export const formDataPost = async (url:string, postData:any) => {
 
 
 const formConverter = (data:any, form:FormData): FormData => {
+    console.log({data})
     Object.keys(data).forEach(key => {
-        if (typeof data[key] === 'object') {
+        if(data[key] instanceof File) {
+            form.append(key, data[key]);
+        } else if (typeof data[key] === 'object') {
             Object.keys(data[key]).forEach(subKey => {
                 if(typeof data[key][subKey] === 'object' && data[key][subKey] !== null) {
                     Object.keys(data[key][subKey]).forEach(subSubKey => {
