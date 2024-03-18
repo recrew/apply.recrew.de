@@ -6,6 +6,9 @@
     export let employee: any
     let insurances: any[] = []
     onMount(async() => {
+        if(!employee.healthInsurance){
+            employee.healthInsurance = {}
+        }
         insurances = (await get('/hr/reference/Krankenkassen')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name))
     })
 </script>
