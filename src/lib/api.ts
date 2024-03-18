@@ -54,7 +54,7 @@ export const formDataPost = async (url:string, postData:any) => {
     const options = getOptions('post')
     delete options.headers['Content-Type']
     const data = new FormData();
-    options.body = formConverter(postData, data);;
+    options.body = formConverter(postData, data);
     const call = await fetch(PUBLIC_API_PATH + url, options)
     if(call.status >= 200 && call.status <= 299){
         return await call.json();
