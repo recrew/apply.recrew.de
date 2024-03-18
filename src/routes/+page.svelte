@@ -165,8 +165,8 @@
                         </div>
                         <div>
                             <Label for="letter_motivation" class="mb-2">Du willst ins Team weil...</Label>
-                            <Textarea minlength="100" maxlength="700" bind:value={candidate.letter_motivation} rows="9" id="letter_motivation" required />
-                            <Helper class="mt-1" color={(candidate.letter_motivation.length < 100 || candidate.letter_motivation.length > 700)  ? 'red' : 'green'}>{candidate.letter_motivation.length}/700</Helper>
+                            <Textarea minlength="10" maxlength="700" bind:value={candidate.letter_motivation} rows="9" id="letter_motivation" required />
+                            <Helper class="mt-1" color={(candidate.letter_motivation.length < 10 || candidate.letter_motivation.length > 700)  ? 'red' : 'green'}>{candidate.letter_motivation.length}/700</Helper>
                         </div>
 
                         <div class="mt-2">
