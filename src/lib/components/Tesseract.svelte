@@ -15,7 +15,8 @@
         value: 'license'
     }]
     let text = '';
-    let files: FileList|null;
+    let input;
+    let files: FileList;
     let preview: any;
     let type: string;
     let loading = false;
@@ -91,14 +92,14 @@
         {#if type}
             <div class="mb-2">
                 <Label for="type" class="mb-2">Dokument</Label>
-                <Fileupload accept="image/*, application/pdf" bind:files/>
+                <Fileupload accept="image/*, application/pdf" bind:files  bind:value={input}/>
             </div>
         {/if}
     </div>
 
     {#if preview && !loading}
         <div class="relative w-1/2">
-            <Button class="absolute top-0 right-0 !p-2" color="red" on:click={() => {files = null; preview = null}}><CloseCircleSolid class="w-3"/></Button>
+            <Button class="absolute top-0 right-0 !p-2" color="red" on:click={() => {input= ''; files = null; preview = null}}><CloseCircleSolid class="w-3"/></Button>
             <img class="py-2" src={preview} alt="preview"/>
         </div>
 

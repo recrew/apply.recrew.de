@@ -10,6 +10,8 @@
     export let data;
     export let inputClass = '';
 
+    export const required = false;
+
     export let icon = PenSolid;
 
     export let extract = (item) => item;
@@ -104,7 +106,7 @@
         {/if}
         <Input
                 bind:this={searchRef}
-                required
+                required={required}
                 class={inputClass}
                 on:focus={onFocus}
                 on:blur={onBlur}

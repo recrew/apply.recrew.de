@@ -10,14 +10,19 @@
     import QualificationData from "$lib/partials/QualificationData.svelte";
     import BaseData from "$lib/partials/BaseData.svelte";
     import {modalStore} from "$lib/stores/modal";
+    import DatasheetSaved from "$lib/partials/DatasheetSaved.svelte";
 
     let error = false;
     let employee:any;
 
     const update = async () => {
-        await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', employee)
+        let updateObject = {...employee};
+        if(employee.avatarFile && typeof employee.avatarFile === 'string'){
+            delete updateObject.avatarFile;
+        }
+        await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', updateObject)
         $modalStore.registerConfig({
-            content: 'Du kannst diese Seite nun schließen.',
+            component: DatasheetSaved,
             title: 'Erfolgreich gespeichert',
         })
         $modalStore.toggle()
