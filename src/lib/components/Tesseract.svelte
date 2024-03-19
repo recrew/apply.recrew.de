@@ -35,11 +35,7 @@
         reader.onload = () => {
             preview = reader.result
 
-            /*loading = true;
-
-            readOcr().then(() => {
-                loading = false;
-            })*/
+            readOcr()
         }
     }
 
