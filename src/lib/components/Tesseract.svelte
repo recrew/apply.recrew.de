@@ -1,7 +1,8 @@
 <script lang="ts">
     import {createWorker, PSM} from 'tesseract.js';
-    import {Fileupload, Label, Select, Spinner} from "flowbite-svelte";
+    import {Button, Fileupload, Label, Select, Spinner} from "flowbite-svelte";
     import {createEventDispatcher, onMount} from "svelte";
+    import {CloseCircleSolid} from "flowbite-svelte-icons";
 
     export let options = [{
         name: 'Personalausweis',
@@ -14,7 +15,7 @@
         value: 'license'
     }]
     let text = '';
-    let files: FileList;
+    let files: FileList|null;
     let preview: any;
     let type: string;
     let loading = false;
@@ -31,15 +32,18 @@
         const reader = new FileReader();
         reader.readAsDataURL(files[0]);
         reader.onload = () => {
-            loading = true;
             preview = reader.result
+
+            /*loading = true;
+
             readOcr().then(() => {
                 loading = false;
-            })
+            })*/
         }
     }
 
     const readOcr = async () => {
+        loading = true;
         const worker = await createWorker('deu', 1);
         await worker.setParameters({
             tessedit_pageseg_mode: PSM.SPARSE_TEXT_OSD,
@@ -60,6 +64,7 @@
             }
         })
         await worker.terminate();
+        loading = false;
     }
 
     $: {
@@ -74,24 +79,30 @@
     })
 
 </script>
-<div>
-    {#if options.length > 1}
-        <div class="mb-2">
-            <Label for="type" class="mb-2">Dokumenttyp</Label>
-            <Select bind:value={type} items={options} placeholder="Typ"/>
+<article>
+    <div>
+        {#if options.length > 1}
+            <div class="mb-2">
+                <Label for="type" class="mb-2">Dokumenttyp</Label>
+                <Select bind:value={type} items={options} placeholder="Typ"/>
+            </div>
+
+        {/if}
+        {#if type}
+            <div class="mb-2">
+                <Label for="type" class="mb-2">Dokument</Label>
+                <Fileupload accept="image/*, application/pdf" bind:files/>
+            </div>
+        {/if}
+    </div>
+
+    {#if preview && !loading}
+        <div class="relative w-1/2">
+            <Button class="absolute top-0 right-0 !p-2" color="red" on:click={() => {files = null; preview = null}}><CloseCircleSolid class="w-3"/></Button>
+            <img class="py-2" src={preview} alt="preview"/>
         </div>
 
+    {:else if loading}
+        <Spinner class="m-5"/>
     {/if}
-    {#if type}
-        <div class="mb-2">
-            <Label for="type" class="mb-2">Dokument</Label>
-            <Fileupload accept="image/*" bind:files/>
-        </div>
-    {/if}
-</div>
-
-{#if preview && !loading}
-    <img class="py-2" src={preview} alt="preview"/>
-{:else if loading}
-    <Spinner class="m-5"/>
-{/if}
+</article>

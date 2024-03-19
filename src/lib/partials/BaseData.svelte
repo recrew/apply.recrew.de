@@ -16,6 +16,8 @@
     import Box from "$lib/components/Box.svelte";
     import AddressData from "$lib/partials/AddressData.svelte";
     import Tesseract from "$lib/components/Tesseract.svelte";
+    import Typeahead from "$lib/components/Typeahead.svelte";
+    import {GlobeSolid} from "flowbite-svelte-icons";
 
     export let employee: any
 
@@ -106,12 +108,12 @@
         </div>
         <div>
             <Label for="maidenName" class="mb-2">Geburtsname</Label>
-            <Input bind:value={employee.maidenName} type="text" id="maidenName" required />
+            <Input bind:value={employee.maidenName} type="text" id="maidenName" />
         </div>
         <div>
             <Label for="familyStatus" class="mb-2">Familienstand</Label>
             <Select bind:value={employee.cv.familyStatus} id="familyStatus">
-                <option value="single">ledig</option>
+                <option value="single">ledig / single</option>
                 <option value="married">verheiratet</option>
                 <option value="registered_partnership">eingetragene Lebenspartnerschaft</option>
                 <option value="divorced">geschieden</option>
@@ -121,7 +123,7 @@
         </div>
         <div>
             <Label for="nationality" class="mb-2">Staatsanghörigkeit</Label>
-            <Select bind:value={employee.cv.nationality} id="nationality" {items} required />
+            <Typeahead bind:value={employee.cv.nationality} id="nationality" data={items} icon={GlobeSolid} />
         </div>
 
 

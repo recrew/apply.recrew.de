@@ -3,6 +3,7 @@
     import {Helper, Input, Label, Select} from "flowbite-svelte";
     import {onMount} from "svelte";
     import {get} from "$lib/api";
+    import Typeahead from "$lib/components/Typeahead.svelte";
     export let employee: any
 
     let taxClasses: any[] = []
@@ -17,7 +18,9 @@
     }
 
     onMount(async() =>{
-        taxClasses = (await get('/hr/reference/Steuerklassen')).map((n) => ({...n, name: n.key + ': ' + n.value})).sort((a,b) => a.key - b.key);
+        taxClasses = (await get('/hr/reference/Steuerklassen')).map((n) => ({...n, name: n.key + ': ' + n.value}))
+            .sort((a,b) => a.key - b.key)
+            .filter(n => n.key < 8);
         religiousAffiliations = (await get('/hr/reference/Kirchensteuer')).map((n) => ({...n, name: n.value})).sort((a,b) => a.key - b.key);
     })
 </script>
@@ -25,11 +28,8 @@
 <Box title="Lohnsteuer">
     <div class="grid gap-3 mt-2">
         <div>
-            <Label class="mb-2" for="taxId">SV-Nummer</Label>
+            <Label class="mb-2" for="taxId">SV-Nummer <span class="text-xs">(Sozialversicherungsnummer)</span></Label>
             <Input id="taxId" bind:value={employee.cv.socialSecurityNumber} />
-            <Helper class="text-sm">
-                Sozialversicherungsnummer
-            </Helper>
         </div>
         <div>
             <Label class="mb-2" for="taxId">Steuer ID</Label>
@@ -47,11 +47,9 @@
         </div>
         <div>
             <Label class="mb-2" for="religion">Religionszugehörigkeit</Label>
-            <Select id="religion" bind:value={employee.cv.religiousAffiliation} items={religiousAffiliations} />
+            <Typeahead bind:value={employee.cv.religiousAffiliation} id="religion" data={religiousAffiliations} />
+<!--            <Select id="religion" bind:value={employee.cv.religiousAffiliation} items={religiousAffiliations} />-->
         </div>
     </div>
-    <div class="mt-2">
-        <Label class="mb-2" for="taxId">Familienstand</Label>
-        <span class="dark:text-white">{familyStati[employee.familyStatus] || 'Nicht bekannt'}</span>
-    </div>
+
 </Box>

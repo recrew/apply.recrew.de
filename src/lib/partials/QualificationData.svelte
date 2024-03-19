@@ -25,8 +25,12 @@
     let experiences = [
         'Promoter', 'Kundenservice', 'Rezeption', 'sonstiger Job', 'Servicekraft',
         'Barkeeper', 'Koch', 'Barista', 'Model', 'Messehost/ess',
-        'Eventhelfer', 'Verkäufer'
-    ].map((n) => ({name: n, value: n}));
+        'Eventhelfer', 'Verkäufer', 'keine Erfahrung', 'Logistik', 'Einzelhandel'
+    ].sort().map((n) => ({name: n, value: n}));
+
+    let shirtSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((n) => ({name: n, value: n}));
+    let pantSizesWoman = [32, 34, 36, 38, 40, 42, 44, 46, 48].map((n) => ({name: n, value: n}));
+    let pantSizesMan = [46, 48, 50, 52, 54].map((n) => ({name: n, value: n}));
 
     const bindLicensee = (ev: CustomEvent) => {
         employee.images[licenseIndex].file = ev.detail.file
@@ -69,12 +73,12 @@
             <Select id="graduation" bind:value={employee.cv.currentStatus} items={stati} />
         </div>
         <div>
-            <Label class="mb-2" for="graduation">Erfahrung</Label>
-            <Select id="graduation" bind:value={employee.cv.workExperiences} items={experiences} />
+            <Label class="mb-2" for="experience">Erfahrung</Label>
+            <Select id="experience" bind:value={employee.cv.workExperiences} items={experiences} />
         </div>
         <div>
-            <Label class="mb-2" for="graduation">Hemdgröße</Label>
-            <Input id="graduation" bind:value={employee.cv.shirtSize} />
+            <Label class="mb-2" for="shirt">Hemdgröße</Label>
+            <Select id="shirt" bind:value={employee.cv.shirtSize} items={shirtSizes} />
         </div>
         <div>
             <div class="mt-6">
@@ -84,20 +88,24 @@
         {#if employee.cv.motorvehicleLicense}
         <Tesseract options={[{name: 'Führerschein', value: 'license'}]} on:ocr={bindLicensee} />
         <div>
-            <Label class="mb-2" for="graduation">Führerscheinnummer</Label>
-            <Input id="graduation" bind:value={employee.images[licenseIndex].documentNumber} />
+            <Label class="mb-2" for="license">Führerscheinnummer</Label>
+            <Input id="license" bind:value={employee.images[licenseIndex].documentNumber} />
             <Helper class="mt-2" color="green">
                 Bitte maschinell gescanntes Ergebnis überprüfen!
             </Helper>
         </div>
         {/if}
         <div>
-            <Label class="mb-2" for="graduation">Hosengröße</Label>
-            <Input id="graduation" bind:value={employee.cv.pantsSize} />
+            <Label class="mb-2" for="pants">Hosengröße</Label>
+            <Select id="pants" bind:value={employee.cv.pantsSize} items={employee.gender === 'male' ? pantSizesMan : pantSizesWoman} />
         </div>
         <div>
-            <Label class="mb-2" for="graduation">Schuhgröße</Label>
-            <Input type="number" id="graduation" bind:value={employee.cv.shoeSize} />
+            <Label class="mb-2" for="shoe">Schuhgröße (EU)</Label>
+            <Select id="shoe" bind:value={employee.cv.shoeSize} >
+                {#each [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49] as size}
+                    <option value={size}>{size}</option>
+                {/each}
+            </Select>
         </div>
         <div>
             <Label class="mb-2" for="graduation">Körpergröße (cm)</Label>

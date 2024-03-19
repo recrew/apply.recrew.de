@@ -3,6 +3,7 @@
     import {Input, Label, Select, Toggle} from "flowbite-svelte";
     import {onMount} from "svelte";
     import {get} from "$lib/api";
+    import Typeahead from "$lib/components/Typeahead.svelte";
     export let employee: any
     let insurances: any[] = []
     onMount(async() => {
@@ -22,7 +23,8 @@
             <div>
                 <Label for="insurance-name" class="mb-2">{employee.healthInsurance.isPublic ? '' : 'Private '} Krankenversicherung</Label>
                 {#if employee.healthInsurance.isPublic}
-                    <Select bind:value={employee.healthInsurance.insuranceName} id="insurance-name" items={insurances} />
+                    <Typeahead bind:value={employee.healthInsurance.insuranceName} id="insurance-name" data={insurances} />
+<!--                    <Select bind:value={employee.healthInsurance.insuranceName} id="insurance-name" items={insurances} />-->
                 {:else}
                     <Input type="text" bind:value={employee.healthInsurance.insuranceName} id="insurance-name"/>
                 {/if}
