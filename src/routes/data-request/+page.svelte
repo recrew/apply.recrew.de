@@ -39,7 +39,7 @@
     })
 
 </script>
-<div class="my-8 w-4/5 mx-auto">
+<div class="my-8 px-2 max-w-screen-lg mx-auto">
     {#if error}
         <Alert border color="red">
             <InfoCircleSolid slot="icon" class="w-4 h-4" />
