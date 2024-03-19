@@ -83,11 +83,11 @@
     <div class="grid grid-cols-2 gap-3 mt-2">
         <div>
             <Label for="firstName" class="mb-2">Vorname</Label>
-            <Input type="text" bind:value={employee.firstName} id="firstName"/>
+            <Input type="text" bind:value={employee.firstName} id="firstName" required/>
         </div>
         <div>
             <Label for="lastName" class="mb-2">Nachname</Label>
-            <Input type="text" bind:value={employee.lastName} id="lastName"/>
+            <Input type="text" bind:value={employee.lastName} id="lastName" required/>
         </div>
 
         <div>
@@ -100,11 +100,11 @@
         </div>
         <div>
             <Label for="placeOfBirth" class="mb-2">Geburtsort</Label>
-            <Input type="text" bind:value={employee.cv.placeOfBirth} id="placeOfBirth"/>
+            <Input type="text" bind:value={employee.cv.placeOfBirth} id="placeOfBirth" required/>
         </div>
         <div>
             <Label for="dob" class="mb-2">Geburtsdatum</Label>
-            <Input type="date" bind:value={employee.dateOfBirth.value} id="dob"/>
+            <Input type="date" bind:value={employee.dateOfBirth.value} id="dob" required/>
         </div>
         <div>
             <Label for="maidenName" class="mb-2">Geburtsname</Label>
@@ -125,7 +125,6 @@
             <Label for="nationality" class="mb-2">Staatsanghörigkeit</Label>
             <Typeahead bind:value={employee.cv.nationality} id="nationality" data={items} icon={GlobeSolid} />
         </div>
-
 
     </div>
     {#if employee.cv.nationality && !isEu(employee.cv.nationality)}
