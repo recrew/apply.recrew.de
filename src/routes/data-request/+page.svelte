@@ -20,11 +20,20 @@
         if(employee.avatarFile && typeof employee.avatarFile === 'string'){
             delete updateObject.avatarFile;
         }
-        await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', updateObject)
-        $modalStore.registerConfig({
-            component: DatasheetSaved,
-            title: 'Erfolgreich gespeichert',
-        })
+        try{
+            await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', updateObject)
+            $modalStore.registerConfig({
+                component: DatasheetSaved,
+                title: 'Erfolgreich gespeichert',
+            })
+        } catch (e) {
+            $modalStore.registerConfig({
+                content: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.',
+                title: 'Ups...',
+            })
+        }
+
+
         $modalStore.toggle()
 
     }

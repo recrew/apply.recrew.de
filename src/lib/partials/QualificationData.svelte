@@ -32,11 +32,25 @@
     let pantSizesWoman = [32, 34, 36, 38, 40, 42, 44, 46, 48].map((n) => ({name: n, value: n}));
     let pantSizesMan = [46, 48, 50, 52, 54].map((n) => ({name: n, value: n}));
 
-    const bindLicensee = (ev: CustomEvent) => {
+    const bindLicense1 = (ev: CustomEvent) => {
         employee.images[licenseIndex].file = ev.detail.file
         employee.images[licenseIndex].documentNumber = ev.detail.text
-        employee.images[licenseIndex].imageTag = ev.detail.type
-        console.log(employee.images)
+    }
+    const bindLicense2 = (ev: CustomEvent) => {
+        const preExisting = employee.images.filter((n) => n.imageTag === 'license').length > 1;
+        if(!preExisting) {
+            employee.images = [...employee.images, {documentNumber: null, imageTag: 'license', file: null}]
+        }
+        const index = employee.images.findIndex((n) => n.imageTag === 'license' && n.documentNumber === null);
+        employee.images[index].file = ev.detail.file
+    }
+    const bindStudentVerification = (ev: CustomEvent) => {
+        const preExisting = employee.images.findIndex((n) => n.imageTag === 'student-verification');
+        if(preExisting < 0) {
+            employee.images = [...employee.images, {documentNumber: null, imageTag: 'student-verification', file: ev.detail.file}]
+        } else {
+            employee.images[preExisting].file = ev.detail.file
+        }
     }
 
     $: {
@@ -59,19 +73,22 @@
 </script>
 
 <Box title="Qualifikationen">
-    <div class="grid grid-cols-2 gap-3 mt-2">
+    <div class="grid grid-cols-2 gap-y-3 gap-x-4 mt-2">
         <div>
             <Label class="mb-2" for="graduation">Schulabschluss</Label>
             <Select id="graduation" bind:value={employee.cv.graduation} items={graduations} />
         </div>
         <div>
-            <Label class="mb-2" for="graduation">Ausbildung</Label>
-            <Select id="graduation" bind:value={employee.cv.degree} items={degrees} />
+            <Label class="mb-2" for="edu">Ausbildung</Label>
+            <Select id="edu" bind:value={employee.cv.degree} items={degrees} />
         </div>
         <div>
-            <Label class="mb-2" for="graduation">Aktueller Status</Label>
-            <Select id="graduation" bind:value={employee.cv.currentStatus} items={stati} />
+            <Label class="mb-2" for="status">Aktueller Status</Label>
+            <Select id="status" bind:value={employee.cv.currentStatus} items={stati} />
         </div>
+        {#if employee.cv.currentStatus === 'Student/in'}
+            <Tesseract options={[{name: 'Immatrikulationsbescheinigung', value: 'student-verification'}]} noRead={true} on:ocr={bindStudentVerification} />
+        {/if}
         <div>
             <Label class="mb-2" for="experience">Erfahrung</Label>
             <Select id="experience" bind:value={employee.cv.workExperiences} items={experiences} />
@@ -81,12 +98,12 @@
             <Select id="shirt" bind:value={employee.cv.shirtSize} items={shirtSizes} />
         </div>
         <div>
-            <div class="mt-6">
+            <div class="mt-8">
                 <Toggle bind:checked={employee.cv.motorvehicleLicense} >Führerschein</Toggle>
             </div>
         </div>
         {#if employee.cv.motorvehicleLicense}
-        <Tesseract options={[{name: 'Führerschein', value: 'license'}]} on:ocr={bindLicensee} />
+        <Tesseract options={[{name: 'Führerschein Vorderseite', value: 'license'}]} on:ocr={bindLicense1} />
         <div>
             <Label class="mb-2" for="license">Führerscheinnummer</Label>
             <Input id="license" bind:value={employee.images[licenseIndex].documentNumber} />
@@ -94,6 +111,7 @@
                 Bitte maschinell gescanntes Ergebnis überprüfen!
             </Helper>
         </div>
+        <Tesseract options={[{name: 'Führerschein Rückseite', value: 'license'}]} noRead={true} on:ocr={bindLicense2} />
         {/if}
         <div>
             <Label class="mb-2" for="pants">Hosengröße</Label>

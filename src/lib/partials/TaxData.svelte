@@ -4,6 +4,7 @@
     import {onMount} from "svelte";
     import {get} from "$lib/api";
     import Typeahead from "$lib/components/Typeahead.svelte";
+    import {MountainSunSolid} from "flowbite-svelte-icons";
     export let employee: any
 
     let taxClasses: any[] = []
@@ -47,7 +48,7 @@
         </div>
         <div>
             <Label class="mb-2" for="religion">Religionszugehörigkeit</Label>
-            <Typeahead bind:value={employee.cv.religiousAffiliation} id="religion" data={religiousAffiliations} />
+            <Typeahead icon={MountainSunSolid} bind:value={employee.cv.religiousAffiliation} id="religion" data={religiousAffiliations} />
 <!--            <Select id="religion" bind:value={employee.cv.religiousAffiliation} items={religiousAffiliations} />-->
         </div>
     </div>
