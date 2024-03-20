@@ -37,7 +37,7 @@
         </div>
         {#if employee.healthInsurance.isPublic}
             <div class="mt-2">
-                <Label for="insurance-place" class="mb-2">Ort gesetzliche VK</Label>
+                <Label for="insurance-place" class="mb-2">Ort gesetzliche KV</Label>
                 <Input type="text" bind:value={employee.healthInsurance.insurancePlace} id="insurance-place"/>
             </div>
         {/if}

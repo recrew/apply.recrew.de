@@ -19,7 +19,7 @@
     }
 
     onMount(async() =>{
-        taxClasses = (await get('/hr/reference/Steuerklassen')).map((n) => ({...n, name: n.key + ': ' + n.value}))
+        taxClasses = (await get('/hr/reference/Steuerklassen')).map((n) => ({...n, name: n.key + ': ' + n.value, value: parseInt(n.key)}))
             .sort((a,b) => a.key - b.key)
             .filter(n => n.key < 8);
         religiousAffiliations = (await get('/hr/reference/Kirchensteuer')).map((n) => ({...n, name: n.value})).sort((a,b) => a.key - b.key);
@@ -49,7 +49,6 @@
         <div>
             <Label class="mb-2" for="religion">Religionszugehörigkeit</Label>
             <Typeahead icon={MountainSunSolid} bind:value={employee.cv.religiousAffiliation} id="religion" data={religiousAffiliations} />
-<!--            <Select id="religion" bind:value={employee.cv.religiousAffiliation} items={religiousAffiliations} />-->
         </div>
     </div>
 

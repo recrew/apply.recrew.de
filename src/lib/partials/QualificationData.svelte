@@ -29,8 +29,8 @@
     ].sort().map((n) => ({name: n, value: n}));
 
     let shirtSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((n) => ({name: n, value: n}));
-    let pantSizesWoman = [32, 34, 36, 38, 40, 42, 44, 46, 48].map((n) => ({name: n, value: n}));
-    let pantSizesMan = [46, 48, 50, 52, 54].map((n) => ({name: n, value: n}));
+    let pantSizesWoman = [32, 34, 36, 38, 40, 42, 44, 46, 48].map((n) => ({name: n, value: "" + n}));
+    let pantSizesMan = [46, 48, 50, 52, 54].map((n) => ({name: n, value: "" + n}));
 
     const bindLicense1 = (ev: CustomEvent) => {
         employee.images[licenseIndex].file = ev.detail.file
