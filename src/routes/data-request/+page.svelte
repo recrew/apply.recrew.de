@@ -21,12 +21,20 @@
             delete updateObject.avatarFile;
         }
         try{
-            await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', updateObject)
+            // await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', updateObject)
+            for (let i = 0; i < updateObject.images.length; i++) {
+                if(!updateObject.images[i].file) {
+                    continue
+                }
+                await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/image', updateObject.images[i])
+            }
+
             $modalStore.registerConfig({
                 component: DatasheetSaved,
                 title: 'Erfolgreich gespeichert',
             })
         } catch (e) {
+            console.log(e)
             $modalStore.registerConfig({
                 content: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.',
                 title: 'Ups...',
@@ -41,6 +49,9 @@
     onMount(() => {
         get('/hr/applicant/' + $page.url.searchParams.get('sheet') + '/data-sheet').then((res) => {
             employee = res
+            if(employee.cv.motorVehicleLicense === '0'){
+                employee.cv.motorVehicleLicense = false;
+            }
             console.log({employee})
         }).catch((e) => {
             error = true;

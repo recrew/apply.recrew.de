@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
+    import {createEventDispatcher, onMount} from "svelte";
     import {Input, Label} from "flowbite-svelte";
     import {CheckOutline, CloseOutline, IconSolid, PenSolid} from "flowbite-svelte-icons";
 
@@ -26,7 +26,8 @@
     let valid = false;
 
     $: filteredItems = !value || value.length === 0 ? [] : data
-        .filter(x => typeof x[displayProperty] === 'string' ? x[displayProperty].toLowerCase().includes(value.hasOwnProperty('toLowerCase') ? value.toLowerCase(): value) : x[displayProperty].toString().includes(value))
+        .filter(x => typeof x[displayProperty] === 'string' ? x[displayProperty].toLowerCase().includes(value.toLowerCase()) : x[displayProperty].toString().toLowerCase().includes(value.toLowerCase()))
+
 
     /*if(value && data){
         value = data.find(x => x.value === value)[displayProperty] || value

@@ -28,9 +28,9 @@
         'Eventhelfer', 'Verkäufer', 'keine Erfahrung', 'Logistik', 'Einzelhandel'
     ].sort().map((n) => ({name: n, value: n}));
 
-    let shirtSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((n) => ({name: n, value: n}));
+    let shirtSizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'].map((n) => ({name: n, value: n}));
     let pantSizesWoman = [32, 34, 36, 38, 40, 42, 44, 46, 48].map((n) => ({name: n, value: "" + n}));
-    let pantSizesMan = [46, 48, 50, 52, 54].map((n) => ({name: n, value: "" + n}));
+    let pantSizesMan = [46, 48, 50, 52, 54, 56].map((n) => ({name: n, value: "" + n}));
 
     const bindLicense1 = (ev: CustomEvent) => {
         employee.images[licenseIndex].file = ev.detail.file
@@ -54,7 +54,7 @@
     }
 
     $: {
-        if(employee.cv.motorvehicleLicense) {
+        if(employee.cv.motorVehicleLicense) {
             licenseIndex = employee.images.findIndex((n) => n.imageTag === 'license');
             if(licenseIndex < 0) {
                 employee.images = [...employee.images, {documentNumber: '', imageTag: 'license', file: null}]
@@ -65,7 +65,6 @@
 
 
     onMount(async() => {
-
         graduations = (await get('/hr/reference/Schulabschluss')).map((n) => ({...n, name: n.value}));
     })
 
@@ -99,10 +98,10 @@
         </div>
         <div>
             <div class="mt-8">
-                <Toggle bind:checked={employee.cv.motorvehicleLicense} >Führerschein</Toggle>
+                <Toggle bind:checked={employee.cv.motorVehicleLicense} >Führerschein</Toggle>
             </div>
         </div>
-        {#if employee.cv.motorvehicleLicense}
+        {#if employee.cv.motorVehicleLicense}
         <Tesseract options={[{name: 'Führerschein Vorderseite', value: 'license'}]} on:ocr={bindLicense1} />
         <div>
             <Label class="mb-2" for="license">Führerscheinnummer</Label>
@@ -120,7 +119,7 @@
         <div>
             <Label class="mb-2" for="shoe">Schuhgröße (EU)</Label>
             <Select id="shoe" bind:value={employee.cv.shoeSize} >
-                {#each [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49] as size}
+                {#each [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53] as size}
                     <option value={size}>{size}</option>
                 {/each}
             </Select>

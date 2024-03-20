@@ -2,7 +2,7 @@
     import {createWorker, PSM} from 'tesseract.js';
     import {Button, Fileupload, Label, Select, Spinner, Tooltip} from "flowbite-svelte";
     import {createEventDispatcher, onMount} from "svelte";
-    import {CloseCircleSolid, QuestionCircleOutline} from "flowbite-svelte-icons";
+    import {CloseCircleSolid, ImageOutline, QuestionCircleOutline} from "flowbite-svelte-icons";
     import {modalStore} from "$lib/stores/modal";
     import UploadTips from "$lib/partials/UploadTips.svelte";
 
@@ -84,6 +84,15 @@
         $modalStore.toggle()
     }
 
+    const showPreviewLightbox = () => {
+        $modalStore.registerConfig({
+            content: '<img src="' + preview + '"/>',
+            title: "Vorschau",
+
+        })
+        $modalStore.toggle()
+    }
+
     $: {
         if (files) {
             readFile()
@@ -108,17 +117,21 @@
         {/if}
         {#if type}
             <div class="mb-2">
-                <Label for="type" class="mb-2">{options[0].name} <QuestionCircleOutline size="sm" class="inline cursor-pointer" on:click={showHelp}/></Label>
+                <Label  class="mb-2">{options.find(x => x.value === type)?.name || 'Dokument'} <QuestionCircleOutline size="xs" class="inline cursor-pointer" on:click={showHelp}/></Label>
                 <Fileupload accept="image/*, application/pdf" bind:files  bind:value={input}/>
             </div>
         {/if}
     </div>
     {/if}
     {#if preview && !loading}
-        <div class="flex justify-end relative pr-4">
-            <Button pill={true} class="absolute top-0 right-0 !p-2" color="red" on:click={() => {files = null; preview = null}}><CloseCircleSolid class="w-4"/></Button>
+        <Label  class="mb-2">{options.find(x => x.value === type)?.name || 'Dokument'} <QuestionCircleOutline size="xs" class="inline cursor-pointer" on:click={showHelp}/></Label>
+        <div class="flex gap-3 relative">
+            <p>{files[0].name}</p>
+            <Button pill={true} class="right-0 !p-2"  on:click={() => showPreviewLightbox()}><ImageOutline class="w-4"/></Button>
+            <Tooltip>Vorschau</Tooltip>
+            <Button pill={true} class="!p-2" color="red" on:click={() => {files = null; preview = null}}><CloseCircleSolid class="w-4"/></Button>
             <Tooltip>Löschen</Tooltip>
-            <img class="py-2 max-h-24" src={preview} alt="preview"/>
+
         </div>
 
     {:else if loading}

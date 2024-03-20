@@ -7,6 +7,6 @@ import {modalStore} from "$lib/stores/modal";
     {#if $modalStore.component}
         <svelte:component this={$modalStore.component} />
     {:else}
-        {$modalStore.content}
+        {@html $modalStore.content}
     {/if}
 </Modal>
