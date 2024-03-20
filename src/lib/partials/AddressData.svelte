@@ -19,23 +19,23 @@
     <div class="grid grid-cols-3 gap-3 mt-2">
         <div class="col-span-2 ">
             <Label for="street" class="mb-2">Straße</Label>
-            <Input type="text" bind:value={employee.address.street} id="street"/>
+            <Input type="text" bind:value={employee.address.street} id="street" required/>
         </div>
         <div>
             <Label for="number" class="mb-2">Hausnummer</Label>
-            <Input type="text" bind:value={employee.address.number} id="number"/>
+            <Input type="text" bind:value={employee.address.number} id="number" required/>
         </div>
         <div class="col-span-2 ">
             <Label for="place" class="mb-2">Ort</Label>
-            <Input type="text" bind:value={employee.address.place} id="place"/>
+            <Input type="text" bind:value={employee.address.place} id="place" required/>
         </div>
         <div>
             <Label for="plz" class="mb-2">PLZ</Label>
-            <Input type="text" bind:value={employee.address.zip} id="plz"/>
+            <Input type="text" bind:value={employee.address.zip} id="plz" required/>
         </div>
         <div class="col-span-3">
             <Label for="country" class="mb-2">Land</Label>
-            <Select bind:value={employee.address.country} items={countries} id="country"/>
+            <Select bind:value={employee.address.country} items={countries} id="country" required/>
         </div>
     </div>
     {/if}
