@@ -24,6 +24,7 @@
             delete updateObject.avatarFile;
         }
         try{
+            await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', updateObject)
             for (let i = 0; i < updateObject.images.length; i++) {
                 if(!updateObject.images[i].file) {
                     continue
