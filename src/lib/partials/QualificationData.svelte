@@ -86,7 +86,7 @@
             <Select id="status" bind:value={employee.cv.currentStatus} items={stati} />
         </div>
         {#if employee.cv.currentStatus === 'Student/in'}
-            <Tesseract options={[{name: 'Immatrikulationsbescheinigung', value: 'student-verification'}]} noRead={true} on:ocr={bindStudentVerification} />
+            <Tesseract value={employee.images.find((n) => n.imageTag === 'student-verification')} options={[{name: 'Immatrikulationsbescheinigung', value: 'student-verification'}]} noRead={true} on:ocr={bindStudentVerification} />
         {/if}
         <div>
             <Label class="mb-2" for="experience">Erfahrung</Label>
@@ -102,7 +102,7 @@
             </div>
         </div>
         {#if employee.cv.motorVehicleLicense}
-        <Tesseract options={[{name: 'Führerschein Vorderseite', value: 'license'}]} on:ocr={bindLicense1} />
+        <Tesseract value={employee.images.find((n) => n.imageTag === 'license' && n.documentNumber)} options={[{name: 'Führerschein Vorderseite', value: 'license'}]} on:ocr={bindLicense1} />
         <div>
             <Label class="mb-2" for="license">Führerscheinnummer</Label>
             <Input id="license" bind:value={employee.images[licenseIndex].documentNumber} />
@@ -110,7 +110,7 @@
                 Bitte maschinell gescanntes Ergebnis überprüfen!
             </Helper>
         </div>
-        <Tesseract options={[{name: 'Führerschein Rückseite', value: 'license'}]} noRead={true} on:ocr={bindLicense2} />
+        <Tesseract value={employee.images.find((n) => n.imageTag === 'license' && !n.documentNumber)} options={[{name: 'Führerschein Rückseite', value: 'license'}]} noRead={true} on:ocr={bindLicense2} />
         {/if}
         <div>
             <Label class="mb-2" for="pants">Hosengröße</Label>

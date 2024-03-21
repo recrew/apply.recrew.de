@@ -15,13 +15,15 @@
     let error = false;
     let employee:any;
 
+    let loading = false
+
     const update = async () => {
+        loading = true;
         let updateObject = {...employee};
         if(employee.avatarFile && typeof employee.avatarFile === 'string'){
             delete updateObject.avatarFile;
         }
         try{
-            // await formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/update', updateObject)
             for (let i = 0; i < updateObject.images.length; i++) {
                 if(!updateObject.images[i].file) {
                     continue
@@ -40,7 +42,7 @@
                 title: 'Ups...',
             })
         }
-
+        loading = false;
 
         $modalStore.toggle()
 
@@ -52,7 +54,6 @@
             if(employee.cv.motorVehicleLicense === '0'){
                 employee.cv.motorVehicleLicense = false;
             }
-            console.log({employee})
         }).catch((e) => {
             error = true;
         })
@@ -84,8 +85,13 @@
             <Hr/>
             <BankData bind:employee/>
             <HealthInsuranceData bind:employee/>
+
             <div class="grid mt-3">
-                <Button type="submit">Speichern</Button>
+                {#if loading}
+                    <Spinner class="place-self-center" />
+                {:else}
+                    <Button type="submit">Speichern</Button>
+                {/if}
             </div>
         </form>
     {:else}

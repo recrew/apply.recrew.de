@@ -17,6 +17,8 @@
         value: 'license'
     }]
 
+    export let value: string;
+
     export let noRead = false;
 
     let text = '';
@@ -97,10 +99,14 @@
         if (files) {
             readFile()
         }
+
     }
     onMount(() => {
         if(options.length === 1){
             type = options[0].value
+        }
+        if(value && value.location) {
+            preview = value.location
         }
     })
 
@@ -125,8 +131,10 @@
     {/if}
     {#if preview && !loading}
         <Label  class="mb-2">{options.find(x => x.value === type)?.name || 'Dokument'} <QuestionCircleOutline size="xs" class="inline cursor-pointer" on:click={showHelp}/></Label>
-        <div class="flex gap-3 relative">
-            <p>{files[0].name}</p>
+        <div class="flex gap-3 relative max-w-full">
+            {#if files}
+            <p class="truncate">{files[0].name}</p>
+            {/if}
             <Button pill={true} class="right-0 !p-2"  on:click={() => showPreviewLightbox()}><ImageOutline class="w-4"/></Button>
             <Tooltip>Vorschau</Tooltip>
             <Button pill={true} class="!p-2" color="red" on:click={() => {files = null; preview = null}}><CloseCircleSolid class="w-4"/></Button>

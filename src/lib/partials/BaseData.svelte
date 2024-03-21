@@ -146,7 +146,7 @@
     {:else if employee.cv.nationality}
         <div class="grid grid-cols-2 gap-3 mt-2">
             <div>
-                <Tesseract options={idOptions} on:ocr={ev => idReader(ev.detail)}/>
+                <Tesseract value={employee.images.find((n) => n.imageTag === 'id-card' || n.imageTag === 'passport')} options={idOptions} on:ocr={ev => idReader(ev.detail)}/>
             </div>
             {#if employee.images[0]?.file}
             <div>
