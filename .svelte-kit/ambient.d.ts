@@ -151,6 +151,8 @@ declare module '$env/static/private' {
  */
 declare module '$env/static/public' {
 	export const PUBLIC_API_PATH: string;
+	export const PUBLIC_CALENDLY_TELEPHONE: string;
+	export const PUBLIC_CALENDLY_TRAINING: string;
 }
 
 /**
@@ -301,6 +303,8 @@ declare module '$env/dynamic/private' {
 declare module '$env/dynamic/public' {
 	export const env: {
 		PUBLIC_API_PATH: string;
+		PUBLIC_CALENDLY_TELEPHONE: string;
+		PUBLIC_CALENDLY_TRAINING: string;
 		[key: `PUBLIC_${string}`]: string | undefined;
 	}
 }
