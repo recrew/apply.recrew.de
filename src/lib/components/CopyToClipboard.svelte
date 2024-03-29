@@ -23,7 +23,7 @@
 </div>
 <div class="absolute">
     <Toast bind:open>
-        <span class="font-semibold">{textToCopy}</span> has been copied to your clipboard
+        <span class="font-semibold text-xl">{textToCopy}</span> wurde in die Zwischenablage kopiert
     </Toast>
 </div>
 

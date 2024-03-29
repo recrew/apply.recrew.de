@@ -26,7 +26,9 @@
         letter_motivation:'',
         photo: null,
         reCapRes:'',
-        application_source: 'Recruiting-Formular'
+        application_source: 'Recruiting-Formular',
+        facebook: undefined,
+        instagram: undefined
     }
     let regions = [
         { value: 'Berlin', name: 'Berlin' },
@@ -153,6 +155,16 @@
                     <div>
                         <Label for="application_field" class="mb-2">Einsatzbereich</Label>
                         <Select bind:value={candidate.application_field} id="application_field" required items={application_fields} />
+                    </div>
+                    <div>
+                        <Label for="facebook" class="mb-2">Facebook Profil</Label>
+                        <Input bind:value={candidate.facebook} type="text" id="facebook" placeholder="https://www.facebook.com/hans.mustermann"  />
+                        <Helper class="mt-0.5 pl-1">Optional</Helper>
+                    </div>
+                    <div>
+                        <Label for="insta" class="mb-2">Instagram Profil</Label>
+                        <Input bind:value={candidate.instagram} type="text" id="insta" placeholder="https://www.instagram.com/mustermann/"  />
+                        <Helper class="mt-0.5 pl-1">Optional</Helper>
                     </div>
                     <div>
                         <Label for="letter_motivation" class="mb-2">Du willst ins Team weil...</Label>
