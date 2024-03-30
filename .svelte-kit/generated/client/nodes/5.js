@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/routes/tele-call/+page.svelte";
+export { default as component } from "../../../../src/routes/schedule/+page.svelte";

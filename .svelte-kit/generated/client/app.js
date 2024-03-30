@@ -16,7 +16,7 @@ export const dictionary = {
 		"/": [2],
 		"/data-request": [3],
 		"/docs": [4],
-		"/tele-call": [5],
+		"/schedule": [5],
 		"/thank-you": [6]
 	};
 
