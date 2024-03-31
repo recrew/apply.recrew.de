@@ -56,7 +56,7 @@
     }
     const generateBlob = () => {
         if(typeof employee.avatarFile === 'string'){
-            return 'https://recrew-employees.s3.eu-north-1.amazonaws.com/' + employee.avatarFile
+            return employee.avatarFile
         }
         return URL.createObjectURL(employee.avatarFile)
     }
