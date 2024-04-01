@@ -146,7 +146,15 @@
                     </div>
                     <div>
                         <Label for="mobile" class="mb-2">Handynummer</Label>
-                        <Input bind:value={candidate.mobile} pattern={'[\\+]\\d{1,3}\\s*\\d{3,4}\\s*\\d{7}'} type="text" id="mobile" placeholder="+49 161 123456" required />
+                        <Input bind:value={candidate.mobile} pattern={'[\\+]\\d{1,3}\\s*\\d{3,4}\\s*\\d{4,8}'} type="text" id="mobile" placeholder="+49 161 123456" required />
+                        <div class="relative">
+                            {#if candidate.mobile.length > 3 && !candidate.mobile.match(/\+\d{1,3}\s*\d{3,4}\s*\d{4,8}/)}
+                                <Helper class="absolute" color="yellow">Formatierung beachten: +[Land] [Vorwahl] [Nummer] <span class="text-[11px]">(z.B. +49 161 123456)</span></Helper>
+                            {:else if candidate.mobile.length > 0 && !candidate.mobile.match(/\+\d{1,3}/)}
+                                <Helper class="absolute" color="red">Bitte Ländervorwahl angeben <span class="text-[11px]">(z.B. +49)</span></Helper>
+                            {/if}
+                        </div>
+
                     </div>
                     <div>
                         <Label for="region" class="mb-2">Region</Label>

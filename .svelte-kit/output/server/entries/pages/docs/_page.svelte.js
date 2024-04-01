@@ -1,9 +1,8 @@
-import { c as create_ssr_component, s as setContext, v as validate_component, h as getContext, d as add_attribute, g as createEventDispatcher, a as spread, b as escape_object, e as escape_attribute_value, f as escape, i as each, m as missing_component } from "../../../chunks/ssr.js";
-import { c as compute_rest_props, i as identity, s as subscribe, a as compute_slots } from "../../../chunks/utils.js";
-import { F as Frame } from "../../../chunks/Frame.js";
+import { c as create_ssr_component, s as setContext, v as validate_component, h as getContext, d as add_attribute, a as spread, b as escape_object, e as escape_attribute_value, g as createEventDispatcher, f as escape, i as each, m as missing_component } from "../../../chunks/ssr.js";
+import { c as compute_rest_props, s as subscribe, a as compute_slots } from "../../../chunks/utils.js";
+import { T as TransitionFrame, C as ClipboardOutline, F as FacebookSolid, S as ShareNodesSolid, a as CopyToClipboard, b as Card } from "../../../chunks/CopyToClipboard.js";
 import { twMerge, twJoin } from "tailwind-merge";
-import { C as CloseButton, G as GithubSolid } from "../../../chunks/GithubSolid.js";
-import { F as FacebookSolid, T as TwitterSolid, C as Card } from "../../../chunks/TwitterSolid.js";
+import { F as Frame, C as CloseButton } from "../../../chunks/CloseButton.js";
 import { w as writable } from "../../../chunks/index.js";
 import { H as Heading } from "../../../chunks/Heading.js";
 import { W as Wrapper, I as Input, U as UserCircleSolid, B as Button } from "../../../chunks/UserCircleSolid.js";
@@ -42,15 +41,6 @@ const Accordion = create_ssr_component(($$result, $$props, $$bindings, slots) =>
     }
   })} `;
 });
-function fade(node, { delay = 0, duration = 400, easing = identity } = {}) {
-  const o = +getComputedStyle(node).opacity;
-  return {
-    delay,
-    duration,
-    easing,
-    css: (t) => `opacity: ${t * o}`
-  };
-}
 const AccordionItem = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let contentClass;
   let $$unsubscribe_selected;
@@ -127,39 +117,6 @@ const AccordionItem = create_ssr_component(($$result, $$props, $$bindings, slots
   ]);
   $$unsubscribe_selected();
   return `<h2 class="group"><button type="button"${add_attribute("class", buttonClass, 0)}${add_attribute("aria-expanded", open, 0)}>${slots.header ? slots.header({}) : ``} ${open ? `${slots.arrowup ? slots.arrowup({}) : ` <svg class="w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"></path></svg> `}` : `${slots.arrowdown ? slots.arrowdown({}) : ` <svg class="w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path></svg> `}`}</button></h2> ${open ? `<div><div${add_attribute("class", contentClass, 0)}>${slots.default ? slots.default({}) : ``}</div></div>` : `<div class="hidden"><div${add_attribute("class", contentClass, 0)}>${slots.default ? slots.default({}) : ``}</div></div>`} `;
-});
-const TransitionFrame = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let $$restProps = compute_rest_props($$props, ["transition", "params", "open", "dismissable"]);
-  let { transition = fade } = $$props;
-  let { params = {} } = $$props;
-  let { open = true } = $$props;
-  let { dismissable = false } = $$props;
-  const dispatch = createEventDispatcher();
-  function close(ev) {
-    if (ev?.stopPropagation)
-      ev.stopPropagation();
-    open = false;
-  }
-  if ($$props.transition === void 0 && $$bindings.transition && transition !== void 0)
-    $$bindings.transition(transition);
-  if ($$props.params === void 0 && $$bindings.params && params !== void 0)
-    $$bindings.params(params);
-  if ($$props.open === void 0 && $$bindings.open && open !== void 0)
-    $$bindings.open(open);
-  if ($$props.dismissable === void 0 && $$bindings.dismissable && dismissable !== void 0)
-    $$bindings.dismissable(dismissable);
-  {
-    dispatch(open ? "open" : "close");
-  }
-  return `${dismissable ? `${open ? `<div>${validate_component(Frame, "Frame").$$render($$result, Object.assign({}, $$restProps), {}, {
-    default: () => {
-      return `${slots.default ? slots.default({ close }) : ``}`;
-    }
-  })}</div>` : ``}` : `${open ? `${validate_component(Frame, "Frame").$$render($$result, Object.assign({}, $$restProps), {}, {
-    default: () => {
-      return `${slots.default ? slots.default({}) : ``}`;
-    }
-  })}` : ``}`} `;
 });
 const Alert = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["dismissable", "defaultClass"]);
@@ -826,81 +783,6 @@ const Tooltip = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   return `${validate_component(Popper, "Popper").$$render($$result, Object.assign({}, { rounded: true }, { shadow: true }, $$restProps, { class: toolTipClass }), {}, {
     default: () => {
       return `${slots.default ? slots.default({}) : ``}`;
-    }
-  })} `;
-});
-const clsBtnExtraClass = "-mx-1.5 -my-1.5 text-gray-400 hover:text-gray-900 focus:!ring-gray-300 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-700";
-const Toast = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let $$restProps = compute_rest_props($$props, [
-    "dismissable",
-    "color",
-    "position",
-    "divClass",
-    "defaultIconClass",
-    "contentClass",
-    "align"
-  ]);
-  let $$slots = compute_slots(slots);
-  let { dismissable = true } = $$props;
-  let { color = "primary" } = $$props;
-  let { position = "none" } = $$props;
-  let { divClass = "w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-800 gap-3" } = $$props;
-  let { defaultIconClass = "w-8 h-8" } = $$props;
-  let { contentClass = "w-full text-sm font-normal" } = $$props;
-  let { align = true } = $$props;
-  const positions = {
-    "top-left": "absolute top-5 start-5",
-    "top-right": "absolute top-5 end-5",
-    "bottom-left": "absolute bottom-5 start-5",
-    "bottom-right": "absolute bottom-5 end-5",
-    none: ""
-  };
-  let finalDivClass;
-  const colors2 = {
-    primary: "text-primary-500 bg-primary-100 dark:bg-primary-800 dark:text-primary-200",
-    gray: "text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-200",
-    red: "text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200",
-    yellow: "text-yellow-500 bg-yellow-100 dark:bg-yellow-800 dark:text-yellow-200",
-    green: "text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200",
-    blue: "text-blue-500 bg-blue-100 dark:bg-blue-800 dark:text-blue-200",
-    indigo: "text-indigo-500 bg-indigo-100 dark:bg-indigo-800 dark:text-indigo-200",
-    purple: "text-purple-500 bg-purple-100 dark:bg-purple-800 dark:text-purple-200",
-    orange: "text-orange-500 bg-orange-100 dark:bg-orange-700 dark:text-orange-200",
-    none: ""
-  };
-  let iconClass;
-  if ($$props.dismissable === void 0 && $$bindings.dismissable && dismissable !== void 0)
-    $$bindings.dismissable(dismissable);
-  if ($$props.color === void 0 && $$bindings.color && color !== void 0)
-    $$bindings.color(color);
-  if ($$props.position === void 0 && $$bindings.position && position !== void 0)
-    $$bindings.position(position);
-  if ($$props.divClass === void 0 && $$bindings.divClass && divClass !== void 0)
-    $$bindings.divClass(divClass);
-  if ($$props.defaultIconClass === void 0 && $$bindings.defaultIconClass && defaultIconClass !== void 0)
-    $$bindings.defaultIconClass(defaultIconClass);
-  if ($$props.contentClass === void 0 && $$bindings.contentClass && contentClass !== void 0)
-    $$bindings.contentClass(contentClass);
-  if ($$props.align === void 0 && $$bindings.align && align !== void 0)
-    $$bindings.align(align);
-  finalDivClass = twMerge("flex", align ? "items-center" : "items-start", divClass, positions[position], $$props.class);
-  iconClass = twMerge("inline-flex items-center justify-center shrink-0", colors2[color], defaultIconClass);
-  return `${validate_component(TransitionFrame, "TransitionFrame").$$render($$result, Object.assign({}, { rounded: true }, { dismissable }, { color: "none" }, { role: "alert" }, $$restProps, { class: finalDivClass }), {}, {
-    default: ({ close }) => {
-      return `${$$slots.icon ? `${validate_component(Frame, "Frame").$$render(
-        $$result,
-        {
-          rounded: true,
-          color: "none",
-          class: iconClass
-        },
-        {},
-        {
-          default: () => {
-            return `${slots.icon ? slots.icon({}) : ``}`;
-          }
-        }
-      )}` : ``} <div${add_attribute("class", contentClass, 0)}>${slots.default ? slots.default({}) : ``}</div> ${dismissable ? `${slots["close-button"] ? slots["close-button"]({ close }) : ` ${validate_component(CloseButton, "CloseButton").$$render($$result, { class: clsBtnExtraClass }, {}, {})} `}` : ``}`;
     }
   })} `;
 });
@@ -7486,51 +7368,6 @@ const ClipboardListSolid = create_ssr_component(($$result, $$props, $$bindings, 
     {}
   )}><path fill="currentColor" d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2ZM7 2h4v2H7V2ZM5 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm8 4H8a1 1 0 0 1 0-2h5a1 1 0 0 1 0 2Zm0-4H8a1 1 0 0 1 0-2h5a1 1 0 1 1 0 2Z"></path></svg> `;
 });
-const ClipboardOutline = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let $$restProps = compute_rest_props($$props, ["size", "role", "strokeLinecap", "strokeLinejoin", "strokeWidth", "ariaLabel"]);
-  const ctx = getContext("iconCtx") ?? {};
-  const sizes = {
-    xs: "w-3 h-3",
-    sm: "w-4 h-4",
-    md: "w-5 h-5",
-    lg: "w-6 h-6",
-    xl: "w-8 h-8"
-  };
-  let { size = ctx.size || "md" } = $$props;
-  let { role = ctx.role || "img" } = $$props;
-  let { strokeLinecap = ctx.strokeLinecap || "round" } = $$props;
-  let { strokeLinejoin = ctx.strokeLinejoin || "round" } = $$props;
-  let { strokeWidth = ctx.strokeWidth || "2" } = $$props;
-  let { ariaLabel = "clipboard outline" } = $$props;
-  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
-    $$bindings.size(size);
-  if ($$props.role === void 0 && $$bindings.role && role !== void 0)
-    $$bindings.role(role);
-  if ($$props.strokeLinecap === void 0 && $$bindings.strokeLinecap && strokeLinecap !== void 0)
-    $$bindings.strokeLinecap(strokeLinecap);
-  if ($$props.strokeLinejoin === void 0 && $$bindings.strokeLinejoin && strokeLinejoin !== void 0)
-    $$bindings.strokeLinejoin(strokeLinejoin);
-  if ($$props.strokeWidth === void 0 && $$bindings.strokeWidth && strokeWidth !== void 0)
-    $$bindings.strokeWidth(strokeWidth);
-  if ($$props.ariaLabel === void 0 && $$bindings.ariaLabel && ariaLabel !== void 0)
-    $$bindings.ariaLabel(ariaLabel);
-  return `<svg${spread(
-    [
-      { xmlns: "http://www.w3.org/2000/svg" },
-      { fill: "none" },
-      escape_object($$restProps),
-      {
-        class: escape_attribute_value(twMerge("shrink-0", sizes[size], $$props.class))
-      },
-      { role: escape_attribute_value(role) },
-      {
-        "aria-label": escape_attribute_value(ariaLabel)
-      },
-      { viewBox: "0 0 18 20" }
-    ],
-    {}
-  )}><path stroke="currentColor"${add_attribute("stroke-linecap", strokeLinecap, 0)}${add_attribute("stroke-linejoin", strokeLinejoin, 0)}${add_attribute("stroke-width", strokeWidth, 0)} d="M12 2h4a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h4m6 0a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1m6 0v3H6V2M5 5h8m-8 5h8m-8 4h8"></path></svg> `;
-});
 const ClipboardSolid = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["size", "role", "ariaLabel"]);
   const ctx = getContext("iconCtx") ?? {};
@@ -13279,6 +13116,42 @@ const GiftBoxSolid = create_ssr_component(($$result, $$props, $$bindings, slots)
     {}
   )}><path fill="currentColor" d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z"></path></svg> `;
 });
+const GithubSolid = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$restProps = compute_rest_props($$props, ["size", "role", "ariaLabel"]);
+  const ctx = getContext("iconCtx") ?? {};
+  const sizes = {
+    xs: "w-3 h-3",
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
+    xl: "w-8 h-8"
+  };
+  let { size = ctx.size || "md" } = $$props;
+  let { role = ctx.role || "img" } = $$props;
+  let { ariaLabel = "github solid" } = $$props;
+  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
+    $$bindings.size(size);
+  if ($$props.role === void 0 && $$bindings.role && role !== void 0)
+    $$bindings.role(role);
+  if ($$props.ariaLabel === void 0 && $$bindings.ariaLabel && ariaLabel !== void 0)
+    $$bindings.ariaLabel(ariaLabel);
+  return `<svg${spread(
+    [
+      { xmlns: "http://www.w3.org/2000/svg" },
+      { fill: "currentColor" },
+      escape_object($$restProps),
+      {
+        class: escape_attribute_value(twMerge("shrink-0", sizes[size], $$props.class))
+      },
+      { role: escape_attribute_value(role) },
+      {
+        "aria-label": escape_attribute_value(ariaLabel)
+      },
+      { viewBox: "0 0 20 20" }
+    ],
+    {}
+  )}><path fill="currentColor" fill-rule="evenodd" d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.069-.6.069-.6a2.084 2.084 0 0 1 1.519 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.267-.973.629-1.325-2.2-.25-4.515-1.1-4.515-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.179.572.681.475A9.91 9.91 0 0 0 10 .333Z" clip-rule="evenodd"></path></svg> `;
+});
 const GlobeOutline = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["size", "role", "strokeLinecap", "strokeLinejoin", "strokeWidth", "ariaLabel"]);
   const ctx = getContext("iconCtx") ?? {};
@@ -18749,42 +18622,6 @@ const ShareNodesOutline = create_ssr_component(($$result, $$props, $$bindings, s
     {}
   )}><path stroke="currentColor"${add_attribute("stroke-linecap", strokeLinecap, 0)}${add_attribute("stroke-linejoin", strokeLinejoin, 0)}${add_attribute("stroke-width", strokeWidth, 0)} d="m5.953 7.467 6.094-2.612m.096 8.114L5.857 9.676m.305-1.192a2.581 2.581 0 1 1-5.162 0 2.581 2.581 0 0 1 5.162 0ZM17 3.839a2.581 2.581 0 1 1-5.162 0 2.581 2.581 0 0 1 5.162 0Zm0 10.322a2.581 2.581 0 1 1-5.162 0 2.581 2.581 0 0 1 5.162 0Z"></path></svg> `;
 });
-const ShareNodesSolid = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let $$restProps = compute_rest_props($$props, ["size", "role", "ariaLabel"]);
-  const ctx = getContext("iconCtx") ?? {};
-  const sizes = {
-    xs: "w-3 h-3",
-    sm: "w-4 h-4",
-    md: "w-5 h-5",
-    lg: "w-6 h-6",
-    xl: "w-8 h-8"
-  };
-  let { size = ctx.size || "md" } = $$props;
-  let { role = ctx.role || "img" } = $$props;
-  let { ariaLabel = "share nodes solid" } = $$props;
-  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
-    $$bindings.size(size);
-  if ($$props.role === void 0 && $$bindings.role && role !== void 0)
-    $$bindings.role(role);
-  if ($$props.ariaLabel === void 0 && $$bindings.ariaLabel && ariaLabel !== void 0)
-    $$bindings.ariaLabel(ariaLabel);
-  return `<svg${spread(
-    [
-      { xmlns: "http://www.w3.org/2000/svg" },
-      { fill: "currentColor" },
-      escape_object($$restProps),
-      {
-        class: escape_attribute_value(twMerge("shrink-0", sizes[size], $$props.class))
-      },
-      { role: escape_attribute_value(role) },
-      {
-        "aria-label": escape_attribute_value(ariaLabel)
-      },
-      { viewBox: "0 0 18 18" }
-    ],
-    {}
-  )}><path fill="currentColor" d="M14.419 10.581a3.566 3.566 0 0 0-2.574 1.1L7.089 9.19a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.427L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.581 3.581 0 1 0 3.508-2.871Z"></path></svg> `;
-});
 const ShieldCheckOutline = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["size", "role", "strokeLinecap", "strokeLinejoin", "strokeWidth", "ariaLabel"]);
   const ctx = getContext("iconCtx") ?? {};
@@ -20695,6 +20532,42 @@ const TruckSolid = create_ssr_component(($$result, $$props, $$bindings, slots) =
     ],
     {}
   )}><path fill="currentColor" d="M19.9 6.58c0-.009 0-.019-.006-.027l-2-4A1 1 0 0 0 17 2h-4a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v9a1 1 0 0 0 1 1h.3c-.03.165-.047.332-.051.5a3.25 3.25 0 1 0 6.5 0A3.173 3.173 0 0 0 7.7 12h4.6c-.03.165-.047.332-.051.5a3.25 3.25 0 1 0 6.5 0 3.177 3.177 0 0 0-.049-.5h.3a1 1 0 0 0 1-1V7a.99.99 0 0 0-.1-.42ZM16.382 4l1 2H13V4h3.382ZM4.5 13.75a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Zm11 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Z"></path></svg> `;
+});
+const TwitterSolid = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$restProps = compute_rest_props($$props, ["size", "role", "ariaLabel"]);
+  const ctx = getContext("iconCtx") ?? {};
+  const sizes = {
+    xs: "w-3 h-3",
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
+    xl: "w-8 h-8"
+  };
+  let { size = ctx.size || "md" } = $$props;
+  let { role = ctx.role || "img" } = $$props;
+  let { ariaLabel = "twitter solid" } = $$props;
+  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
+    $$bindings.size(size);
+  if ($$props.role === void 0 && $$bindings.role && role !== void 0)
+    $$bindings.role(role);
+  if ($$props.ariaLabel === void 0 && $$bindings.ariaLabel && ariaLabel !== void 0)
+    $$bindings.ariaLabel(ariaLabel);
+  return `<svg${spread(
+    [
+      { xmlns: "http://www.w3.org/2000/svg" },
+      { fill: "currentColor" },
+      escape_object($$restProps),
+      {
+        class: escape_attribute_value(twMerge("shrink-0", sizes[size], $$props.class))
+      },
+      { role: escape_attribute_value(role) },
+      {
+        "aria-label": escape_attribute_value(ariaLabel)
+      },
+      { viewBox: "0 0 20 17" }
+    ],
+    {}
+  )}><path fill="currentColor" fill-rule="evenodd" d="M20 1.892a8.178 8.178 0 0 1-2.355.635 4.074 4.074 0 0 0 1.8-2.235 8.344 8.344 0 0 1-2.605.981A4.13 4.13 0 0 0 13.85 0a4.068 4.068 0 0 0-4.1 4.038 4 4 0 0 0 .105.919A11.705 11.705 0 0 1 1.4.734a4.006 4.006 0 0 0 1.268 5.392 4.165 4.165 0 0 1-1.859-.5v.05A4.057 4.057 0 0 0 4.1 9.635a4.19 4.19 0 0 1-1.856.07 4.108 4.108 0 0 0 3.831 2.807A8.36 8.36 0 0 1 0 14.184 11.732 11.732 0 0 0 6.291 16 11.502 11.502 0 0 0 17.964 4.5c0-.177 0-.349-.012-.523A8.143 8.143 0 0 0 20 1.892Z" clip-rule="evenodd"></path></svg> `;
 });
 const UnderlineSolid = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["size", "role", "ariaLabel"]);
@@ -22950,46 +22823,6 @@ const DocsColors = create_ssr_component(($$result, $$props, $$bindings, slots) =
       return `<div class="${"h-32 p-3 bg-" + escape(name, true) + "-" + escape(shade, true)}">${escape(shade)} <br> <p class="text-xs text-gray-500 bg-gray-200/50 rounded px-1">.bg-${escape(name)}-${escape(shade)}</p> </div>`;
     })} </div>`;
   })}</div>`;
-});
-const CopyToClipboard = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let { textToCopy } = $$props;
-  let { size = "md" } = $$props;
-  let open = false;
-  if ($$props.textToCopy === void 0 && $$bindings.textToCopy && textToCopy !== void 0)
-    $$bindings.textToCopy(textToCopy);
-  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
-    $$bindings.size(size);
-  let $$settled;
-  let $$rendered;
-  let previous_head = $$result.head;
-  do {
-    $$settled = true;
-    $$result.head = previous_head;
-    $$rendered = `<div class="cursor-pointer" role="button" tabindex="0">${slots.default ? slots.default({}) : ` ${validate_component(ClipboardOutline, "ClipboardOutline").$$render(
-      $$result,
-      {
-        size,
-        class: "text-primary-400 text-inherit"
-      },
-      {},
-      {}
-    )} `}</div> <div class="absolute">${validate_component(Toast, "Toast").$$render(
-      $$result,
-      { open },
-      {
-        open: ($$value) => {
-          open = $$value;
-          $$settled = false;
-        }
-      },
-      {
-        default: () => {
-          return `<span class="font-semibold">${escape(textToCopy)}</span> has been copied to your clipboard`;
-        }
-      }
-    )}</div>`;
-  } while (!$$settled);
-  return $$rendered;
 });
 const DocsIcons = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let { id = "icons" } = $$props;

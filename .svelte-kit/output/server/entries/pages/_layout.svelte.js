@@ -1,9 +1,8 @@
 import { c as create_ssr_component, a as spread, e as escape_attribute_value, b as escape_object, d as add_attribute, f as escape, g as createEventDispatcher, v as validate_component, s as setContext, h as getContext, m as missing_component } from "../../chunks/ssr.js";
 import { c as compute_rest_props, a as compute_slots, s as subscribe } from "../../chunks/utils.js";
 import { twMerge } from "tailwind-merge";
-import { F as Frame } from "../../chunks/Frame.js";
+import { F as Frame, C as CloseButton, T as ToolbarButton } from "../../chunks/CloseButton.js";
 import { w as writable } from "../../chunks/index.js";
-import { C as CloseButton, T as ToolbarButton, G as GithubSolid } from "../../chunks/GithubSolid.js";
 import { i as is_void } from "../../chunks/names.js";
 import "../../chunks/client.js";
 import { b as base } from "../../chunks/paths.js";
@@ -546,7 +545,7 @@ const ReusableModal = create_ssr_component(($$result, $$props, $$bindings, slots
       },
       {
         default: () => {
-          return `${$modalStore.component ? `${validate_component($modalStore.component || missing_component, "svelte:component").$$render($$result, {}, {}, {})}` : `${escape($modalStore.content)}`}`;
+          return `${$modalStore.component ? `${validate_component($modalStore.component || missing_component, "svelte:component").$$render($$result, {}, {}, {})}` : `<!-- HTML_TAG_START -->${$modalStore.content}<!-- HTML_TAG_END -->`}`;
         }
       }
     )}`;
@@ -559,19 +558,19 @@ const Layout = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     default: ({ hidden, toggle }) => {
       return `${validate_component(NavBrand, "NavBrand").$$render($$result, {}, {}, {
         default: () => {
-          return `${validate_component(DarkMode, "DarkMode").$$render($$result, {}, {}, {})} <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white pl-3" data-svelte-h="svelte-17e5889"><a href="${escape(base, true) + "/"}"><img class="h-10" src="https://static.wixstatic.com/media/4ac443_e7a3c63994904de2ae798fc232426d39~mv2.png/v1/crop/x_540,y_1618,w_7392,h_1941/fill/w_342,h_90,al_c,q_85,usm_0.66_1.00_0.01/logo(300dpi).webp" alt="logo"></a></span>`;
+          return `${validate_component(DarkMode, "DarkMode").$$render($$result, {}, {}, {})} <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white pl-3" data-svelte-h="svelte-ag76e2"><a href="${escape(base, true) + "/"}"><img class="h-10" src="/recrew-web-banner.webp" alt="logo"></a></span>`;
         }
       })} ${validate_component(NavHamburger, "NavHamburger").$$render($$result, {}, {}, {})} ${validate_component(NavUl, "NavUl").$$render($$result, { hidden }, {}, {
         default: () => {
-          return ` ${validate_component(NavLi, "NavLi").$$render(
+          return `${validate_component(NavLi, "NavLi").$$render(
             $$result,
             {
-              href: "https://github.com/https://github.com/recrew"
+              href: "https://www.instagram.com/recrewjobs/"
             },
             {},
             {
               default: () => {
-                return `${validate_component(GithubSolid, "GithubSolid").$$render($$result, {}, {}, {})}`;
+                return `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C5.829 0 5.556.01 4.703.048C3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7C.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297c.04.852.174 1.433.372 1.942c.205.526.478.972.923 1.417c.444.445.89.719 1.416.923c.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417c.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046c.78.035 1.204.166 1.486.275c.373.145.64.319.92.599s.453.546.598.92c.11.281.24.705.275 1.485c.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.92.598c-.28.11-.704.24-1.485.276c-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598a2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485c-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486c.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276c.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92a.96.96 0 0 0 0-1.92m-4.27 1.122a4.109 4.109 0 1 0 0 8.217a4.109 4.109 0 0 0 0-8.217m0 1.441a2.667 2.667 0 1 1 0 5.334a2.667 2.667 0 0 1 0-5.334"></path></svg>`;
               }
             }
           )}`;
@@ -580,7 +579,7 @@ const Layout = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     }
   })} <div class="mb-5">${slots.default ? slots.default({}) : ``} ${validate_component(Footer, "Footer").$$render($$result, {}, {}, {
     default: () => {
-      return `${validate_component(FooterCopyright, "FooterCopyright").$$render(
+      return `<div class="grid place-items-center">${validate_component(FooterCopyright, "FooterCopyright").$$render(
         $$result,
         {
           href: "/",
@@ -589,7 +588,7 @@ const Layout = create_ssr_component(($$result, $$props, $$bindings, slots) => {
         },
         {},
         {}
-      )} ${validate_component(FooterLinkGroup, "FooterLinkGroup").$$render(
+      )}</div> ${validate_component(FooterLinkGroup, "FooterLinkGroup").$$render(
         $$result,
         {
           ulClass: "grid grid-cols-3 text-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0 "

@@ -4,7 +4,7 @@
     import {FacebookSolid, NewspaperSolid, ShareAllSolid, ShareNodesSolid, TwitterSolid} from "flowbite-svelte-icons";
     import CopyToClipboard from "$lib/components/CopyToClipboard.svelte";
 
-    let link = "https://sroehrl.github.io/apply.recrew.de/";
+    let link = "https://apply.recrew.de/";
 </script>
 
 <div class="flex items-center justify-center my-10">

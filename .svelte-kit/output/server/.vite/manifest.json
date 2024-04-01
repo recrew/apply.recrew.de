@@ -8,19 +8,20 @@
       "_paths.js"
     ]
   },
-  "_Frame.js": {
-    "file": "chunks/Frame.js",
+  "_CloseButton.js": {
+    "file": "chunks/CloseButton.js",
     "imports": [
       "_utils.js",
       "_ssr.js",
       "_names.js"
     ]
   },
-  "_GithubSolid.js": {
-    "file": "chunks/GithubSolid.js",
+  "_CopyToClipboard.js": {
+    "file": "chunks/CopyToClipboard.js",
     "imports": [
       "_utils.js",
-      "_ssr.js"
+      "_ssr.js",
+      "_CloseButton.js"
     ]
   },
   "_Heading.js": {
@@ -29,14 +30,6 @@
       "_utils.js",
       "_ssr.js",
       "_names.js"
-    ]
-  },
-  "_TwitterSolid.js": {
-    "file": "chunks/TwitterSolid.js",
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_Frame.js"
     ]
   },
   "_UserCircleSolid.js": {
@@ -136,16 +129,15 @@
     "imports": [
       "_ssr.js",
       "_utils.js",
-      "_Frame.js",
+      "_CloseButton.js",
       "_index.js",
-      "_GithubSolid.js",
       "_names.js",
       "_client.js",
       "_paths.js",
       "_modal.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.DIzjqj9n.css"
+      "_app/immutable/assets/_layout.BwkXbM5E.css"
     ]
   },
   "src/routes/+layout.ts": {
@@ -171,28 +163,23 @@
       "_client.js",
       "_api.js",
       "_stores.js",
-      "_modal.js",
-      "_paths.js"
+      "_modal.js"
     ],
     "css": [
       "_app/immutable/assets/_page.DymJcYVG.css"
     ]
   },
-  "src/routes/data-request/[uuid]/+page.svelte": {
-    "file": "entries/pages/data-request/_uuid_/_page.svelte.js",
-    "src": "src/routes/data-request/[uuid]/+page.svelte",
+  "src/routes/data-request/+page.svelte": {
+    "file": "entries/pages/data-request/_page.svelte.js",
+    "src": "src/routes/data-request/+page.svelte",
     "isEntry": true,
     "imports": [
       "_utils.js",
       "_ssr.js",
       "_api.js",
-      "_stores.js"
+      "_stores.js",
+      "_modal.js"
     ]
-  },
-  "src/routes/data-request/[uuid]/+page.ts": {
-    "file": "entries/pages/data-request/_uuid_/_page.ts.js",
-    "src": "src/routes/data-request/[uuid]/+page.ts",
-    "isEntry": true
   },
   "src/routes/docs/+page.svelte": {
     "file": "entries/pages/docs/_page.svelte.js",
@@ -201,14 +188,24 @@
     "imports": [
       "_ssr.js",
       "_utils.js",
-      "_Frame.js",
-      "_GithubSolid.js",
-      "_TwitterSolid.js",
+      "_CopyToClipboard.js",
+      "_CloseButton.js",
       "_index.js",
       "_Heading.js",
       "_UserCircleSolid.js",
       "_names.js",
       "_modal.js"
+    ]
+  },
+  "src/routes/schedule/+page.svelte": {
+    "file": "entries/pages/schedule/_page.svelte.js",
+    "src": "src/routes/schedule/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_utils.js",
+      "_ssr.js",
+      "_api.js",
+      "_stores.js"
     ]
   },
   "src/routes/thank-you/+page.svelte": {
@@ -217,7 +214,7 @@
     "isEntry": true,
     "imports": [
       "_ssr.js",
-      "_TwitterSolid.js",
+      "_CopyToClipboard.js",
       "_Heading.js",
       "_utils.js"
     ]

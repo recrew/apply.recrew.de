@@ -1,3 +1,7 @@
+/// <reference types="@sveltejs/kit" />
+/// <reference no-default-lib="true"/>
+/// <reference lib="esnext" />
+/// <reference lib="webworker" />
 import { build, files, version } from "$service-worker";
 
 const worker = self as unknown as ServiceWorkerGlobalScope;
@@ -84,7 +88,7 @@ async function fetchAndCache(request: Request) {
 }
 
 worker.addEventListener("fetch", (event) => {
-    if (event.request.method !== "GET" || event.request.headers.has("range")) {
+    if (event.request.method !== "GET" || event.request.headers.has("range") || event.request.url.includes('/api/')) {
         return;
     }
 

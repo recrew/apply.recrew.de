@@ -45,9 +45,9 @@ export {
   compute_slots as a,
   safe_not_equal as b,
   compute_rest_props as c,
-  is_function as d,
+  identity as d,
   blank_object as e,
-  identity as i,
+  is_function as i,
   noop as n,
   run_all as r,
   subscribe as s

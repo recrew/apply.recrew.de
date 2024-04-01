@@ -7,7 +7,6 @@ import "../../chunks/client.js";
 import "../../chunks/api.js";
 import { p as page } from "../../chunks/stores.js";
 import { m as modalStore } from "../../chunks/modal.js";
-import { b as base } from "../../chunks/paths.js";
 const Label = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let labelClass2;
   let $$restProps = compute_rest_props($$props, ["color", "defaultClass", "show"]);
@@ -299,7 +298,9 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     letter_motivation: "",
     photo: null,
     reCapRes: "",
-    application_source: "Recruiting-Formular"
+    application_source: "Recruiting-Formular",
+    facebook: void 0,
+    instagram: void 0
   };
   let regions = [
     { value: "Berlin", name: "Berlin" },
@@ -326,9 +327,8 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   do {
     $$settled = true;
     $$result.head = previous_head;
-    $$rendered = `<div class="w-full banner svelte-16kowbh"></div> <div class="w-4/5 lg:max-w-screen-lg mx-auto mb-24"><section><div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12" data-svelte-h="svelte-12xem0f"><p class="mb-4 text-2xl font-normal tracking-tight leading-none text-gray-900 md:text-4xl lg:text-5xl dark:text-white">Wir bieten:</p> <h1 class="mb-4 text-3xl font-extrabold tracking-tight leading-none text-gray-700 md:text-4xl lg:text-5xl dark:text-white">Den flexibelsten Nebenjob der Stadt</h1> <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">Flexibel,
-                jung &amp; dynamisch: Das ist recrew.</p></div> <div class="grid grid-cols-3 gap-3"><div class="col-span-3 lg:col-span-1 dark:text-white" data-svelte-h="svelte-d02c88"><div class="hidden md:flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900"><img class="w-10 h-10 inline" src="${escape(base, true) + "/apple-touch-icon.png"}" alt="CR"></div> <p class="font-semibold mb-2">Täglich neue Jobs und Aufgaben als Teil einer familiären Crew meistern:</p> <p>Werde ein Teil unserer Crew und bewirb dich noch heute bei uns! Wir freuen uns auf deine (Schnell)
-                    Bewerbung.</p></div> <div class="col-span-3 lg:col-span-2 rounded-lg shadow shadow-primary-400 py-3 px-4">${validate_component(Heading, "Heading").$$render($$result, { class: "text-neutral-600", tag: "h3" }, {}, {
+    $$rendered = `<div class="w-full banner svelte-16kowbh"></div> <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto mb-24"><section><div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12" data-svelte-h="svelte-1fqntnm"><p class="mb-4 text-2xl font-normal tracking-tight leading-none text-gray-900 md:text-4xl lg:text-5xl dark:text-white">Wir bieten:</p> <h1 class="mb-4 text-3xl font-extrabold tracking-tight leading-none text-gray-700 md:text-4xl lg:text-5xl dark:text-white">Den flexibelsten Nebenjob der Stadt</h1> <p class="font-semibold mb-2">Täglich neue Jobs und Aufgaben als Teil einer familiären Crew meistern:</p> <p>Werde ein Teil unserer Crew und bewirb dich noch heute bei uns! Wir freuen uns auf deine (Schnell)
+                Bewerbung.</p></div> <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">${validate_component(Heading, "Heading").$$render($$result, { class: "text-neutral-600", tag: "h3" }, {}, {
       default: () => {
         return `Schnellbewerbung`;
       }
@@ -399,7 +399,7 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     })} ${validate_component(Input, "Input").$$render(
       $$result,
       {
-        pattern: "[\\+]\\d{1,3}\\s*\\d{3,4}\\s*\\d{7}",
+        pattern: "[\\+]\\d{1,3}\\s*\\d{3,4}\\s*\\d{4,8}",
         type: "text",
         id: "mobile",
         placeholder: "+49 161 123456",
@@ -413,7 +413,15 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
         }
       },
       {}
-    )}</div> <div>${validate_component(Label, "Label").$$render($$result, { for: "region", class: "mb-2" }, {}, {
+    )} <div class="relative">${candidate.mobile.length > 3 && !candidate.mobile.match(/\+\d{1,3}\s*\d{3,4}\s*\d{4,8}/) ? `${validate_component(Helper, "Helper").$$render($$result, { class: "absolute", color: "yellow" }, {}, {
+      default: () => {
+        return `Formatierung beachten: +[Land] [Vorwahl] [Nummer] <span class="text-[11px]" data-svelte-h="svelte-dvny2n">(z.B. +49 161 123456)</span>`;
+      }
+    })}` : `${candidate.mobile.length > 0 && !candidate.mobile.match(/\+\d{1,3}/) ? `${validate_component(Helper, "Helper").$$render($$result, { class: "absolute", color: "red" }, {}, {
+      default: () => {
+        return `Bitte Ländervorwahl angeben <span class="text-[11px]" data-svelte-h="svelte-1ru702c">(z.B. +49)</span>`;
+      }
+    })}` : ``}`}</div></div> <div>${validate_component(Label, "Label").$$render($$result, { for: "region", class: "mb-2" }, {}, {
       default: () => {
         return `Region`;
       }
@@ -451,14 +459,60 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
         }
       },
       {}
-    )}</div> <div>${validate_component(Label, "Label").$$render($$result, { for: "letter_motivation", class: "mb-2" }, {}, {
+    )}</div> <div>${validate_component(Label, "Label").$$render($$result, { for: "facebook", class: "mb-2" }, {}, {
+      default: () => {
+        return `Facebook Profil`;
+      }
+    })} ${validate_component(Input, "Input").$$render(
+      $$result,
+      {
+        type: "text",
+        id: "facebook",
+        placeholder: "https://www.facebook.com/hans.mustermann",
+        value: candidate.facebook
+      },
+      {
+        value: ($$value) => {
+          candidate.facebook = $$value;
+          $$settled = false;
+        }
+      },
+      {}
+    )} ${validate_component(Helper, "Helper").$$render($$result, { class: "mt-0.5 pl-1" }, {}, {
+      default: () => {
+        return `Optional`;
+      }
+    })}</div> <div>${validate_component(Label, "Label").$$render($$result, { for: "insta", class: "mb-2" }, {}, {
+      default: () => {
+        return `Instagram Profil`;
+      }
+    })} ${validate_component(Input, "Input").$$render(
+      $$result,
+      {
+        type: "text",
+        id: "insta",
+        placeholder: "https://www.instagram.com/mustermann/",
+        value: candidate.instagram
+      },
+      {
+        value: ($$value) => {
+          candidate.instagram = $$value;
+          $$settled = false;
+        }
+      },
+      {}
+    )} ${validate_component(Helper, "Helper").$$render($$result, { class: "mt-0.5 pl-1" }, {}, {
+      default: () => {
+        return `Optional`;
+      }
+    })}</div> <div>${validate_component(Label, "Label").$$render($$result, { for: "letter_motivation", class: "mb-2" }, {}, {
       default: () => {
         return `Du willst ins Team weil...`;
       }
     })} ${validate_component(Textarea, "Textarea").$$render(
       $$result,
       {
-        minlength: "100",
+        minlength: "5",
         maxlength: "700",
         rows: "9",
         id: "letter_motivation",
@@ -476,7 +530,7 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
       $$result,
       {
         class: "mt-1",
-        color: candidate.letter_motivation.length < 100 || candidate.letter_motivation.length > 700 ? "red" : "green"
+        color: candidate.letter_motivation.length < 5 || candidate.letter_motivation.length > 700 ? "red" : "green"
       },
       {},
       {
@@ -517,7 +571,7 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
       default: () => {
         return `BEWERBEN`;
       }
-    })}</div></form></div></div></section></div>`;
+    })}</div></form></div></section></div>`;
   } while (!$$settled);
   $$unsubscribe_modalStore();
   $$unsubscribe_page();

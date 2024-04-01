@@ -109,7 +109,7 @@ const options = {
   root: Root,
   service_worker: true,
   templates: {
-    app: ({ head, body, assets, nonce, env }) => '<!DOCTYPE html>\r\n<html lang="en">\r\n	<head>\r\n		<meta charset="utf-8" />\r\n		<link rel="icon" href="' + assets + '/favicon.ico" />\r\n		<meta name="viewport" content="width=device-width" />\r\n		<link rel="manifest" crossorigin="use-credentials" href="' + assets + '/manifest.json">\r\n		' + head + '\r\n	</head>\r\n	<body class="bg-white dark:bg-neutral-800" data-sveltekit-preload-data="hover">\r\n		<div style="display: contents">' + body + "</div>\r\n	</body>\r\n</html>\r\n",
+    app: ({ head, body, assets, nonce, env }) => '<!DOCTYPE html>\r\n<html lang="en">\r\n	<head>\r\n		<meta charset="utf-8" />\r\n		<link rel="icon" href="' + assets + '/favicon.ico" />\r\n		<meta name="viewport" content="width=device-width" />\r\n		<link rel="manifest" crossorigin="use-credentials" href="' + assets + '/manifest.json">\r\n		' + head + '\r\n	</head>\r\n	<body class="bg-white dark:bg-neutral-800" data-sveltekit-preload-data="hover">\r\n		<div style="display: contents">' + body + '</div>\r\n		<script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async><\/script>\r\n	</body>\r\n</html>\r\n',
     error: ({ status, message }) => '<!doctype html>\n<html lang="en">\n	<head>\n		<meta charset="utf-8" />\n		<title>' + message + `</title>
 
 		<style>
@@ -181,7 +181,7 @@ const options = {
 		<div class="error">
 			<span class="status">` + status + '</span>\n			<div class="message">\n				<h1>' + message + "</h1>\n			</div>\n		</div>\n	</body>\n</html>\n"
   },
-  version_hash: "124f2ac"
+  version_hash: "167jtge"
 };
 async function get_hooks() {
   return {};
