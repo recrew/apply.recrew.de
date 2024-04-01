@@ -1692,6 +1692,13 @@ svelte-check@^3.6.2:
     svelte-preprocess "^5.1.3"
     typescript "^5.0.3"
 
+svelte-easy-crop@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/svelte-easy-crop/-/svelte-easy-crop-2.0.3.tgz#8458477c2c9018857049e6ea15eca08517ab66f7"
+  integrity sha512-hB4CK4JOcnNdXPtaHyI2lFoFYxs2lGrjPvT1/A8Rp5m9aBC2RV0MHCJ0VjNrlSEWjTOEexcBIXCC5RW8QhF4zQ==
+  dependencies:
+    svelte "^4.2.8"
+
 svelte-hmr@^0.15.3:
   version "0.15.3"
   resolved "https://registry.yarnpkg.com/svelte-hmr/-/svelte-hmr-0.15.3.tgz#df54ccde9be3f091bf5f18fc4ef7b8eb6405fbe6"
@@ -1726,7 +1733,7 @@ svelte-qrcode@^1.0.0:
   resolved "https://registry.yarnpkg.com/svelte-qrcode/-/svelte-qrcode-1.0.0.tgz#4fd219ae20ccaecb91ba9727a2aaf3a0163b251d"
   integrity sha512-WrOvyyxtUzu32gVIDxcFMy0A7uUpbl/8yHaTNOsUaI8W5V4wa7AmReCjffhNY2aS42CqCLJ6qdwUoj/KxmeZzA==
 
-svelte@^4.2.7:
+svelte@^4.2.7, svelte@^4.2.8:
   version "4.2.12"
   resolved "https://registry.yarnpkg.com/svelte/-/svelte-4.2.12.tgz#13d98d2274d24d3ad216c8fdc801511171c70bb1"
   integrity sha512-d8+wsh5TfPwqVzbm4/HCXC783/KPHV60NvwitJnyTA5lWn1elhXMNWhXGCJ7PwPa8qFUnyJNIyuIRt2mT0WMug==

@@ -1,10 +1,11 @@
 <script lang="ts">
     import {createWorker, PSM} from 'tesseract.js';
-    import {Button, Fileupload, Label, Select, Spinner, Tooltip} from "flowbite-svelte";
+    import {Button, Fileupload, Label, Modal, Select, Spinner, Tooltip} from "flowbite-svelte";
     import {createEventDispatcher, onMount} from "svelte";
     import {CloseCircleSolid, ImageOutline, QuestionCircleOutline} from "flowbite-svelte-icons";
     import {modalStore} from "$lib/stores/modal";
     import UploadTips from "$lib/partials/UploadTips.svelte";
+    import ImageCropper from "$lib/components/ImageCropper.svelte";
 
     export let options = [{
         name: 'Personalausweis',
@@ -27,6 +28,7 @@
     let preview: any;
     let type: string;
     let loading = false;
+    let cropperModal = false
 
     let expressions = {
         'passport': /^(?=.*\d)[A-Z0-9]+(?=<)/,
@@ -124,7 +126,16 @@
         {#if type}
             <div class="mb-2">
                 <Label  class="mb-2">{options.find(x => x.value === type)?.name || 'Dokument'} <QuestionCircleOutline size="xs" class="inline cursor-pointer" on:click={showHelp}/></Label>
-                <Fileupload accept="image/*, application/pdf" bind:files  bind:value={input}/>
+                <Button on:click={() => cropperModal = true}>Hochladen</Button>
+                <Modal title="Hochladen" bind:open={cropperModal} autoclose={false}>
+                    <div class="my-5">
+                        <ImageCropper aspect={type === 'passport'? 1.53 : 1.6} on:cropped={({detail}) => {
+                            files = detail.files
+                            cropperModal = false
+                        }}/>
+                    </div>
+                </Modal>
+<!--                <Fileupload accept="image/*, application/pdf" bind:files  bind:value={input}/>-->
             </div>
         {/if}
     </div>

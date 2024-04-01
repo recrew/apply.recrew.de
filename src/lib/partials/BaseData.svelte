@@ -26,8 +26,8 @@
     let avatarFiles: FileList;
 
     let idOptions = [
-        {name: "Personalausweis", value: "id-card"},
-        {name: "Reisepass", value: "passport"},
+        {name: "Personalausweis Vorderseite", value: "id-card"},
+        {name: "Reisepass Vorderseite", value: "passport"},
     ]
 
     const isEu = (key) => {
@@ -43,10 +43,10 @@
         ].includes(key)
     }
 
-    const idReader = (detail: any) => {
-        employee.images[0].file = detail.file
-        employee.images[0].documentNumber = detail.text
-        employee.images[0].imageTag = detail.type
+    const idReader = (detail: any, index?: number) => {
+        employee.images[index ?? 0].file = detail.file
+        employee.images[index ?? 0].documentNumber = detail.text
+        employee.images[index ?? 0].imageTag = detail.type
 
     }
     $: {
@@ -62,7 +62,7 @@
     }
     onMount(async () => {
         if(employee.images.length < 1){
-            employee.images = [{documentNumber: '', imageTag: 'id-card', file: null}]
+            employee.images = [{documentNumber: '', imageTag: 'id-card', file: null},{documentNumber: '', imageTag: 'id-card', file: null}]
         }
         if(employee.dateOfBirth.value){
             employee.dateOfBirth.value = employee.dateOfBirth.value.split(' ')[0]
@@ -149,6 +149,13 @@
                 <Tesseract value={employee.images.find((n) => n.imageTag === 'id-card' || n.imageTag === 'passport')} options={idOptions} on:ocr={ev => idReader(ev.detail)}/>
             </div>
             {#if employee.images[0]?.file}
+            <div>
+                <Tesseract
+                        value={employee.images.filter((n) => n.imageTag === 'id-card' || n.imageTag === 'passport')[1]}
+                        options={idOptions.filter((n) => n.value === employee.images[0].imageTag).map((n) => ({...n, name: n.name.replace('Vorderseite', 'Rückseite')}))}
+                        noRead={true}
+                        on:ocr={ev => idReader(ev.detail, 1)}/>
+            </div>
             <div>
                 <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer</Label>
                 <Input bind:value={employee.images[0].documentNumber} type="text" id="id" required />

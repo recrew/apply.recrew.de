@@ -21,7 +21,7 @@
     onMount(async() =>{
         taxClasses = (await get('/hr/reference/Steuerklassen')).map((n) => ({...n, name: n.key + ': ' + n.value, value: parseInt(n.key)}))
             .sort((a,b) => a.key - b.key)
-            .filter(n => n.key < 8);
+            .filter(n => n.key < 7);
         religiousAffiliations = (await get('/hr/reference/Kirchensteuer')).map((n) => ({...n, name: n.value})).sort((a,b) => a.key - b.key);
     })
 </script>

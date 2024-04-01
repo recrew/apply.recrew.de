@@ -95,7 +95,7 @@
                 {/if}
             </div>
         </form>
-    {:else}
+    {:else if !error}
         <Spinner /> <span class="dark:text-white text-lg pl-3">Loading ...</span>
     {/if}
 </div>

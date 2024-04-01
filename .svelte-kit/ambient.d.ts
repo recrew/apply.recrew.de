@@ -74,6 +74,7 @@ declare module '$env/static/private' {
 	export const npm_package_dependencies_flowbite_svelte: string;
 	export const npm_package_dependencies_flowbite_svelte_icons: string;
 	export const npm_package_dependencies_flowbite_typography: string;
+	export const npm_package_dependencies_svelte_easy_crop: string;
 	export const npm_package_dependencies_svelte_i18n: string;
 	export const npm_package_dependencies_svelte_qrcode: string;
 	export const npm_package_dependencies_tailwind_merge: string;
@@ -219,6 +220,7 @@ declare module '$env/dynamic/private' {
 		npm_package_dependencies_flowbite_svelte: string;
 		npm_package_dependencies_flowbite_svelte_icons: string;
 		npm_package_dependencies_flowbite_typography: string;
+		npm_package_dependencies_svelte_easy_crop: string;
 		npm_package_dependencies_svelte_i18n: string;
 		npm_package_dependencies_svelte_qrcode: string;
 		npm_package_dependencies_tailwind_merge: string;
