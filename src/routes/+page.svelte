@@ -16,7 +16,7 @@
     let form;
     let valid = false;
 
-    let candidate= {
+    let candidate = {
         firstname:'',
         lastname:'',
         email:'',
@@ -28,7 +28,8 @@
         reCapRes:'',
         application_source: 'Recruiting-Formular',
         facebook: undefined,
-        instagram: undefined
+        instagram: undefined,
+        referer: null
     }
     let regions = [
         { value: 'Berlin', name: 'Berlin' },
@@ -88,7 +89,7 @@
         }
         try{
             const res = await formDataPost('/hr/application', candidate)
-            goto(base + '/thank-you')
+            goto(base + '/thank-you' + '?ref=' + res.employee.uuid)
 
         }
         catch (e){
@@ -97,6 +98,11 @@
         }
         valid = true;
     }
+    onMount(() => {
+        if($page.url.searchParams.get('ref')) {
+            candidate.referer = $page.url.searchParams.get('ref');
+        }
+    })
 
 
 

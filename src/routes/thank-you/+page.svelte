@@ -1,10 +1,41 @@
-<script>
-    import {Card, Heading, Hr} from "flowbite-svelte";
+<script lang="ts">
+    import {Button, Card, Heading, Hr} from "flowbite-svelte";
     import QrCode from "svelte-qrcode"
-    import {FacebookSolid, NewspaperSolid, ShareAllSolid, ShareNodesSolid, TwitterSolid} from "flowbite-svelte-icons";
+    import {
+        EnvelopeSolid,
+        FacebookSolid,
+        NewspaperSolid,
+        ShareAllSolid,
+        ShareNodesSolid,
+        TwitterSolid
+    } from "flowbite-svelte-icons";
     import CopyToClipboard from "$lib/components/CopyToClipboard.svelte";
+    import {page} from "$app/stores";
+    import {onMount} from "svelte";
+    import {PUBLIC_API_PATH} from "$env/static/public";
 
-    let link = "https://apply.recrew.de/";
+    let link = "https://apply.recrew.de"
+
+    let generatedQrCode: string;
+    onMount(() => {
+        if($page.url.searchParams.get('ref')) {
+            link = "https://apply.recrew.de?ref=" + $page.url.searchParams.get('ref');
+            fetch(PUBLIC_API_PATH + '/qr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: link,
+                    logoPath: 'https://portal.celest.services/img/ci/button_recrew_solid_black.svg'
+                })
+            }).then(r => r.blob()).then(r => {
+                generatedQrCode = URL.createObjectURL(r)
+            })
+        }
+
+
+    })
 </script>
 
 <div class="flex items-center justify-center my-10">
@@ -27,6 +58,9 @@
         <a href="https://www.facebook.com/sharer/sharer.php?u={link}" class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">
             <FacebookSolid class="w-6 h-6 inline"/>
         </a>
+        <a href="mailto:?subject=Arbeite%20mit%20mir%20bei%20Recrew&amp;body=Bewerbung:%20{link}" class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">
+            <EnvelopeSolid class="w-6 h-6 inline"/>
+        </a>
         <CopyToClipboard textToCopy={link}>
             <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">
                 <ShareNodesSolid/>
@@ -34,7 +68,23 @@
         </CopyToClipboard>
     </div>
     <div class="grid place-items-center">
-        <QrCode value={link} class="mt-3 "/>
+        {#if generatedQrCode}
+            <img src={generatedQrCode} class="mt-3 w-[300px]">
+            <div class="my-3">
+
+                <Button download="recrew-apply.svg" href={generatedQrCode}>QR-Code herunterladen</Button>
+            </div>
+            <p>Mit Freunden zu arbeiten macht nicht nur mehr Spaß, sondern bringt auch was in die Kasse!</p>
+            <p>Dein persönlicher QR-Code sichert dir die Zuordnung von Empfehlungen.</p>
+
+        {:else }
+            <h3 class="leading-4 text-xl mb-3">Allgemeiner QR-Code</h3>
+            <QrCode value={link} class="mt-3 "/>
+            {#if $page.url.searchParams.get('ref')}
+            <p class="mt-3">Erstelle persönlichen Empfehlungscode ...</p>
+            {/if}
+        {/if}
+
     </div>
 </div>
 
