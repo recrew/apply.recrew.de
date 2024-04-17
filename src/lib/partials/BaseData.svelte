@@ -156,6 +156,9 @@
                         noRead={true}
                         on:ocr={ev => idReader(ev.detail, 1)}/>
             </div>
+
+            {/if}
+            {#if employee.images[0]}
             <div>
                 <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer</Label>
                 <Input bind:value={employee.images[0].documentNumber} type="text" id="id" required />

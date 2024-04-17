@@ -16,8 +16,8 @@
     ].map((n) => ({name: n, value: n}));
 
     let stati = [
-        'Umschüler/in', 'Schüler/in', 'Schulentlassen mit Studienabsicht', 'Student/in',
-        'abgeschl. Studium mit Masterplan', 'Praktikant/in', 'Auszubildende/r', 'Freiwilliger Wehrdienst',
+        'Umschüler(in)', 'Schüler(in)', 'Schulentlassen mit Studienabsicht', 'Student(in)',
+        'abgeschl. Studium mit Masterplan', 'Praktikant(in)', 'Auszubildende(r)', 'Freiwilliger Wehrdienst',
         'Hausfrau/-mann', 'beschäftigungslos', 'arbeitslos bei Agentur für Arbeit gemeldet', 'sozialversichert hauptbeschäftigt',
         'selbständig', 'Sonstiges', 'Wiederaufnahme Studium geplant'
     ].map((n) => ({name: n, value: n}));

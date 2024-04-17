@@ -137,7 +137,7 @@
       "_modal.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.BwkXbM5E.css"
+      "_app/immutable/assets/_layout.R92QBIy3.css"
     ]
   },
   "src/routes/+layout.ts": {
@@ -179,6 +179,9 @@
       "_api.js",
       "_stores.js",
       "_modal.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.CwQatgB9.css"
     ]
   },
   "src/routes/docs/+page.svelte": {

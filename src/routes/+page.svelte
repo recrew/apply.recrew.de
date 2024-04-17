@@ -120,10 +120,10 @@
                 Wir bieten:</p>
             <h1 class="mb-4 text-3xl font-extrabold tracking-tight leading-none text-gray-700 md:text-4xl lg:text-5xl dark:text-white">
                 Den flexibelsten Nebenjob der Stadt</h1>
-            <p class="font-semibold mb-2">
+            <p class="font-semibold mb-2 dark:text-white">
                 Täglich neue Jobs und Aufgaben als Teil einer familiären Crew meistern:
             </p>
-            <p>
+            <p class=" dark:text-white">
                 Werde ein Teil unserer Crew und bewirb dich noch heute bei uns! Wir freuen uns auf deine (Schnell)
                 Bewerbung.
             </p>

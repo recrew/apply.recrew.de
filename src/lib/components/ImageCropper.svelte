@@ -19,7 +19,7 @@
 
     function onFileSelected() {
         // 1 MB
-        if (files[0].size > 1048576) {
+        if (files[0].size > (1048576 * 4)) {
             alert('Die Datei ist zu groß!');
             return;
         }

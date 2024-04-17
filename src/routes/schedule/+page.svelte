@@ -26,7 +26,7 @@
         try{
             serverData = await get('/hr/applicant/' + $page.url.searchParams.get('sheet') + '/phone-appointment');
 
-            let url = serverData.status === 'data-verified' ? PUBLIC_CALENDLY_TRAINING : PUBLIC_CALENDLY_TELEPHONE;
+            let url = serverData.status === 'data-verified' ? serverData['get-to-know'] : PUBLIC_CALENDLY_TELEPHONE;
 
 
             Calendly.initInlineWidget({

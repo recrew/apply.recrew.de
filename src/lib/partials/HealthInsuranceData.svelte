@@ -32,7 +32,7 @@
             </div>
             <div>
                 <Label for="insurance-number" class="mb-2">Versicherungsnummer</Label>
-                <Input type="number" bind:value={employee.healthInsurance.insuranceNumber} id="insurance-number"/>
+                <Input type="text" bind:value={employee.healthInsurance.insuranceNumber} id="insurance-number"/>
             </div>
         </div>
         {#if employee.healthInsurance.isPublic}
