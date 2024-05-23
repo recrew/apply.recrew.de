@@ -36,7 +36,9 @@
         croppedImage = await getCroppedImg(image, e.detail.pixels);
         preview = URL.createObjectURL(croppedImage)
         // Convert Blob into File
-        const file = new File([croppedImage], files[0].name.split('.')[0] + '-cropped.jpg', {type: croppedImage.type});
+        const fileNameParts = files[0].name.split('.')
+        const fileName = (fileNameParts[0].includes('-cropped') ? fileNameParts[0] : fileNameParts[0] + '-cropped') + '.' + fileNameParts[fileNameParts.length -1];
+        const file = new File([croppedImage], fileName, {type: croppedImage.type});
         // Create a new DataTransfer instance
         const dataTransfer = new DataTransfer();
         // Add file to DataTransfer

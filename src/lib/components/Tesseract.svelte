@@ -77,6 +77,13 @@
                 })
             }
         })
+        if(text === ''){
+            dispatch('ocr', {
+                text,
+                file: files[0],
+                type
+            })
+        }
         await worker.terminate();
         loading = false;
     }

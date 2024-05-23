@@ -7,10 +7,10 @@ function __memo(fn) {
 return {
 	appDir: "_app",
 	appPath: "apply.recrew.de/_app",
-	assets: new Set([".htaccess","android-chrome-192x192.png","android-chrome-512x512.png","apple-touch-icon.png","barkeeper-1400x600.jpg","browserconfig.xml","favicon-16x16.png","favicon-32x32.png","favicon.ico","icon-192x192.png","icon-512x512.png","manifest.json","mstile-144x144.png","mstile-150x150.png","mstile-310x150.png","mstile-310x310.png","mstile-70x70.png","recrew-web-banner.webp","safari-pinned-tab.svg","site.webmanifest","service-worker.js"]),
+	assets: new Set([".htaccess","android-chrome-192x192.png","android-chrome-512x512.png","apple-touch-icon.png","barkeeper-1400x600.jpg","browserconfig.xml","favicon-16x16.png","favicon-32x32.png","favicon.ico","icon-192x192.png","icon-512x512.png","manifest.json","mstile-144x144.png","mstile-150x150.png","mstile-310x150.png","mstile-310x310.png","mstile-70x70.png","recrew-web-banner.webp","safari-pinned-tab.svg","site.webmanifest"]),
 	mimeTypes: {".png":"image/png",".jpg":"image/jpeg",".xml":"text/xml",".json":"application/json",".webp":"image/webp",".svg":"image/svg+xml",".webmanifest":"application/manifest+json"},
 	_: {
-		client: {"start":"_app/immutable/entry/start.BoH5x-vD.js","app":"_app/immutable/entry/app.Cc8o_CaV.js","imports":["_app/immutable/entry/start.BoH5x-vD.js","_app/immutable/chunks/entry.Dg5AwCgI.js","_app/immutable/chunks/scheduler.Bcx0TcDP.js","_app/immutable/chunks/index.D0oo-Ivb.js","_app/immutable/entry/app.Cc8o_CaV.js","_app/immutable/chunks/preload-helper.BQ24v_F8.js","_app/immutable/chunks/scheduler.Bcx0TcDP.js","_app/immutable/chunks/index.DhAk6tgC.js"],"stylesheets":[],"fonts":[],"uses_env_dynamic_public":false},
+		client: {"start":"_app/immutable/entry/start.BasmZ8Wd.js","app":"_app/immutable/entry/app.BhR6Ci_V.js","imports":["_app/immutable/entry/start.BasmZ8Wd.js","_app/immutable/chunks/entry.CWby8ymr.js","_app/immutable/chunks/scheduler.DrIHIsRK.js","_app/immutable/chunks/index.B4p_thPL.js","_app/immutable/entry/app.BhR6Ci_V.js","_app/immutable/chunks/preload-helper.BQ24v_F8.js","_app/immutable/chunks/scheduler.DrIHIsRK.js","_app/immutable/chunks/index.BfVcQvBH.js"],"stylesheets":[],"fonts":[],"uses_env_dynamic_public":false},
 		nodes: [
 			__memo(() => import('./nodes/0.js')),
 			__memo(() => import('./nodes/1.js')),
