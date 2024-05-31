@@ -21,24 +21,24 @@
         </div>
         <div class="grid grid-cols-2 gap-3 mt-2">
             <div>
-                <Label for="insurance-name" class="mb-2">{employee.healthInsurance.isPublic ? '' : 'Private '} Krankenversicherung</Label>
+                <Label for="insurance-name" class="mb-2">{employee.healthInsurance.isPublic ? '' : 'Private '} Krankenversicherung *</Label>
                 {#if employee.healthInsurance.isPublic}
-                    <Typeahead bind:value={employee.healthInsurance.insuranceName} id="insurance-name" data={insurances} />
+                    <Typeahead bind:value={employee.healthInsurance.insuranceName} id="insurance-name" data={insurances} required/>
 <!--                    <Select bind:value={employee.healthInsurance.insuranceName} id="insurance-name" items={insurances} />-->
                 {:else}
-                    <Input type="text" bind:value={employee.healthInsurance.insuranceName} id="insurance-name"/>
+                    <Input type="text" bind:value={employee.healthInsurance.insuranceName} id="insurance-name" required/>
                 {/if}
 
             </div>
             <div>
-                <Label for="insurance-number" class="mb-2">Versicherungsnummer</Label>
-                <Input type="text" bind:value={employee.healthInsurance.insuranceNumber} id="insurance-number"/>
+                <Label for="insurance-number" class="mb-2">Versicherungsnummer *</Label>
+                <Input type="text" bind:value={employee.healthInsurance.insuranceNumber} id="insurance-number" required/>
             </div>
         </div>
         {#if employee.healthInsurance.isPublic}
             <div class="mt-2">
-                <Label for="insurance-place" class="mb-2">Ort gesetzliche KV</Label>
-                <Input type="text" bind:value={employee.healthInsurance.insurancePlace} id="insurance-place"/>
+                <Label for="insurance-place" class="mb-2">Ort gesetzliche KV *</Label>
+                <Input type="text" bind:value={employee.healthInsurance.insurancePlace} id="insurance-place" required/>
             </div>
         {/if}
     {/if}

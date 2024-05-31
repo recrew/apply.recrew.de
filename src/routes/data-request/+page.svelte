@@ -49,6 +49,8 @@
 
     }
 
+
+
     onMount(() => {
         get('/hr/applicant/' + $page.url.searchParams.get('sheet') + '/data-sheet').then((res) => {
             employee = res
@@ -58,6 +60,16 @@
         }).catch((e) => {
             error = true;
         })
+        /*setTimeout(()=> {
+            document.querySelectorAll('input').forEach(x => {
+                if(x.required){
+                    const label = document.querySelector('label[for=' + x.id)
+                    label.innerHTML += '*'
+                    console.log({label})
+                }
+                // console.log({x})
+            })
+        },300)*/
     })
 
 </script>

@@ -29,16 +29,16 @@
     {#if employee.bankAccount}
     <div class="grid grid-cols-2 gap-3 mt-2">
         <div>
-            <Label class="mb-2" for="accountName">Kontoinhaber</Label>
-            <Input id="accountName" bind:value={employee.bankAccount.accountName} />
+            <Label class="mb-2" for="accountName">Kontoinhaber *</Label>
+            <Input id="accountName" bind:value={employee.bankAccount.accountName} required/>
         </div>
         <div>
-            <Label class="mb-2" for="iban">IBAN</Label>
-            <Input on:blur={getBankDetails} id="iban" bind:value={employee.bankAccount.iban} />
+            <Label class="mb-2" for="iban">IBAN *</Label>
+            <Input on:blur={getBankDetails} id="iban" bind:value={employee.bankAccount.iban} required/>
         </div>
         <div>
-            <Label class="mb-2" for="bic">BIC</Label>
-            <Input id="bic" bind:value={employee.bankAccount.bicSwift} />
+            <Label class="mb-2" for="bic">BIC *</Label>
+            <Input id="bic" bind:value={employee.bankAccount.bicSwift} required/>
         </div>
         <div>
             <Label class="mb-2" for="bank">Bankname</Label>

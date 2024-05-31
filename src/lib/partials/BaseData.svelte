@@ -80,39 +80,39 @@
         <Avatar src={employee.avatarFile ? generateBlob() : ''} rounded size="xl" >{employee.firstName.charAt(0)+employee.lastName.charAt(0)}</Avatar>
     </Label>
     <input bind:files={avatarFiles} class="hidden" type="file" id="avatarFile"/>
-    <div class="grid grid-cols-2 gap-3 mt-2">
+    <div class="grid grid-cols-2 gap-3 mt-8">
         <div>
-            <Label for="firstName" class="mb-2">Vorname</Label>
+            <Label for="firstName" class="mb-2">Vorname *</Label>
             <Input type="text" bind:value={employee.firstName} id="firstName" required/>
         </div>
         <div>
-            <Label for="lastName" class="mb-2">Nachname</Label>
+            <Label for="lastName" class="mb-2">Nachname *</Label>
             <Input type="text" bind:value={employee.lastName} id="lastName" required/>
         </div>
 
         <div>
-            <Label for="gender" class="mb-2">Geschlecht</Label>
-            <Select bind:value={employee.gender} id="gender">
+            <Label for="gender" class="mb-2">Geschlecht *</Label>
+            <Select bind:value={employee.gender} id="gender" required>
                 <option value="female">Frau</option>
                 <option value="male">Herr</option>
                 <option value="diverse">Divers</option>
             </Select>
         </div>
         <div>
-            <Label for="placeOfBirth" class="mb-2">Geburtsort</Label>
+            <Label for="placeOfBirth" class="mb-2">Geburtsort *</Label>
             <Input type="text" bind:value={employee.cv.placeOfBirth} id="placeOfBirth" required/>
         </div>
         <div>
-            <Label for="dob" class="mb-2">Geburtsdatum</Label>
+            <Label for="dob" class="mb-2">Geburtsdatum *</Label>
             <Input type="date" bind:value={employee.dateOfBirth.value} id="dob" required/>
         </div>
         <div>
-            <Label for="maidenName" class="mb-2">Geburtsname</Label>
-            <Input bind:value={employee.maidenName} type="text" id="maidenName" />
+            <Label for="maidenName" class="mb-2">Geburtsname *</Label>
+            <Input bind:value={employee.maidenName} type="text" id="maidenName" required/>
         </div>
         <div>
-            <Label for="familyStatus" class="mb-2">Familienstand</Label>
-            <Select bind:value={employee.cv.familyStatus} id="familyStatus">
+            <Label for="familyStatus" class="mb-2">Familienstand *</Label>
+            <Select bind:value={employee.cv.familyStatus} id="familyStatus" required>
                 <option value="single">ledig / single</option>
                 <option value="married">verheiratet</option>
                 <option value="registered_partnership">eingetragene Lebenspartnerschaft</option>
@@ -122,8 +122,8 @@
             </Select>
         </div>
         <div>
-            <Label for="nationality" class="mb-2">Staatsanghörigkeit</Label>
-            <Typeahead bind:value={employee.cv.nationality} id="nationality" data={items} icon={GlobeSolid} />
+            <Label for="nationality" class="mb-2">Staatsanghörigkeit *</Label>
+            <Typeahead bind:value={employee.cv.nationality} id="nationality" data={items} icon={GlobeSolid} required/>
         </div>
 
     </div>
@@ -160,7 +160,7 @@
             {/if}
             {#if employee.images[0]}
             <div>
-                <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer</Label>
+                <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer *</Label>
                 <Input bind:value={employee.images[0].documentNumber} type="text" id="id" required />
                 <Helper class="mt-2" color="green">
                     Bitte maschinell gescanntes Ergebnis überprüfen!
