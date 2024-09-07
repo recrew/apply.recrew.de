@@ -1,6 +1,6 @@
 import { c as create_ssr_component, s as setContext, v as validate_component, h as getContext, d as add_attribute, a as spread, b as escape_object, e as escape_attribute_value, g as createEventDispatcher, f as escape, i as each, m as missing_component } from "../../../chunks/ssr.js";
 import { c as compute_rest_props, s as subscribe, a as compute_slots } from "../../../chunks/utils.js";
-import { T as TransitionFrame, C as ClipboardOutline, F as FacebookSolid, S as ShareNodesSolid, a as CopyToClipboard, b as Card } from "../../../chunks/CopyToClipboard.js";
+import { T as TransitionFrame, C as ClipboardOutline, E as EnvelopeSolid, F as FacebookSolid, S as ShareNodesSolid, a as CopyToClipboard, b as Card } from "../../../chunks/CopyToClipboard.js";
 import { twMerge, twJoin } from "tailwind-merge";
 import { F as Frame, C as CloseButton } from "../../../chunks/CloseButton.js";
 import { w as writable } from "../../../chunks/index.js";
@@ -9557,42 +9557,6 @@ const EnvelopeOutline = create_ssr_component(($$result, $$props, $$bindings, slo
     ],
     {}
   )}><path stroke="currentColor"${add_attribute("stroke-linecap", strokeLinecap, 0)}${add_attribute("stroke-linejoin", strokeLinejoin, 0)}${add_attribute("stroke-width", strokeWidth, 0)} d="m19 2-8.4 7.05a1 1 0 0 1-1.2 0L1 2m18 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1m18 0v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2"></path></svg> `;
-});
-const EnvelopeSolid = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let $$restProps = compute_rest_props($$props, ["size", "role", "ariaLabel"]);
-  const ctx = getContext("iconCtx") ?? {};
-  const sizes = {
-    xs: "w-3 h-3",
-    sm: "w-4 h-4",
-    md: "w-5 h-5",
-    lg: "w-6 h-6",
-    xl: "w-8 h-8"
-  };
-  let { size = ctx.size || "md" } = $$props;
-  let { role = ctx.role || "img" } = $$props;
-  let { ariaLabel = "envelope solid" } = $$props;
-  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
-    $$bindings.size(size);
-  if ($$props.role === void 0 && $$bindings.role && role !== void 0)
-    $$bindings.role(role);
-  if ($$props.ariaLabel === void 0 && $$bindings.ariaLabel && ariaLabel !== void 0)
-    $$bindings.ariaLabel(ariaLabel);
-  return `<svg${spread(
-    [
-      { xmlns: "http://www.w3.org/2000/svg" },
-      { fill: "currentColor" },
-      escape_object($$restProps),
-      {
-        class: escape_attribute_value(twMerge("shrink-0", sizes[size], $$props.class))
-      },
-      { role: escape_attribute_value(role) },
-      {
-        "aria-label": escape_attribute_value(ariaLabel)
-      },
-      { viewBox: "0 0 20 16" }
-    ],
-    {}
-  )}><g fill="currentColor"><path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"></path><path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"></path></g></svg> `;
 });
 const EuroOutline = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["size", "role", "strokeLinecap", "strokeLinejoin", "strokeWidth", "ariaLabel"]);

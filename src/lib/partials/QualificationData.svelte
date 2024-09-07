@@ -66,6 +66,7 @@
 
     onMount(async() => {
         graduations = (await get('/hr/reference/Schulabschluss')).map((n) => ({...n, name: n.value}));
+        stati = (await get('/hr/references/stati')).map((n) => ({name: n, value: n}));
     })
 
 
@@ -83,9 +84,9 @@
         </div>
         <div>
             <Label class="mb-2" for="status">Aktueller Status *</Label>
-            <Select id="status" bind:value={employee.cv.currentStatus} items={stati} required/>
+            <Select id="status" bind:value={employee.status} items={stati} required/>
         </div>
-        {#if employee.cv.currentStatus === 'Student/in'}
+        {#if employee.status === 'Student'}
             <Tesseract value={employee.images.find((n) => n.imageTag === 'student-verification')} options={[{name: 'Immatrikulationsbescheinigung', value: 'student-verification'}]} noRead={true} on:ocr={bindStudentVerification} />
         {/if}
         <div>

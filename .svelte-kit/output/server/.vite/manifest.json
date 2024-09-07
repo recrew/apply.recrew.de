@@ -137,7 +137,7 @@
       "_modal.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.ONOTaCai.css"
+      "_app/immutable/assets/_layout.BB0S57hi.css"
     ]
   },
   "src/routes/+layout.ts": {
@@ -216,10 +216,11 @@
     "src": "src/routes/thank-you/+page.svelte",
     "isEntry": true,
     "imports": [
+      "_utils.js",
       "_ssr.js",
       "_CopyToClipboard.js",
       "_Heading.js",
-      "_utils.js"
+      "_stores.js"
     ]
   }
 }

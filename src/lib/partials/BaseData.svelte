@@ -21,7 +21,8 @@
 
     export let employee: any
 
-    let items: any[] = [];
+    let nationalities: any[] = [];
+    let countries: any[] = [];
     let files: File[];
     let avatarFiles: FileList;
 
@@ -67,8 +68,8 @@
         if(employee.dateOfBirth.value){
             employee.dateOfBirth.value = employee.dateOfBirth.value.split(' ')[0]
         }
-        items = await get('/hr/reference/Staatsangehoerigkeiten')
-        items = items.map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name))
+        nationalities = (await get('/hr/reference/Staatsangehoerigkeiten')).map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name))
+        countries = (await get('/hr/reference/Staaten')).map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name))
     })
 
 
@@ -80,7 +81,7 @@
         <Avatar src={employee.avatarFile ? generateBlob() : ''} rounded size="xl" >{employee.firstName.charAt(0)+employee.lastName.charAt(0)}</Avatar>
     </Label>
     <input bind:files={avatarFiles} class="hidden" type="file" id="avatarFile"/>
-    <div class="grid grid-cols-2 gap-3 mt-8">
+    <div class="grid md:grid-cols-2 gap-3 mt-8">
         <div>
             <Label for="firstName" class="mb-2">Vorname *</Label>
             <Input type="text" bind:value={employee.firstName} id="firstName" required/>
@@ -103,6 +104,10 @@
             <Input type="text" bind:value={employee.cv.placeOfBirth} id="placeOfBirth" required/>
         </div>
         <div>
+            <Label for="countryOfBirth" class="mb-2">Geburtsland *</Label>
+            <Typeahead bind:value={employee.cv.countryOfBirth} id="countryOfBirth" data={countries} icon={GlobeSolid} />
+        </div>
+        <div>
             <Label for="dob" class="mb-2">Geburtsdatum *</Label>
             <Input type="date" bind:value={employee.dateOfBirth.value} id="dob" required/>
         </div>
@@ -123,7 +128,7 @@
         </div>
         <div>
             <Label for="nationality" class="mb-2">Staatsanghörigkeit *</Label>
-            <Typeahead bind:value={employee.cv.nationality} id="nationality" data={items} icon={GlobeSolid} required/>
+            <Typeahead bind:value={employee.cv.nationality} id="nationality" data={nationalities} icon={GlobeSolid} required/>
         </div>
 
     </div>

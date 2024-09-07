@@ -1,8 +1,9 @@
+import { c as compute_rest_props, a as compute_slots, s as subscribe } from "../../../chunks/utils.js";
 import { c as create_ssr_component, a as spread, b as escape_object, e as escape_attribute_value, d as add_attribute, v as validate_component, f as escape } from "../../../chunks/ssr.js";
-import { b as Card, F as FacebookSolid, a as CopyToClipboard, S as ShareNodesSolid } from "../../../chunks/CopyToClipboard.js";
+import { b as Card, F as FacebookSolid, E as EnvelopeSolid, a as CopyToClipboard, S as ShareNodesSolid } from "../../../chunks/CopyToClipboard.js";
 import { H as Heading } from "../../../chunks/Heading.js";
-import { c as compute_rest_props, a as compute_slots } from "../../../chunks/utils.js";
 import { twMerge } from "tailwind-merge";
+import { p as page } from "../../../chunks/stores.js";
 const Hr = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["icon", "divClass", "hrClass", "iconDivClass", "textSpanClass", "innerDivClass"]);
   let $$slots = compute_slots(slots);
@@ -2842,8 +2843,11 @@ const Lib = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   }
   return `<img${add_attribute("src", image, 0)}${add_attribute("alt", value, 0)}${add_attribute("class", className, 0)}>`;
 });
-let link = "https://apply.recrew.de/";
 const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $page, $$unsubscribe_page;
+  $$unsubscribe_page = subscribe(page, (value) => $page = value);
+  let link = "https://apply.recrew.de";
+  $$unsubscribe_page();
   return `<div class="flex items-center justify-center my-10">${validate_component(Card, "Card").$$render($$result, { href: "/cards" }, {}, {
     default: () => {
       return `<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white" data-svelte-h="svelte-100nt1u">Danke!</h5> <p class="font-normal text-gray-700 dark:text-gray-400 leading-tight" data-svelte-h="svelte-9wxh4p">Deine Anfrage wurde gesendet. Wir melden uns!</p>`;
@@ -2852,11 +2856,11 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     default: () => {
       return `Lust mit deinen Freunden zu arbeiten?`;
     }
-  })} <p class="text-center mb-3" data-svelte-h="svelte-hnzpyw">Schnellbewerbung teilen:</p> <div class="flex gap-8 justify-center"><a href="https://www.instagram.com/recrewjobs/" class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900" data-svelte-h="svelte-1krd3e"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M13.028 2c1.125.003 1.696.009 2.189.023l.194.007c.224.008.445.018.712.03c1.064.05 1.79.218 2.427.465c.66.254 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428c.012.266.022.487.03.712l.006.194c.015.492.021 1.063.023 2.188l.001.746v1.31a78.831 78.831 0 0 1-.023 2.188l-.006.194c-.008.225-.018.446-.03.712c-.05 1.065-.22 1.79-.466 2.428a4.883 4.883 0 0 1-1.153 1.772a4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.427.465a72.11 72.11 0 0 1-.712.03l-.194.006c-.493.014-1.064.021-2.189.023l-.746.001h-1.309a78.43 78.43 0 0 1-2.189-.023l-.194-.006a63.036 63.036 0 0 1-.712-.031c-1.064-.05-1.79-.218-2.428-.465a4.889 4.889 0 0 1-1.771-1.153a4.904 4.904 0 0 1-1.154-1.772c-.247-.637-.415-1.363-.465-2.428a74.1 74.1 0 0 1-.03-.712l-.005-.194A79.047 79.047 0 0 1 2 13.028v-2.056a78.82 78.82 0 0 1 .022-2.188l.007-.194c.008-.225.018-.446.03-.712c.05-1.065.218-1.79.465-2.428A4.88 4.88 0 0 1 3.68 3.678a4.897 4.897 0 0 1 1.77-1.153c.638-.247 1.363-.415 2.428-.465c.266-.012.488-.022.712-.03l.194-.006a79 79 0 0 1 2.188-.023zM12 7a5 5 0 1 0 0 10a5 5 0 0 0 0-10m0 2a3 3 0 1 1 .001 6a3 3 0 0 1 0-6m5.25-3.5a1.25 1.25 0 0 0 0 2.5a1.25 1.25 0 0 0 0-2.5"></path></svg></a> <a href="${"https://www.facebook.com/sharer/sharer.php?u=" + escape(link, true)}" class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">${validate_component(FacebookSolid, "FacebookSolid").$$render($$result, { class: "w-6 h-6 inline" }, {}, {})}</a> ${validate_component(CopyToClipboard, "CopyToClipboard").$$render($$result, { textToCopy: link }, {}, {
+  })} <p class="text-center mb-3" data-svelte-h="svelte-hnzpyw">Schnellbewerbung teilen:</p> <div class="flex gap-8 justify-center"><a href="https://www.instagram.com/recrewjobs/" class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900" data-svelte-h="svelte-1krd3e"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M13.028 2c1.125.003 1.696.009 2.189.023l.194.007c.224.008.445.018.712.03c1.064.05 1.79.218 2.427.465c.66.254 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428c.012.266.022.487.03.712l.006.194c.015.492.021 1.063.023 2.188l.001.746v1.31a78.831 78.831 0 0 1-.023 2.188l-.006.194c-.008.225-.018.446-.03.712c-.05 1.065-.22 1.79-.466 2.428a4.883 4.883 0 0 1-1.153 1.772a4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.427.465a72.11 72.11 0 0 1-.712.03l-.194.006c-.493.014-1.064.021-2.189.023l-.746.001h-1.309a78.43 78.43 0 0 1-2.189-.023l-.194-.006a63.036 63.036 0 0 1-.712-.031c-1.064-.05-1.79-.218-2.428-.465a4.889 4.889 0 0 1-1.771-1.153a4.904 4.904 0 0 1-1.154-1.772c-.247-.637-.415-1.363-.465-2.428a74.1 74.1 0 0 1-.03-.712l-.005-.194A79.047 79.047 0 0 1 2 13.028v-2.056a78.82 78.82 0 0 1 .022-2.188l.007-.194c.008-.225.018-.446.03-.712c.05-1.065.218-1.79.465-2.428A4.88 4.88 0 0 1 3.68 3.678a4.897 4.897 0 0 1 1.77-1.153c.638-.247 1.363-.415 2.428-.465c.266-.012.488-.022.712-.03l.194-.006a79 79 0 0 1 2.188-.023zM12 7a5 5 0 1 0 0 10a5 5 0 0 0 0-10m0 2a3 3 0 1 1 .001 6a3 3 0 0 1 0-6m5.25-3.5a1.25 1.25 0 0 0 0 2.5a1.25 1.25 0 0 0 0-2.5"></path></svg></a> <a href="${"https://www.facebook.com/sharer/sharer.php?u=" + escape(link, true)}" class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">${validate_component(FacebookSolid, "FacebookSolid").$$render($$result, { class: "w-6 h-6 inline" }, {}, {})}</a> <a href="${"mailto:?subject=Arbeite%20mit%20mir%20bei%20Recrew&body=Bewerbung:%20" + escape(link, true)}" class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">${validate_component(EnvelopeSolid, "EnvelopeSolid").$$render($$result, { class: "w-6 h-6 inline" }, {}, {})}</a> ${validate_component(CopyToClipboard, "CopyToClipboard").$$render($$result, { textToCopy: link }, {}, {
     default: () => {
       return `<div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12 dark:bg-primary-900">${validate_component(ShareNodesSolid, "ShareNodesSolid").$$render($$result, {}, {}, {})}</div>`;
     }
-  })}</div> <div class="grid place-items-center">${validate_component(Lib, "QrCode").$$render($$result, { value: link, class: "mt-3 " }, {}, {})}</div></div>`;
+  })}</div> <div class="grid place-items-center">${`<h3 class="leading-4 text-xl mb-3" data-svelte-h="svelte-kpjgjt">Allgemeiner QR-Code</h3> ${validate_component(Lib, "QrCode").$$render($$result, { value: link, class: "mt-3 " }, {}, {})} ${$page.url.searchParams.get("ref") ? `<p class="mt-3" data-svelte-h="svelte-1lj6kdo">Erstelle persönlichen Empfehlungscode ...</p>` : ``}`}</div></div>`;
 });
 export {
   Page as default

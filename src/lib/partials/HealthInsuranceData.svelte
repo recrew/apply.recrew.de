@@ -16,7 +16,7 @@
 
 <Box title="Krankenversicherung">
     {#if employee.healthInsurance}
-        <div class="mt-2">
+        <div class="my-2">
             <Toggle bind:checked={employee.healthInsurance.isPublic}>Gesetzlich versichert?</Toggle>
         </div>
         <div class="grid grid-cols-2 gap-3 mt-2">
