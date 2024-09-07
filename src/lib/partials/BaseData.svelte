@@ -126,7 +126,7 @@
                 <option value="other">nicht bekannt</option>
             </Select>
         </div>
-        <div>
+        <div class="col-span-2">
             <Label for="nationality" class="mb-2">Staatsanghörigkeit *</Label>
             <Typeahead bind:value={employee.cv.nationality} id="nationality" data={nationalities} icon={GlobeSolid} required/>
         </div>

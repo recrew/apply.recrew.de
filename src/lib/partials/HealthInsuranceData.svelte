@@ -19,7 +19,7 @@
         <div class="my-2">
             <Toggle bind:checked={employee.healthInsurance.isPublic}>Gesetzlich versichert?</Toggle>
         </div>
-        <div class="grid grid-cols-2 gap-3 mt-2">
+        <div class="grid md:grid-cols-2 gap-3 mt-2">
             <div>
                 <Label for="insurance-name" class="mb-2">{employee.healthInsurance.isPublic ? '' : 'Private '} Krankenversicherung *</Label>
                 {#if employee.healthInsurance.isPublic}
