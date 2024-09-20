@@ -2,7 +2,7 @@
     import {onMount} from "svelte";
     import {get, formDataPost} from "$lib/api";
     import {page} from "$app/stores";
-    import {Alert, Button, Heading, Hr, P, Spinner} from "flowbite-svelte";
+    import {Alert, Button, Heading, Hr, P, Spinner, StepIndicator} from "flowbite-svelte";
     import {InfoCircleSolid} from "flowbite-svelte-icons";
     import TaxData from "$lib/partials/TaxData.svelte";
     import HealthInsuranceData from "$lib/partials/HealthInsuranceData.svelte";
@@ -11,6 +11,7 @@
     import BaseData from "$lib/partials/BaseData.svelte";
     import {modalStore} from "$lib/stores/modal";
     import DatasheetSaved from "$lib/partials/DatasheetSaved.svelte";
+    import {currentStep} from "$lib/stores/currentStep";
 
     let error = false;
     let employee:any;
@@ -39,7 +40,7 @@
         } catch (e) {
             console.log(e)
             $modalStore.registerConfig({
-                content: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.',
+                content: 'Ein Fehler ist aufgetreten. Alle erfolgreichen Daten angegeben? Sind Bilder evtl. zu groß?',
                 title: 'Ups...',
             })
         }
@@ -51,6 +52,10 @@
 
 
 
+    let steps = ['Persönliche Daten', 'Qualifikationen', 'Lohnsteuer', 'Bankdaten', 'Krankenversicherung']
+    currentStep.set(1)
+
+
     onMount(() => {
         get('/hr/applicant/' + $page.url.searchParams.get('sheet') + '/data-sheet').then((res) => {
             employee = res
@@ -60,16 +65,7 @@
         }).catch((e) => {
             error = true;
         })
-        /*setTimeout(()=> {
-            document.querySelectorAll('input').forEach(x => {
-                if(x.required){
-                    const label = document.querySelector('label[for=' + x.id)
-                    label.innerHTML += '*'
-                    console.log({label})
-                }
-                // console.log({x})
-            })
-        },300)*/
+
     })
 
 </script>
@@ -86,16 +82,17 @@
         </p>
     {/if}
     {#if employee && !error}
+
         <form on:submit|preventDefault={() => update()}>
             <Heading class="dark:text-white text-neutral-700" tag="h1">Hallo, {employee.name}</Heading>
             <P class="my-5">
                 Schön, dass du dich für RECREW bewirbst. Im nächsten Schritt brauchen wir die nötigen Daten, um den Papierkram erledigen zu können.
             </P>
+            <StepIndicator currentStep={$currentStep} {steps} />
             <BaseData bind:employee/>
             <QualificationData bind:employee/>
 
             <TaxData bind:employee/>
-            <Hr/>
             <BankData bind:employee/>
             <HealthInsuranceData bind:employee/>
 

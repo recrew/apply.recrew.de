@@ -1,9 +1,12 @@
 <script lang="ts">
     import Box from "$lib/components/Box.svelte";
-    import {Helper, Input, Label, Select, Toggle} from "flowbite-svelte";
+    import {Button, Helper, Input, Label, Select, Toggle} from "flowbite-svelte";
     import {onMount} from "svelte";
     import {get} from "$lib/api";
     import Tesseract from "$lib/components/Tesseract.svelte";
+    import {reactToBoxInteraction} from "$lib/utils/openStep";
+    import {currentStep} from "$lib/stores/currentStep";
+    import {BellRingOutline, CheckCircleOutline} from "flowbite-svelte-icons";
     export let employee: any;
 
     let graduations : any[] = [];
@@ -62,6 +65,7 @@
             }
         }
     }
+    $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor;
 
 
     onMount(async() => {
@@ -72,7 +76,7 @@
 
 </script>
 
-<Box title="Qualifikationen">
+<Box title="Qualifikationen" open={$currentStep === 2} on:open={ev => reactToBoxInteraction(ev, 2)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <div class="grid grid-cols-2 gap-y-3 gap-x-4 mt-2">
         <div>
             <Label class="mb-2" for="graduation">Schulabschluss *</Label>
@@ -133,6 +137,6 @@
             <Label class="mb-2" for="graduation">Haarfarbe *</Label>
             <Input id="graduation" bind:value={employee.cv.hairColor} required/>
         </div>
-
     </div>
+    <Button on:click={() => currentStep.update((n) => n + 1)} class="mt-5 w-full">Weiter</Button>
 </Box>

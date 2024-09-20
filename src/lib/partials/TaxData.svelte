@@ -1,10 +1,12 @@
 <script lang="ts">
     import Box from "$lib/components/Box.svelte";
-    import {Helper, Input, Label, Select, Tooltip} from "flowbite-svelte";
+    import {Button, Helper, Input, Label, Select, Tooltip} from "flowbite-svelte";
     import {onMount} from "svelte";
     import {get} from "$lib/api";
     import Typeahead from "$lib/components/Typeahead.svelte";
-    import {MountainSunSolid, QuestionCircleOutline} from "flowbite-svelte-icons";
+    import {BellRingOutline, CheckCircleOutline, MountainSunSolid, QuestionCircleOutline} from "flowbite-svelte-icons";
+    import {currentStep} from "$lib/stores/currentStep";
+    import {reactToBoxInteraction} from "$lib/utils/openStep";
     export let employee: any
 
     let taxClasses: any[] = []
@@ -18,6 +20,8 @@
         other: 'nicht bekannt'
     }
 
+    $: dataComplete = employee.cv && employee.taxId && employee.cv.taxationClass && employee.cv.religiousAffiliation
+
     onMount(async() =>{
         taxClasses = (await get('/hr/reference/Steuerklassen')).map((n) => ({...n, name: n.key + ': ' + n.value, value: parseInt(n.key)}))
             .sort((a,b) => a.key - b.key)
@@ -26,7 +30,7 @@
     })
 </script>
 
-<Box title="Lohnsteuer">
+<Box title="Lohnsteuer" open={$currentStep === 3} on:open={ev => reactToBoxInteraction(ev, 3)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <div class="grid gap-3 mt-2">
         <div>
             <Label class="mb-2" for="taxId">
@@ -55,5 +59,5 @@
             <Typeahead icon={MountainSunSolid} bind:value={employee.cv.religiousAffiliation} id="religion" data={religiousAffiliations} required/>
         </div>
     </div>
-
+    <Button on:click={() => currentStep.update((n) => n + 1)} class="mt-5 w-full">Weiter</Button>
 </Box>

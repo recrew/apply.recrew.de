@@ -1,6 +1,6 @@
 <script lang="ts">
     import {
-        Alert, Avatar,
+        Alert, Avatar, Button,
         Fileupload,
         Heading,
         Helper,
@@ -17,7 +17,9 @@
     import AddressData from "$lib/partials/AddressData.svelte";
     import Tesseract from "$lib/components/Tesseract.svelte";
     import Typeahead from "$lib/components/Typeahead.svelte";
-    import {GlobeSolid} from "flowbite-svelte-icons";
+    import {BellRingOutline, CheckCircleOutline, GlobeSolid} from "flowbite-svelte-icons";
+    import {reactToBoxInteraction} from "$lib/utils/openStep";
+    import {currentStep} from "$lib/stores/currentStep";
 
     export let employee: any
 
@@ -61,6 +63,9 @@
         }
         return URL.createObjectURL(employee.avatarFile)
     }
+
+    $:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0].file || employee.images[0].location) && employee.address.country
+
     onMount(async () => {
         if(employee.images.length < 1){
             employee.images = [{documentNumber: '', imageTag: 'id-card', file: null},{documentNumber: '', imageTag: 'id-card', file: null}]
@@ -75,7 +80,7 @@
 
 
 </script>
-<Box title="Persönliche Daten">
+<Box title="Persönliche Daten" open={$currentStep === 1} on:open={ev => reactToBoxInteraction(ev, 1)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <Label for="avatarFile">
         <div class="text-sm rtl:text-right font-medium block text-gray-900 dark:text-gray-300 mb-2">Profilbild</div>
         <Avatar src={employee.avatarFile ? generateBlob() : ''} rounded size="xl" >{employee.firstName.charAt(0)+employee.lastName.charAt(0)}</Avatar>
@@ -151,12 +156,12 @@
     {:else if employee.cv.nationality}
         <div class="grid grid-cols-2 gap-3 mt-2">
             <div>
-                <Tesseract value={employee.images.find((n) => n.imageTag === 'id-card' || n.imageTag === 'passport')} options={idOptions} on:ocr={ev => idReader(ev.detail)}/>
+                <Tesseract value={employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)} options={idOptions} on:ocr={ev => idReader(ev.detail)}/>
             </div>
-            {#if employee.images[0]?.file}
+            {#if employee.images[0]?.file || employee.images[0]?.location}
             <div>
                 <Tesseract
-                        value={employee.images.filter((n) => n.imageTag === 'id-card' || n.imageTag === 'passport')[1]}
+                        value={employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && !n.documentNumber)}
                         options={idOptions.filter((n) => n.value === employee.images[0].imageTag).map((n) => ({...n, name: n.name.replace('Vorderseite', 'Rückseite')}))}
                         noRead={true}
                         on:ocr={ev => idReader(ev.detail, 1)}/>
@@ -177,4 +182,5 @@
 
 
     <AddressData bind:employee/>
+    <Button on:click={() => currentStep.update((n) => n + 1)} class="mt-5 w-full">Weiter</Button>
 </Box>

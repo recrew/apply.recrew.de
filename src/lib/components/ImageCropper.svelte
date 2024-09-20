@@ -56,12 +56,14 @@
 </script>
 
 <div class="flex gap-2">
+    {#if !preview}
     <Fileupload bind:files accept="image/*" {name}/>
     <Button type="button"
             on:click={() => {
                 onFileSelected()
             }}>Zuschneiden
     </Button>
+    {/if}
 </div>
 
 {#if image}

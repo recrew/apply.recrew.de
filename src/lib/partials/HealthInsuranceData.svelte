@@ -1,12 +1,16 @@
 <script lang="ts">
     import Box from "$lib/components/Box.svelte";
-    import {Input, Label, Select, Toggle} from "flowbite-svelte";
+    import {Button, Input, Label, Select, Toggle} from "flowbite-svelte";
     import {onMount} from "svelte";
     import {get} from "$lib/api";
     import Typeahead from "$lib/components/Typeahead.svelte";
+    import {currentStep} from "$lib/stores/currentStep";
+    import {reactToBoxInteraction} from "$lib/utils/openStep";
+    import {BellRingOutline, CheckCircleOutline} from "flowbite-svelte-icons";
     export let employee: any
     let insurances: any[] = []
-    onMount(async() => {
+    $: dataComplete = employee.healthInsurance && employee.healthInsurance.insuranceName && employee.healthInsurance.insuranceNumber
+        onMount(async() => {
         if(!employee.healthInsurance){
             employee.healthInsurance = {}
         }
@@ -14,7 +18,7 @@
     })
 </script>
 
-<Box title="Krankenversicherung">
+<Box title="Krankenversicherung" open={$currentStep === 5} on:open={ev => reactToBoxInteraction(ev, 5)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     {#if employee.healthInsurance}
         <div class="my-2">
             <Toggle bind:checked={employee.healthInsurance.isPublic}>Gesetzlich versichert?</Toggle>
@@ -35,11 +39,12 @@
                 <Input type="text" bind:value={employee.healthInsurance.insuranceNumber} id="insurance-number" required/>
             </div>
         </div>
-        {#if employee.healthInsurance.isPublic}
+        {#if !employee.healthInsurance.isPublic}
             <div class="mt-2">
-                <Label for="insurance-place" class="mb-2">Ort gesetzliche KV *</Label>
-                <Input type="text" bind:value={employee.healthInsurance.insurancePlace} id="insurance-place" required/>
+                <Label for="insurance-place" class="mb-2">Eventuelle vorherige gesetl. Versicherung</Label>
+                <Typeahead bind:value={employee.healthInsurance.previouslyInsuredBy} id="insurance-place" data={insurances}/>
             </div>
         {/if}
     {/if}
+
 </Box>

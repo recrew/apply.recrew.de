@@ -1,7 +1,10 @@
 <script lang="ts">
     import Box from "$lib/components/Box.svelte";
-    import {Input, Label, P} from "flowbite-svelte";
+    import {Button, Input, Label, P} from "flowbite-svelte";
     import {onMount} from "svelte";
+    import {currentStep} from "$lib/stores/currentStep";
+    import {reactToBoxInteraction} from "$lib/utils/openStep";
+    import {BellRingOutline, CheckCircleOutline} from "flowbite-svelte-icons";
     export let employee: any;
 
     let bankDetails = null;
@@ -20,12 +23,13 @@
 
         })
     }
+    $: dataComplete = employee.bankAccount && employee.bankAccount.iban && employee.bankAccount.accountName
     onMount(() => {
         getBankDetails()
     })
 </script>
 
-<Box title="Bankdaten">
+<Box title="Bankdaten" open={$currentStep === 4} on:open={ev => reactToBoxInteraction(ev, 4)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     {#if employee.bankAccount}
     <div class="grid grid-cols-2 gap-3 mt-2">
         <div>
@@ -46,4 +50,5 @@
         </div>
     </div>
     {/if}
+    <Button on:click={() => currentStep.update((n) => n + 1)} class="mt-5 w-full">Weiter</Button>
 </Box>
