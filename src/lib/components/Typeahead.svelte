@@ -10,7 +10,8 @@
     export let data;
     export let inputClass = '';
 
-    export const required = false;
+    export let required = false;
+
 
     export let icon = PenSolid;
 

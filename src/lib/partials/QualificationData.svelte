@@ -7,6 +7,7 @@
     import {reactToBoxInteraction} from "$lib/utils/openStep";
     import {currentStep} from "$lib/stores/currentStep";
     import {BellRingOutline, CheckCircleOutline} from "flowbite-svelte-icons";
+    import {fileNameGenerator} from "$lib/utils/fileNameGenerator.js";
     export let employee: any;
 
     let graduations : any[] = [];
@@ -36,22 +37,28 @@
     let pantSizesMan = [46, 48, 50, 52, 54, 56].map((n) => ({name: n, value: "" + n}));
 
     const bindLicense1 = (ev: CustomEvent) => {
+        employee.images[licenseIndex].name = fileNameGenerator(ev.detail.file, employee, 'license', 'Vorderseite')
         employee.images[licenseIndex].file = ev.detail.file
         employee.images[licenseIndex].documentNumber = ev.detail.text
+        console.log(employee.images[licenseIndex])
     }
     const bindLicense2 = (ev: CustomEvent) => {
         const preExisting = employee.images.filter((n) => n.imageTag === 'license').length > 1;
+        const name = fileNameGenerator(ev.detail.file, employee, 'license', 'Rückseite')
         if(!preExisting) {
-            employee.images = [...employee.images, {documentNumber: null, imageTag: 'license', file: null}]
+            employee.images = [...employee.images, {documentNumber: null, imageTag: 'license', file: null, name}]
         }
         const index = employee.images.findIndex((n) => n.imageTag === 'license' && n.documentNumber === null);
+        employee.images[index].name = name
         employee.images[index].file = ev.detail.file
     }
     const bindStudentVerification = (ev: CustomEvent) => {
         const preExisting = employee.images.findIndex((n) => n.imageTag === 'student-verification');
+        const name = fileNameGenerator(ev.detail.file, employee, 'student-verification')
         if(preExisting < 0) {
-            employee.images = [...employee.images, {documentNumber: null, imageTag: 'student-verification', file: ev.detail.file}]
+            employee.images = [...employee.images, {documentNumber: null, imageTag: 'student-verification', file: ev.detail.file, name}]
         } else {
+            employee.images[preExisting].name = name
             employee.images[preExisting].file = ev.detail.file
         }
     }

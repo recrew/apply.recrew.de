@@ -20,6 +20,7 @@
     import {BellRingOutline, CheckCircleOutline, GlobeSolid} from "flowbite-svelte-icons";
     import {reactToBoxInteraction} from "$lib/utils/openStep";
     import {currentStep} from "$lib/stores/currentStep";
+    import {fileNameGenerator} from "$lib/utils/fileNameGenerator";
 
     export let employee: any
 
@@ -47,9 +48,11 @@
     }
 
     const idReader = (detail: any, index?: number) => {
+        employee.images[index ?? 0].name = fileNameGenerator(detail.file, employee, detail.type, index ? 'Rückseite' : 'Vorderseite')
         employee.images[index ?? 0].file = detail.file
         employee.images[index ?? 0].documentNumber = detail.text
         employee.images[index ?? 0].imageTag = detail.type
+        console.log(employee.images[index ?? 0])
 
     }
     $: {

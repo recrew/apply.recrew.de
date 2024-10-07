@@ -20,7 +20,10 @@
 
     const update = async () => {
         loading = true;
-        let updateObject = {...employee};
+        let updateObject = {
+            healthInsurance: employee.healthInsurance || {},
+            ...employee
+        };
         if(employee.avatarFile && typeof employee.avatarFile === 'string'){
             delete updateObject.avatarFile;
         }

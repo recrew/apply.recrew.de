@@ -3,6 +3,8 @@
     import {get} from "$lib/api";
     import {onMount} from "svelte";
     import Box from "$lib/components/Box.svelte";
+    import {GlobeSolid} from "flowbite-svelte-icons";
+    import Typeahead from "$lib/components/Typeahead.svelte";
 
     export let employee: any
 
@@ -35,7 +37,7 @@
         </div>
         <div class="col-span-3">
             <Label for="country" class="mb-2">Land *</Label>
-            <Select bind:value={employee.address.country} items={countries} id="country" required/>
+            <Typeahead bind:value={employee.address.country} id="country" data={countries} icon={GlobeSolid} required/>
         </div>
     </div>
     {/if}
