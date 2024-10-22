@@ -67,7 +67,7 @@
         return URL.createObjectURL(employee.avatarFile)
     }
 
-    $:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0].file || employee.images[0].location) && employee.address.country
+    $:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
 
     onMount(async () => {
         if(employee.images.length < 1){

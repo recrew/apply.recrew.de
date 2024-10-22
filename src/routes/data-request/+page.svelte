@@ -88,9 +88,16 @@
 
         <form on:submit|preventDefault={() => update()}>
             <Heading class="dark:text-white text-neutral-700" tag="h1">Hallo, {employee.name}</Heading>
-            <P class="my-5">
-                Schön, dass du dich für RECREW bewirbst. Im nächsten Schritt brauchen wir die nötigen Daten, um den Papierkram erledigen zu können.
-            </P>
+            {#if employee.employmentStatus === 'data-re-requested' || employee.employmentStatus === 'data-re-provided'}
+                <P class="my-5">
+                    Bevor du wieder ins Team zurückkehrst, kannst du bitte sorgfältig deine Daten prüfen?
+                </P>
+            {:else}
+                <P class="my-5">
+                    Schön, dass du dich für RECREW bewirbst. Im nächsten Schritt brauchen wir die nötigen Daten, um den Papierkram erledigen zu können.
+                </P>
+            {/if}
+
             <StepIndicator currentStep={$currentStep} {steps} />
             <BaseData bind:employee/>
             <QualificationData bind:employee/>
