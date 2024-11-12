@@ -6,6 +6,9 @@
     import {reactToBoxInteraction} from "$lib/utils/openStep";
     import {BellRingOutline, CheckCircleOutline} from "flowbite-svelte-icons";
     export let employee: any;
+    import {blocked} from "$lib/stores/blocked";
+    import markEmptyFields from "$lib/utils/markEmptyFields";
+
 
     let bankDetails = null;
 
@@ -27,9 +30,15 @@
     onMount(() => {
         getBankDetails()
     })
+
+    $:{
+        if($currentStep === 4) {
+            markEmptyFields();
+        }
+    }
 </script>
 
-<Box title="Bankdaten" open={$currentStep === 4} on:open={ev => reactToBoxInteraction(ev, 4)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={$blocked} title="Bankdaten" open={$currentStep === 4} on:open={ev => reactToBoxInteraction(ev, 4)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     {#if employee.bankAccount}
     <div class="grid grid-cols-2 gap-3 mt-2">
         <div>

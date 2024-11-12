@@ -8,7 +8,10 @@
     import {currentStep} from "$lib/stores/currentStep";
     import {BellRingOutline, CheckCircleOutline} from "flowbite-svelte-icons";
     import {fileNameGenerator} from "$lib/utils/fileNameGenerator.js";
+    import {blocked} from "$lib/stores/blocked";
+    import markEmptyFields from "$lib/utils/markEmptyFields";
     export let employee: any;
+
 
     let graduations : any[] = [];
     let licenseIndex = 0;
@@ -71,11 +74,18 @@
                 licenseIndex = employee.images.length - 1
             }
         }
+        if($currentStep == 2) {
+            console.log("hdsjlfhl");
+            markEmptyFields();
+        }
     }
     $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor;
 
 
     onMount(async() => {
+        //markEmptyFields();
+
+
         graduations = (await get('/hr/reference/Schulabschluss')).map((n) => ({...n, name: n.value}));
         stati = (await get('/hr/references/stati')).map((n) => ({name: n, value: n}));
     })
@@ -83,7 +93,7 @@
 
 </script>
 
-<Box title="Qualifikationen" open={$currentStep === 2} on:open={ev => reactToBoxInteraction(ev, 2)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={$blocked} title="Qualifikationen" open={$currentStep === 2} on:open={ev => reactToBoxInteraction(ev, 2)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <div class="grid grid-cols-2 gap-y-3 gap-x-4 mt-2">
         <div>
             <Label class="mb-2" for="graduation">Schulabschluss *</Label>

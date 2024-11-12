@@ -7,6 +7,9 @@
     import {currentStep} from "$lib/stores/currentStep";
     import {reactToBoxInteraction} from "$lib/utils/openStep";
     import {BellRingOutline, CheckCircleOutline} from "flowbite-svelte-icons";
+    import {blocked} from "$lib/stores/blocked";
+    import markEmptyFields from "$lib/utils/markEmptyFields";
+
     export let employee: any
     let insurances: any[] = []
     $: dataComplete = employee.healthInsurance && employee.healthInsurance.insuranceName && employee.healthInsurance.insuranceNumber
@@ -16,9 +19,15 @@
         }
         insurances = (await get('/hr/reference/Krankenkassen')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name))
     })
+
+    $:{
+        if($currentStep === 5) {
+            markEmptyFields();
+        }
+    }
 </script>
 
-<Box title="Krankenversicherung" open={$currentStep === 5} on:open={ev => reactToBoxInteraction(ev, 5)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={$blocked} title="Krankenversicherung" open={$currentStep === 5} on:open={ev => reactToBoxInteraction(ev, 5)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     {#if employee.healthInsurance}
         <div class="my-2">
             <Toggle bind:checked={employee.healthInsurance.isPublic}>Gesetzlich versichert?</Toggle>

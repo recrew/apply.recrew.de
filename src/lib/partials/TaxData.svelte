@@ -8,6 +8,9 @@
     import {currentStep} from "$lib/stores/currentStep";
     import {reactToBoxInteraction} from "$lib/utils/openStep";
     export let employee: any
+    import {blocked} from "$lib/stores/blocked";
+    import markEmptyFields from "$lib/utils/markEmptyFields";
+
 
     let taxClasses: any[] = []
     let religiousAffiliations: any[] = []
@@ -22,6 +25,12 @@
 
     $: dataComplete = employee.cv && employee.taxId && employee.cv.taxationClass && employee.cv.religiousAffiliation
 
+    $:{
+        if($currentStep === 3) {
+            markEmptyFields();
+        }
+    }
+
     onMount(async() =>{
         taxClasses = (await get('/hr/reference/Steuerklassen')).map((n) => ({...n, name: n.key + ': ' + n.value, value: parseInt(n.key)}))
             .sort((a,b) => a.key - b.key)
@@ -30,7 +39,7 @@
     })
 </script>
 
-<Box title="Lohnsteuer" open={$currentStep === 3} on:open={ev => reactToBoxInteraction(ev, 3)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={$blocked} title="Lohnsteuer" open={$currentStep === 3} on:open={ev => reactToBoxInteraction(ev, 3)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <div class="grid gap-3 mt-2">
         <div>
             <Label class="mb-2" for="taxId">
