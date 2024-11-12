@@ -18,6 +18,10 @@
 
     let loading = false
 
+    let test = (e) => {
+        console.log(e)
+    }
+
     const update = async () => {
         loading = true;
         let updateObject = {
@@ -53,17 +57,17 @@
 
     }
 
-
-
     let steps = ['Persönliche Daten', 'Qualifikationen', 'Lohnsteuer', 'Bankdaten', 'Krankenversicherung']
     currentStep.set(1)
-
 
     onMount(() => {
         get('/hr/applicant/' + $page.url.searchParams.get('sheet') + '/data-sheet').then((res) => {
             employee = res
             if(employee.cv.motorVehicleLicense === '0'){
                 employee.cv.motorVehicleLicense = false;
+            }
+            if(employee.dateOfBirth.value){
+                employee.dateOfBirth.value = employee.dateOfBirth.value.split(' ')[0]
             }
         }).catch((e) => {
             error = true;
@@ -86,7 +90,7 @@
     {/if}
     {#if employee && !error}
 
-        <form on:submit|preventDefault={() => update()}>
+        <form on:submit|preventDefault={() => update()} >
             <Heading class="dark:text-white text-neutral-700" tag="h1">Hallo, {employee.name}</Heading>
             {#if employee.employmentStatus === 'data-re-requested' || employee.employmentStatus === 'data-re-provided'}
                 <P class="my-5">
@@ -99,7 +103,7 @@
             {/if}
 
             <StepIndicator currentStep={$currentStep} {steps} />
-            <BaseData bind:employee/>
+            <BaseData bind:employee />
             <QualificationData bind:employee/>
 
             <TaxData bind:employee/>

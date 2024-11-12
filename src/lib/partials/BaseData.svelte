@@ -12,7 +12,7 @@
         Select
     } from "flowbite-svelte";
     import {get} from "$lib/api";
-    import {onMount} from "svelte";
+    import {createEventDispatcher, onMount} from "svelte";
     import Box from "$lib/components/Box.svelte";
     import AddressData from "$lib/partials/AddressData.svelte";
     import Tesseract from "$lib/components/Tesseract.svelte";
@@ -21,6 +21,8 @@
     import {reactToBoxInteraction} from "$lib/utils/openStep";
     import {currentStep} from "$lib/stores/currentStep";
     import {fileNameGenerator} from "$lib/utils/fileNameGenerator";
+    import markEmptyFields from "$lib/utils/markEmptyFields";
+    import {blocked} from "$lib/stores/blocked";
 
     export let employee: any
 
@@ -55,7 +57,17 @@
         console.log(employee.images[index ?? 0])
 
     }
+
+    let dataComplete = false;
     $: {
+        dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
+
+        if(employee) {
+            markEmptyFields();
+        }
+
+        $blocked = !dataComplete
+
         if(avatarFiles && avatarFiles.length > 0){
             employee.avatarFile = avatarFiles[0]
         }
@@ -67,14 +79,11 @@
         return URL.createObjectURL(employee.avatarFile)
     }
 
-    $:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
+    //$:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
 
     onMount(async () => {
         if(employee.images.length < 1){
             employee.images = [{documentNumber: '', imageTag: 'id-card', file: null},{documentNumber: '', imageTag: 'id-card', file: null}]
-        }
-        if(employee.dateOfBirth.value){
-            employee.dateOfBirth.value = employee.dateOfBirth.value.split(' ')[0]
         }
         nationalities = (await get('/hr/reference/Staatsangehoerigkeiten')).map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name))
         countries = (await get('/hr/reference/Staaten')).map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name))
@@ -83,7 +92,7 @@
 
 
 </script>
-<Box title="Persönliche Daten" open={$currentStep === 1} on:open={ev => reactToBoxInteraction(ev, 1)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={!dataComplete} title="Persönliche Daten" open={$currentStep === 1} on:open={ev => reactToBoxInteraction(ev, 1)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <Label for="avatarFile">
         <div class="text-sm rtl:text-right font-medium block text-gray-900 dark:text-gray-300 mb-2">Profilbild</div>
         <Avatar src={employee.avatarFile ? generateBlob() : ''} rounded size="xl" >{employee.firstName.charAt(0)+employee.lastName.charAt(0)}</Avatar>
@@ -171,7 +180,7 @@
             </div>
 
             {/if}
-            {#if employee.images[0]}
+            {#if employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport'))}
             <div>
                 <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer *</Label>
                 <Input bind:value={employee.images[0].documentNumber} type="text" id="id" required />
@@ -185,5 +194,5 @@
 
 
     <AddressData bind:employee/>
-    <Button on:click={() => currentStep.update((n) => n + 1)} class="mt-5 w-full">Weiter</Button>
+    <Button on:click={() => dataComplete ? currentStep.update((n) => n + 1) : markEmptyFields()} class="mt-5 w-full">Weiter</Button>
 </Box>

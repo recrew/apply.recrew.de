@@ -111,7 +111,7 @@
 
     }
     onMount(() => {
-        if(options.length === 1){
+        if(options.length > 0){
             type = options[0].value
         }
         if(value && value.location) {
@@ -125,8 +125,8 @@
     <div>
         {#if options.length > 1}
             <div class="mb-2">
-                <Label for="type" class="mb-2">Dokumenttyp</Label>
-                <Select bind:value={type} items={options} placeholder="Typ"/>
+                <Label for="type" class="mb-2">Dokumenttyp *</Label>
+                <Select require bind:value={type} items={options} placeholder="Typ"/>
             </div>
 
         {/if}
