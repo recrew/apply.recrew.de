@@ -2,7 +2,7 @@
     import {onMount} from "svelte";
     import {get, formDataPost} from "$lib/api";
     import {page} from "$app/stores";
-    import {Alert, Button, Heading, Hr, P, Spinner, StepIndicator} from "flowbite-svelte";
+    import {Alert, Button, Heading, Hr, P, Spinner, StepIndicator, Tooltip} from "flowbite-svelte";
     import {InfoCircleSolid} from "flowbite-svelte-icons";
     import TaxData from "$lib/partials/TaxData.svelte";
     import HealthInsuranceData from "$lib/partials/HealthInsuranceData.svelte";
@@ -12,6 +12,7 @@
     import {modalStore} from "$lib/stores/modal";
     import DatasheetSaved from "$lib/partials/DatasheetSaved.svelte";
     import {currentStep} from "$lib/stores/currentStep";
+    import {blocked} from "$lib/stores/blocked";
 
     let error = false;
     let employee:any;
@@ -114,7 +115,10 @@
                 {#if loading}
                     <Spinner class="place-self-center" />
                 {:else}
-                    <Button type="submit">Speichern</Button>
+                    <Button disabled={$blocked} type="submit">Speichern</Button>
+                    {#if $blocked}
+                    <Tooltip>Bitte markierte Felder ausfüllen</Tooltip>
+                    {/if}
                 {/if}
             </div>
         </form>
