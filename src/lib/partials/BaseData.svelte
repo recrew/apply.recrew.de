@@ -17,7 +17,13 @@
     import AddressData from "$lib/partials/AddressData.svelte";
     import Tesseract from "$lib/components/Tesseract.svelte";
     import Typeahead from "$lib/components/Typeahead.svelte";
-    import {BellRingOutline, CheckCircleOutline, GlobeSolid} from "flowbite-svelte-icons";
+    import {
+        ArrowUpDownOutline,
+        ArrowUpOutline,
+        BellRingOutline,
+        CheckCircleOutline,
+        GlobeSolid
+    } from "flowbite-svelte-icons";
     import {reactToBoxInteraction} from "$lib/utils/openStep";
     import {currentStep} from "$lib/stores/currentStep";
     import {fileNameGenerator} from "$lib/utils/fileNameGenerator";
@@ -180,7 +186,7 @@
             </div>
 
             {/if}
-            {#if employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport'))}
+            {#if employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport').file)}
             <div>
                 <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer *</Label>
                 <Input bind:value={employee.images[0].documentNumber} type="text" id="id" required />
@@ -190,9 +196,18 @@
             </div>
             {/if}
         </div>
+        {#if $blocked && (!(employee.images[0]?.file || employee.images[0]?.location) || !(employee.images[1]?.file || employee.images[1]?.location))}
+            <Alert class="mt-3" border color="red">
+                <div class="flex gap-3">
+                    <ArrowUpOutline /> Bitte Dokument hochladen
+                </div>
+
+            </Alert>
+        {/if}
     {/if}
 
 
     <AddressData bind:employee/>
+
     <Button on:click={() => dataComplete ? currentStep.update((n) => n + 1) : markEmptyFields()} class="mt-5 w-full">Weiter</Button>
 </Box>
