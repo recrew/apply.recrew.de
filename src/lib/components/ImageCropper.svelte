@@ -55,7 +55,6 @@
             ctx?.rotate((90 * Math.PI) / 180);
             ctx?.drawImage(interim, -interim.width / 2, -interim.height / 2);
             image = interimCanvas.toDataURL();
-            console.log({image})
         }
         interim.src = image;
     }
@@ -67,7 +66,7 @@
         preview = URL.createObjectURL(croppedImage)
         // Convert Blob into File
         const fileNameParts = files[0].name.split('.')
-        const fileName = (fileNameParts[0].includes('-cropped') ? fileNameParts[0] : fileNameParts[0] + '-cropped') + '.' + fileNameParts[fileNameParts.length -1];
+        const fileName = (fileNameParts[0].includes('-cropped') ? fileNameParts[0] : fileNameParts[0] + '-cropped') + '.' + croppedImage.type.split('/')[1];
         const file = new File([croppedImage], fileName, {type: croppedImage.type});
         // Create a new DataTransfer instance
         const dataTransfer = new DataTransfer();
