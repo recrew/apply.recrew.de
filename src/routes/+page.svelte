@@ -11,10 +11,12 @@
     import {modalStore} from "$lib/stores/modal";
     import {base} from "$app/paths";
     import {onMount} from "svelte";
+    import {convertPdfToImageFromFileInput} from "$lib/utils/convertPdfToImage";
 
     let preview = null;
     let form;
     let valid = false;
+    let canvas: HTMLCanvasElement;
 
     let candidate = {
         firstname:'',
@@ -54,23 +56,39 @@
         candidate.photo = null;
         event.preventDefault();
         if (event.dataTransfer.items) {
-            [...event.dataTransfer.items].forEach((item, i) => {
+            [...event.dataTransfer.items].forEach(async (item, i) => {
                 if (item.kind === 'file') {
-                    candidate.photo = item.getAsFile();
+                    if(item.getAsFile().type === 'application/pdf'){
+                        candidate.photo = await convertPdfToImageFromFileInput([item.getAsFile()])
+                    } else {
+                        candidate.photo = item.getAsFile();
+                    }
+
                 }
             });
         } else {
-            [...event.dataTransfer.files].forEach((file, i) => {
-                candidate.photo = file;
+            [...event.dataTransfer.files].forEach(async (file, i) => {
+                if(file.type === 'application/pdf'){
+                    candidate.photo = await convertPdfToImageFromFileInput([file])
+                } else {
+                    candidate.photo = file;
+                }
             });
         }
-        showPreview()
+        setTimeout(showPreview, 300)
+
     };
 
-    const handleChange = (event) => {
+    const handleChange = async (event) => {
         const files = event.target.files;
         if (files.length > 0) {
-            candidate.photo = files[0];
+            if(files[0].type === 'application/pdf'){
+                candidate.photo = await convertPdfToImageFromFileInput(files)
+            } else {
+                candidate.photo = files[0];
+            }
+
+
             showPreview()
         }
     };
