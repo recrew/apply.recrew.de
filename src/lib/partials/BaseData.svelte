@@ -7,11 +7,11 @@
         Input,
         Label,
         Listgroup,
-        ListgroupItem,
+        ListgroupItem, Modal,
         P,
         Select
     } from "flowbite-svelte";
-    import {get} from "$lib/api";
+    import {formDataPost, get} from "$lib/api";
     import {createEventDispatcher, onMount} from "svelte";
     import Box from "$lib/components/Box.svelte";
     import AddressData from "$lib/partials/AddressData.svelte";
@@ -29,6 +29,8 @@
     import {fileNameGenerator} from "$lib/utils/fileNameGenerator";
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import {blocked} from "$lib/stores/blocked";
+    import {page} from "$app/stores";
+    import uploadImages from "$lib/utils/uploadImages";
 
     export let employee: any
 
@@ -36,6 +38,7 @@
     let countries: any[] = [];
     let files: File[];
     let avatarFiles: FileList;
+    let loading = false;
 
     let idOptions = [
         {name: "Personalausweis Vorderseite", value: "id-card"},
@@ -85,6 +88,18 @@
         return URL.createObjectURL(employee.avatarFile)
     }
 
+    const saveImages = async () => {
+        loading = true;
+        try{
+            await uploadImages(employee, $page.url.searchParams.get('sheet'))
+            currentStep.update((n) => n + 1)
+        } catch (e) {
+            alert('Fehler beim Hochladen der Bilder. Bitte prüfen Sie Ihren Browser, ob alle Dateien nicht zu groß sind. ')
+        } finally {
+            loading = false
+        }
+    }
+
     //$:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
 
     onMount(async () => {
@@ -98,6 +113,9 @@
 
 
 </script>
+<Modal open={loading} title="Upload">
+    <p>Bitte warten...</p>
+</Modal>
 <Box disabled={!dataComplete} title="Persönliche Daten" open={$currentStep === 1} on:open={ev => reactToBoxInteraction(ev, 1)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <Label for="avatarFile">
         <div class="text-sm rtl:text-right font-medium block text-gray-900 dark:text-gray-300 mb-2">Profilbild</div>
@@ -209,5 +227,5 @@
 
     <AddressData bind:employee/>
 
-    <Button on:click={() => dataComplete ? currentStep.update((n) => n + 1) : markEmptyFields()} class="mt-5 w-full">Weiter</Button>
+    <Button on:click={() => dataComplete ? saveImages() : markEmptyFields()} class="mt-5 w-full">Weiter</Button>
 </Box>

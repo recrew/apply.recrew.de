@@ -48,7 +48,7 @@
         } catch (e) {
             console.log(e)
             $modalStore.registerConfig({
-                content: 'Ein Fehler ist aufgetreten. Alle erfolgreichen Daten angegeben? Sind Bilder evtl. zu groß?',
+                content: 'Ein Fehler ist aufgetreten.',
                 title: 'Ups...',
             })
         }

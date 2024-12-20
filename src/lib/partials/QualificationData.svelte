@@ -1,6 +1,6 @@
 <script lang="ts">
     import Box from "$lib/components/Box.svelte";
-    import {Button, Helper, Input, Label, Select, Toggle} from "flowbite-svelte";
+    import {Button, Helper, Input, Label, Modal, Select, Toggle} from "flowbite-svelte";
     import {onMount} from "svelte";
     import {get} from "$lib/api";
     import Tesseract from "$lib/components/Tesseract.svelte";
@@ -10,11 +10,14 @@
     import {fileNameGenerator} from "$lib/utils/fileNameGenerator.js";
     import {blocked} from "$lib/stores/blocked";
     import markEmptyFields from "$lib/utils/markEmptyFields";
+    import uploadImages from "$lib/utils/uploadImages";
+    import {page} from "$app/stores";
     export let employee: any;
 
 
     let graduations : any[] = [];
     let licenseIndex = 0;
+    let loading = false;
 
     let degrees = [
         'Ohne beruflichen Ausbildungsabschluss', 'Abschluss einer anerkannten Berufsausbildung',
@@ -80,7 +83,17 @@
         }
     }
     $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor;
-
+    const saveImages = async () => {
+        loading = true;
+        try{
+            await uploadImages(employee, $page.url.searchParams.get('sheet'))
+            currentStep.update((n) => n + 1)
+        } catch (e) {
+            alert('Fehler beim Hochladen der Bilder. Bitte prüfen Sie Ihren Browser, ob alle Dateien nicht zu groß sind. ')
+        } finally {
+            loading = false
+        }
+    }
 
     onMount(async() => {
         //markEmptyFields();
@@ -92,7 +105,9 @@
 
 
 </script>
-
+<Modal open={loading} title="Upload">
+    <p>Bitte warten...</p>
+</Modal>
 <Box disabled={$blocked} title="Qualifikationen" open={$currentStep === 2} on:open={ev => reactToBoxInteraction(ev, 2)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <div class="grid grid-cols-2 gap-y-3 gap-x-4 mt-2">
         <div>
@@ -155,5 +170,5 @@
             <Input id="graduation" bind:value={employee.cv.hairColor} required/>
         </div>
     </div>
-    <Button on:click={() => currentStep.update((n) => n + 1)} class="mt-5 w-full">Weiter</Button>
+    <Button on:click={() => saveImages()} class="mt-5 w-full">Weiter</Button>
 </Box>
