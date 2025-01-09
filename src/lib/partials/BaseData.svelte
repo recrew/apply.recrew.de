@@ -154,7 +154,7 @@
         </div>
         <div>
             <Label for="maidenName" class="mb-2">Geburtsname *</Label>
-            <Input bind:value={employee.maidenName} type="text" id="maidenName" required/>
+            <Input bind:value={employee.maidenName} placeholder="Nachname" type="text" id="maidenName" required/>
         </div>
         <div>
             <Label for="familyStatus" class="mb-2">Familienstand *</Label>

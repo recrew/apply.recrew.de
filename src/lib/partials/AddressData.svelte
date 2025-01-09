@@ -25,7 +25,11 @@
         </div>
         <div>
             <Label for="number" class="mb-2">Hausnummer *</Label>
-            <Input type="text" bind:value={employee.address.number} id="number" required/>
+            <Input type="text" bind:value={employee.address.number} pattern="[0-9]*" id="number" required/>
+        </div>
+        <div class="col-span-2 ">
+            <Label for="addressAddendum" class="mb-2">Zusatz</Label>
+            <Input type="text" bind:value={employee.address.addressAddendum} id="addressAddendum" />
         </div>
         <div class="col-span-2 ">
             <Label for="place" class="mb-2">Ort *</Label>

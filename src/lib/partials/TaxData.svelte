@@ -47,7 +47,7 @@
                 <QuestionCircleOutline size="xs" class="inline cursor-pointer"/>
                 <Tooltip>Wenn nicht vorhanden, bitte leer lassen</Tooltip>
             </Label>
-            <Input id="taxId" bind:value={employee.cv.socialSecurityNumber}/>
+            <Input id="taxId" pattern="{'[0-9]{8}[A-Z][0-9]{3}'}" bind:value={employee.cv.socialSecurityNumber}/>
         </div>
         <div>
             <Label class="mb-2" for="taxId">Steuer ID *</Label>
