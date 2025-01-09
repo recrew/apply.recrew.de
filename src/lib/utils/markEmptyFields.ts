@@ -1,6 +1,6 @@
 export default function markEmptyFields() {
 
-    let inputs = document.querySelectorAll('input, select');
+    let inputs = document.querySelectorAll('input[required], select[required]');
     inputs.forEach((input) => {
         if(input.value.length < 1 ) {
             input.classList.add('ring-1');
