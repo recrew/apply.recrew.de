@@ -31,6 +31,8 @@
     import {blocked} from "$lib/stores/blocked";
     import {page} from "$app/stores";
     import uploadImages from "$lib/utils/uploadImages";
+    import dayjs from "dayjs";
+    import updateCall from "$lib/utils/updateCall";
 
     export let employee: any
 
@@ -71,9 +73,9 @@
     $: {
         dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
 
-        if(employee) {
+        /*if(employee) {
             markEmptyFields();
-        }
+        }*/
 
         $blocked = !dataComplete
 
@@ -98,6 +100,16 @@
         } finally {
             loading = false
         }
+    }
+
+    const proceed = async () => {
+        if(!dataComplete){
+            markEmptyFields()
+        } else {
+            await saveImages()
+            await updateCall(employee)
+        }
+
     }
 
     //$:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
@@ -146,15 +158,18 @@
         </div>
         <div>
             <Label for="countryOfBirth" class="mb-2">Geburtsland *</Label>
-            <Typeahead bind:value={employee.cv.countryOfBirth} id="countryOfBirth" data={countries} icon={GlobeSolid} />
+            <Typeahead required bind:value={employee.cv.countryOfBirth} id="countryOfBirth" data={countries} icon={GlobeSolid} />
         </div>
         <div>
             <Label for="dob" class="mb-2">Geburtsdatum *</Label>
             <Input type="date" bind:value={employee.dateOfBirth.value} id="dob" required/>
+            {#if employee.dateOfBirth?.value && dayjs().diff(dayjs(employee.dateOfBirth.value), 'years') < 18}
+                <Alert class="mt-2" color="yellow">Hinweis: Unter 18!</Alert>
+            {/if}
         </div>
         <div>
             <Label for="maidenName" class="mb-2">Geburtsname *</Label>
-            <Input bind:value={employee.maidenName} placeholder="Nachname" type="text" id="maidenName" required/>
+            <Input pattern="[A-Z][A-Za-z-]+" bind:value={employee.maidenName} placeholder="Nachname" type="text" id="maidenName" required/>
         </div>
         <div>
             <Label for="familyStatus" class="mb-2">Familienstand *</Label>
@@ -167,7 +182,7 @@
                 <option value="other">nicht bekannt</option>
             </Select>
         </div>
-        <div class="col-span-2">
+        <div class="md:col-span-2">
             <Label for="nationality" class="mb-2">Staatsanghörigkeit *</Label>
             <Typeahead bind:value={employee.cv.nationality} id="nationality" data={nationalities} icon={GlobeSolid} required/>
         </div>
@@ -190,7 +205,7 @@
             </div>
         </Alert>
     {:else if employee.cv.nationality}
-        <div class="grid grid-cols-2 gap-3 mt-2">
+        <div class="grid md:grid-cols-2 gap-3 mt-2">
             <div>
                 <Tesseract value={employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)} options={idOptions} on:ocr={ev => idReader(ev.detail)}/>
             </div>
@@ -207,7 +222,7 @@
             {#if employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport'))}
             <div>
                 <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer *</Label>
-                <Input bind:value={employee.images[0].documentNumber} type="text" id="id" required />
+                <Input placeholder="{employee.images[0].imageTag === 'id-card' ? 'XY1234A12' : 'ABC456789'}" bind:value={employee.images[0].documentNumber} type="text" id="id" required />
                 <Helper class="mt-2" color="green">
                     Bitte maschinell gescanntes Ergebnis überprüfen!
                 </Helper>
@@ -219,7 +234,6 @@
                 <div class="flex gap-3">
                     <ArrowUpOutline /> Bitte Dokument hochladen
                 </div>
-
             </Alert>
         {/if}
     {/if}
@@ -227,5 +241,5 @@
 
     <AddressData bind:employee/>
 
-    <Button on:click={() => dataComplete ? saveImages() : markEmptyFields()} class="mt-5 w-full">Weiter</Button>
+    <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>

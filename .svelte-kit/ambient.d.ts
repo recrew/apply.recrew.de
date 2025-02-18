@@ -30,12 +30,14 @@ declare module '$env/static/private' {
 	export const APPDATA: string;
 	export const ChocolateyInstall: string;
 	export const ChocolateyLastPathUpdate: string;
-	export const ChocolateyToolsLocation: string;
 	export const CommonProgramFiles: string;
 	export const CommonProgramW6432: string;
 	export const COMPUTERNAME: string;
 	export const ComSpec: string;
 	export const DriverData: string;
+	export const EFC_30604: string;
+	export const FPS_BROWSER_APP_PROFILE_STRING: string;
+	export const FPS_BROWSER_USER_PROFILE_STRING: string;
 	export const HOMEDRIVE: string;
 	export const HOMEPATH: string;
 	export const IDEA_INITIAL_DIRECTORY: string;
@@ -113,11 +115,13 @@ declare module '$env/static/private' {
 	export const NVM_HOME: string;
 	export const NVM_SYMLINK: string;
 	export const OneDrive: string;
+	export const OneDriveCommercial: string;
 	export const OneDriveConsumer: string;
 	export const OS: string;
 	export const Path: string;
 	export const PATHEXT: string;
 	export const PhpStorm: string;
+	export const PNPM_HOME: string;
 	export const PROCESSOR_ARCHITECTURE: string;
 	export const PROCESSOR_IDENTIFIER: string;
 	export const PROCESSOR_LEVEL: string;
@@ -140,7 +144,6 @@ declare module '$env/static/private' {
 	export const USERDOMAIN_ROAMINGPROFILE: string;
 	export const USERNAME: string;
 	export const USERPROFILE: string;
-	export const VBOX_MSI_INSTALL_PATH: string;
 	export const windir: string;
 	export const YARN_WRAP_OUTPUT: string;
 }
@@ -180,12 +183,14 @@ declare module '$env/dynamic/private' {
 		APPDATA: string;
 		ChocolateyInstall: string;
 		ChocolateyLastPathUpdate: string;
-		ChocolateyToolsLocation: string;
 		CommonProgramFiles: string;
 		CommonProgramW6432: string;
 		COMPUTERNAME: string;
 		ComSpec: string;
 		DriverData: string;
+		EFC_30604: string;
+		FPS_BROWSER_APP_PROFILE_STRING: string;
+		FPS_BROWSER_USER_PROFILE_STRING: string;
 		HOMEDRIVE: string;
 		HOMEPATH: string;
 		IDEA_INITIAL_DIRECTORY: string;
@@ -263,11 +268,13 @@ declare module '$env/dynamic/private' {
 		NVM_HOME: string;
 		NVM_SYMLINK: string;
 		OneDrive: string;
+		OneDriveCommercial: string;
 		OneDriveConsumer: string;
 		OS: string;
 		Path: string;
 		PATHEXT: string;
 		PhpStorm: string;
+		PNPM_HOME: string;
 		PROCESSOR_ARCHITECTURE: string;
 		PROCESSOR_IDENTIFIER: string;
 		PROCESSOR_LEVEL: string;
@@ -290,7 +297,6 @@ declare module '$env/dynamic/private' {
 		USERDOMAIN_ROAMINGPROFILE: string;
 		USERNAME: string;
 		USERPROFILE: string;
-		VBOX_MSI_INSTALL_PATH: string;
 		windir: string;
 		YARN_WRAP_OUTPUT: string;
 		[key: `PUBLIC_${string}`]: undefined;

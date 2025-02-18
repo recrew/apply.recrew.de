@@ -19,6 +19,9 @@
 <style>
 
 </style>
+<svelte:head>
+    <title>Der flexibelste Nebenjob der Stadt</title>
+</svelte:head>
 <Navbar class="z-10 dark:bg-neutral-600" let:hidden let:toggle>
     <NavBrand>
         <DarkMode/>

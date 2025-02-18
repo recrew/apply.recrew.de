@@ -12,6 +12,7 @@
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import uploadImages from "$lib/utils/uploadImages";
     import {page} from "$app/stores";
+    import updateCall from "$lib/utils/updateCall";
     export let employee: any;
 
 
@@ -77,16 +78,17 @@
                 licenseIndex = employee.images.length - 1
             }
         }
-        if($currentStep == 2) {
-            console.log("hdsjlfhl");
-            markEmptyFields();
-        }
+
     }
     $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor;
-    const saveImages = async () => {
+    const proceed = async () => {
+        if(!markEmptyFields()){
+            return;
+        }
         loading = true;
         try{
-            await uploadImages(employee, $page.url.searchParams.get('sheet'))
+            await uploadImages(employee, employee.uuid)
+            await updateCall(employee)
             currentStep.update((n) => n + 1)
         } catch (e) {
             alert('Fehler beim Hochladen der Bilder. Bitte prüfen Sie Ihren Browser, ob alle Dateien nicht zu groß sind. ')
@@ -109,7 +111,7 @@
     <p>Bitte warten...</p>
 </Modal>
 <Box disabled={$blocked} title="Qualifikationen" open={$currentStep === 2} on:open={ev => reactToBoxInteraction(ev, 2)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
-    <div class="grid grid-cols-2 gap-y-3 gap-x-4 mt-2">
+    <div class="grid md:grid-cols-2 gap-y-3 gap-x-4 mt-2">
         <div>
             <Label class="mb-2" for="graduation">Schulabschluss *</Label>
             <Select id="graduation" bind:value={employee.cv.graduation} items={graduations} required/>
@@ -170,5 +172,5 @@
             <Input id="graduation" bind:value={employee.cv.hairColor} required/>
         </div>
     </div>
-    <Button on:click={() => saveImages()} class="mt-5 w-full">Weiter</Button>
+    <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>

@@ -10,6 +10,7 @@
     export let employee: any
     import {blocked} from "$lib/stores/blocked";
     import markEmptyFields from "$lib/utils/markEmptyFields";
+    import updateCall from "$lib/utils/updateCall";
 
 
     let taxClasses: any[] = []
@@ -25,10 +26,15 @@
 
     $: dataComplete = employee.cv && employee.taxId && employee.cv.taxationClass && employee.cv.religiousAffiliation
 
-    $:{
-        if($currentStep === 3) {
+
+
+    const proceed = async () => {
+        if(!dataComplete){
             markEmptyFields();
+            return;
         }
+        updateCall(employee)
+        currentStep.update((n) => n + 1)
     }
 
     onMount(async() =>{
@@ -42,16 +48,16 @@
 <Box disabled={$blocked} title="Lohnsteuer" open={$currentStep === 3} on:open={ev => reactToBoxInteraction(ev, 3)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <div class="grid gap-3 mt-2">
         <div>
-            <Label class="mb-2" for="taxId">
+            <Label class="mb-2" for="sv">
                 SV-Nummer <span class="text-xs">(Sozialversicherungsnummer)</span>
                 <QuestionCircleOutline size="xs" class="inline cursor-pointer"/>
                 <Tooltip>Wenn nicht vorhanden, bitte leer lassen</Tooltip>
             </Label>
-            <Input id="taxId" pattern="{'[0-9]{8}[A-Z][0-9]{3}'}" bind:value={employee.cv.socialSecurityNumber}/>
+            <Input id="sv" pattern="{'[0-9]{8}[A-Z][0-9]{3}'}" bind:value={employee.cv.socialSecurityNumber}/>
         </div>
         <div>
             <Label class="mb-2" for="taxId">Steuer ID *</Label>
-            <Input id="taxId" bind:value={employee.taxId} required/>
+            <Input placeholder="12345678901" id="taxId" bind:value={employee.taxId} required/>
         </div>
         <div>
             <Label class="mb-2" for="allowance">Kinderfreibetrag *</Label>
@@ -68,5 +74,5 @@
             <Typeahead icon={MountainSunSolid} bind:value={employee.cv.religiousAffiliation} id="religion" data={religiousAffiliations} required/>
         </div>
     </div>
-    <Button on:click={() => currentStep.update((n) => n + 1)} class="mt-5 w-full">Weiter</Button>
+    <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>
