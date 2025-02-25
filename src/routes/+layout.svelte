@@ -40,12 +40,12 @@
     <slot />
     <Footer>
         <div class="grid place-items-center">
-            <FooterCopyright href="/" by="RECREW™" year={(new Date()).getFullYear()} />
+            <FooterCopyright href="/" by="RETECH™" year={(new Date()).getFullYear()} />
         </div>
         <FooterLinkGroup ulClass="grid grid-cols-3 text-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0 ">
-            <FooterLink href="https://www.recrew.info/kopie-von-legal">Impressum</FooterLink>
-            <FooterLink href="https://www.recrew.info/kopie-von-dsgvo">Privacy Policy</FooterLink>
-            <FooterLink href="https://www.recrew.info/kontakt">Contact</FooterLink>
+            <FooterLink href="https://retech-software.de/impressum/">Impressum</FooterLink>
+            <FooterLink href="https://retech-software.de/datenschutz/">Privacy Policy</FooterLink>
+            <FooterLink href="https://retech-software.de/">Contact</FooterLink>
         </FooterLinkGroup>
     </Footer>
     <ReusableModal/>
