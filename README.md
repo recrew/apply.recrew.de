@@ -6,7 +6,7 @@ Application form for celest-powered RECREW candidate flow
 
 ### Live
 
-[visit @ github pages](https://sroehrl.github.io/apply.recrew.de)
+[visit @ github pages](https://recrew.github.io/apply.recrew.de)
 
 
 
