@@ -23,11 +23,19 @@
     };
 
     const characterTraitsList = [
-        "Eigeninitiative",
-        "Verantwortungsbewusstsein",
-        "Belastbarkeit",
-        "Motivation",
+        "Freundlichkeit & Höflichkeit",
+        "Selbstbewusstsein",
         "Teamfähigkeit",
+        "Motivation",
+        "Engagement",
+        "Selbstständigkeit / Eigeninitiative",
+        "Zuverlässigkeit",
+        "Organisation & Struktur",
+        "Lernbereitschaft & Auffassungsgabe",
+        "Kritikfähigkeit",
+        "Belastbarkeit / Stressresistenz",
+        "Auftreten",
+        "Umgangsformen",
     ];
     const characterTraitOptions = ["Positiv", "Negativ", "Nicht sicher"];
 
@@ -208,7 +216,7 @@
                         </div>
 
                         <div
-                            class="md:col-span-2 grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 items-center font-semibold mb-2"
+                            class="md:col-span-2 grid grid-cols-[4fr_1fr_1fr_1fr] gap-4 items-center font-semibold mb-2"
                         >
                             <div></div>
                             <div class="text-center">Positiv</div>
@@ -217,10 +225,9 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            {#each characterTraitsList as trait}
-                                <div
-                                    class="grid grid-cols-[2fr_1fr_1fr_1fr] items-center mb-2"
-                                >
+                            {#each characterTraitsList as trait, index}
+                                <div class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center py-4 min-w-0 {index !== characterTraitsList.length - 1 ? 'border-b border-gray-300' : ''}">
+                                    
                                     <div>{trait}</div>
                                     {#each characterTraitOptions as option}
                                         <div class="text-center">
