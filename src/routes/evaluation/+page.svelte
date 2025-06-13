@@ -43,7 +43,6 @@
             rebuddyName: data.rebuddyData?.rebuddyName || "",
             starterName: data.rebuddyData?.starterName || "",
             shifts: data.rebuddyData?.shifts as Shift[],
-            totalShifts: 0, //computed
         },
         recrewBasics: {
             beingPrepared: 0,
@@ -57,25 +56,18 @@
             workEthic: 0,
             sendEnergy: 0,
         },
-        whatsApp: {
+        communication: {
             starterResponse: 0,
             additionalComments: 0,
         },
+        characterTraits: Object.fromEntries(
+            characterTraitsList.map((trait) => [trait, "Nicht sicher"]),
+        ),
         additional: {
-            friendGroup: "",
-            observations: "",
-            character: "",
-            customerFit: "",
-            characterTraits: Object.fromEntries(
-                characterTraitsList.map((trait) => [trait, "Nicht sicher"]),
-            ),
             crewFit: 0,
-            additionalObservations: "",
+            additionalComments: "",
         },
     };
-
-    $: evaluation.generalInfo.totalShifts =
-        evaluation.generalInfo.shifts.length;
 
     function submit() {
         console.log("Evaluation submitted:", evaluation);
@@ -101,31 +93,43 @@
             <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">
                 <form on:submit|preventDefault={submit} class="mt-4">
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
-                        <h2 class="text-gray-800 text-xl font-bold md:col-span-2">
+                        <h2
+                            class="text-gray-800 text-xl font-bold md:col-span-2"
+                        >
                             Allgemeine Infos
                         </h2>
-                        <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6">
+                        <div
+                            class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
+                        >
                             <div>
-                                <Label class="text-gray-500">ReBuddy (du)</Label>
-                                <div class="mt-1 text-gray-900 dark:text-gray-300 font-medium">
+                                <Label class="text-gray-500">ReBuddy (du)</Label
+                                >
+                                <div
+                                    class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
+                                >
                                     {evaluation.generalInfo.rebuddyName}
                                 </div>
                             </div>
                             <div>
                                 <Label class="text-gray-500">Starter</Label>
-                                <div class="mt-1 text-gray-900 dark:text-gray-300 font-medium">
+                                <div
+                                    class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
+                                >
                                     {evaluation.generalInfo.starterName}
                                 </div>
                             </div>
                         </div>
                         <div class="md:col-span-2">
                             <Label>
-                                Welche Schichten hattest du gemeinsam mit {evaluation.generalInfo.starterName}?
+                                Welche Schichten hattest du gemeinsam mit {evaluation
+                                    .generalInfo.starterName}?
                             </Label>
                             <p class="text-xs text-gray-500 mb-2">
                                 Wähle aus, welche Schichten ihr zusammen hattet.
                             </p>
-                            <ShiftWizard bind:shifts={evaluation.generalInfo.shifts} />
+                            <ShiftWizard
+                                bind:shifts={evaluation.generalInfo.shifts}
+                            />
                         </div>
                         <hr class="md:col-span-2 my-4" />
                         <div class="md:col-span-2">
@@ -190,12 +194,16 @@
 
                         <StarRating
                             label="Freundlichkeit"
-                            bind:rating={evaluation.whatsApp.starterResponse}
+                            bind:rating={
+                                evaluation.communication.starterResponse
+                            }
                         />
 
                         <StarRating
                             label="Zuverlässigkeit/ Schnelligkeit"
-                            bind:rating={evaluation.whatsApp.additionalComments}
+                            bind:rating={
+                                evaluation.communication.additionalComments
+                            }
                         />
 
                         <hr class="md:col-span-2 my-4" />
@@ -227,6 +235,7 @@
                                         {#each characterTraitOptions as option}
                                             <div class="text-center">
                                                 <Radio
+                                                    bind:group={evaluation.characterTraits[trait]}
                                                     name={trait}
                                                     value={option}
                                                     id={"radio-" +
@@ -261,7 +270,7 @@
                             </Label>
                             <Input
                                 bind:value={
-                                    evaluation.additional.additionalObservations
+                                    evaluation.additional.additionalComments
                                 }
                                 type="text"
                             />
