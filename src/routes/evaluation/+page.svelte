@@ -1,6 +1,13 @@
 <script lang="ts">
     import { page } from "$app/stores";
-    import { Heading, Label, Input, Button, Star } from "flowbite-svelte";
+    import {
+        Heading,
+        Label,
+        Input,
+        Button,
+        Star,
+        Radio,
+    } from "flowbite-svelte";
     import StarRating from "$lib/components/StarRating.svelte";
     import ShiftWizard from "$lib/components/ShiftWizard.svelte";
     import type { Shift } from "$lib/components/ShiftWizard.svelte";
@@ -14,6 +21,15 @@
         };
         errorMessage?: string;
     };
+
+    const characterTraitsList = [
+        "Eigeninitiative",
+        "Verantwortungsbewusstsein",
+        "Belastbarkeit",
+        "Motivation",
+        "Teamfähigkeit",
+    ];
+    const characterTraitOptions = ["Positiv", "Negativ", "Nicht sicher"];
 
     let evaluation = {
         generalInfo: {
@@ -43,7 +59,10 @@
             observations: "",
             character: "",
             customerFit: "",
-            crewFit: 0, // Star rating
+            characterTraits: Object.fromEntries(
+                characterTraitsList.map((trait) => [trait, "Nicht sicher"]),
+            ),
+            crewFit: 0,
             additionalObservations: "",
         },
     };
@@ -178,11 +197,47 @@
 
                         <hr class="md:col-span-2 my-4" />
 
-                        <h2
-                            class="text-gray-800 text-xl font-bold md:col-span-2"
+                        <div class="md:col-span-2">
+                            <h2 class="text-gray-800 text-xl font-bold">
+                                Charakter & Verhalten
+                            </h2>
+                            <p class=" text-sm text-gray-500 mb-4">
+                                Bitte bewerte jede Eigenschaft mit Positiv,
+                                Negativ oder Nicht sicher.
+                            </p>
+                        </div>
+
+                        <div
+                            class="md:col-span-2 grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 items-center font-semibold mb-2"
                         >
-                            Charakter & Verhalten
-                        </h2>
+                            <div></div>
+                            <div class="text-center">Positiv</div>
+                            <div class="text-center">Negativ</div>
+                            <div class="text-center">Nicht sicher</div>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            {#each characterTraitsList as trait}
+                                <div
+                                    class="grid grid-cols-[2fr_1fr_1fr_1fr] items-center mb-2"
+                                >
+                                    <div>{trait}</div>
+                                    {#each characterTraitOptions as option}
+                                        <div class="text-center">
+                                            <Radio
+                                                name={trait}
+                                                value={option}
+                                                id={"radio-" +
+                                                    trait +
+                                                    "-" +
+                                                    option}
+                                                class="mx-auto"
+                                            />
+                                        </div>
+                                    {/each}
+                                </div>
+                            {/each}
+                        </div>
 
                         <hr class="md:col-span-2 my-4" />
 
