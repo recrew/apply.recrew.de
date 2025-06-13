@@ -36,7 +36,12 @@
         "Lernbereitschaft & Auffassungsgabe",
         "Belastbarkeit / Stressresistenz",
     ];
-    const characterTraitOptions = ["Positiv", "Negativ", "Nicht sicher"];
+    // Use numeric codes for character traits for easier analysis: 1=Positiv, -1=Negativ, 0=Nicht sicher
+    const characterTraitOptions = [
+        { label: "Positiv", value: 1 },
+        { label: "Negativ", value: -1 },
+        { label: "Nicht sicher", value: 0 },
+    ];
 
     let evaluation = {
         generalInfo: {
@@ -60,8 +65,9 @@
             starterResponse: 0,
             additionalComments: 0,
         },
+        // default to 0 (Nicht sicher)
         characterTraits: Object.fromEntries(
-            characterTraitsList.map((trait) => [trait, "Nicht sicher"]),
+            characterTraitsList.map((trait) => [trait, 0]),
         ),
         additional: {
             crewFit: 0,
@@ -70,7 +76,14 @@
     };
 
     function submit() {
-        console.log("Evaluation submitted:", evaluation);
+    // normalize character traits to numeric codes for storage/analysis
+    const normalizedTraits = Object.fromEntries(
+        Object.entries(evaluation.characterTraits).map(
+            ([trait, val]) => [trait, Number(val)]
+        )
+    );
+    const payload = { ...evaluation, characterTraits: normalizedTraits };
+    console.log("Evaluation submitted:", payload);
     }
 </script>
 
@@ -213,8 +226,9 @@
                                 Charakter & Verhalten
                             </h2>
                             <p class="text-sm text-gray-500 mb-4">
-                                Bitte bewerte jede Eigenschaft mit Positiv,
-                                Negativ oder Nicht sicher.
+                                Bitte wähle bis zu 5 positive und bis zu 5 negative 
+                                Eigenschaften aus, die dir bei {evaluation
+                                    .generalInfo.starterName} aufgefallen sind.
                             </p>
 
                             <div
@@ -223,7 +237,7 @@
                                 <div></div>
                                 <div class="text-center">Positiv</div>
                                 <div class="text-center">Negativ</div>
-                                <div class="text-center">Nicht sicher</div>
+                                <div class="text-center">-</div>
                             </div>
 
                             <div class="divide-y divide-gray-200">
@@ -237,11 +251,8 @@
                                                 <Radio
                                                     bind:group={evaluation.characterTraits[trait]}
                                                     name={trait}
-                                                    value={option}
-                                                    id={"radio-" +
-                                                        trait +
-                                                        "-" +
-                                                        option}
+                                                    value={option.value}
+                                                    id={"radio-" + trait + "-" + option.value}
                                                     class="mx-auto"
                                                 />
                                             </div>
