@@ -36,11 +36,11 @@
         "Lernbereitschaft & Auffassungsgabe",
         "Belastbarkeit / Stressresistenz",
     ];
-    // Use numeric codes for character traits for easier analysis: 1=Positiv, -1=Negativ, 0=Nicht sicher
+    // Use numeric codes for analysis: 1=Positiv, -1=Negativ; empty value = Keine Angabe (not stored)
     const characterTraitOptions = [
-        { label: "Positiv", value: 1 },
-        { label: "Negativ", value: -1 },
-        { label: "Nicht sicher", value: 0 },
+        { label: "Positiv",       value: "1" },
+        { label: "Keine Angabe",  value: ""  },
+        { label: "Negativ",       value: "-1" },
     ];
 
     let evaluation = {
@@ -65,9 +65,9 @@
             starterResponse: 0,
             additionalComments: 0,
         },
-        // default to 0 (Nicht sicher)
+        // default to empty (no answer)
         characterTraits: Object.fromEntries(
-            characterTraitsList.map((trait) => [trait, 0]),
+            characterTraitsList.map((trait) => [trait, ""]),
         ),
         additional: {
             crewFit: 0,
@@ -76,14 +76,14 @@
     };
 
     function submit() {
-    // normalize character traits to numeric codes for storage/analysis
-    const normalizedTraits = Object.fromEntries(
-        Object.entries(evaluation.characterTraits).map(
-            ([trait, val]) => [trait, Number(val)]
-        )
-    );
-    const payload = { ...evaluation, characterTraits: normalizedTraits };
-    console.log("Evaluation submitted:", payload);
+        // normalize character traits: only include answered traits and cast to Number
+        const normalizedTraits = Object.fromEntries(
+            Object.entries(evaluation.characterTraits)
+                .filter(([, val]) => val !== "")
+                .map(([trait, val]) => [trait, Number(val)])
+        );
+        const payload = { ...evaluation, characterTraits: normalizedTraits };
+        console.log("Evaluation submitted:", payload);
     }
 </script>
 
@@ -227,8 +227,7 @@
                             </h2>
                             <p class="text-sm text-gray-500 mb-4">
                                 Bitte wähle bis zu 5 positive und bis zu 5 negative 
-                                Eigenschaften aus, die dir bei {evaluation
-                                    .generalInfo.starterName} aufgefallen sind.
+                                Eigenschaften aus, die dir <span>besonders</span> aufgefallen sind.
                             </p>
 
                             <div
@@ -236,8 +235,8 @@
                             >
                                 <div></div>
                                 <div class="text-center">Positiv</div>
+                                <div class="text-center"></div>
                                 <div class="text-center">Negativ</div>
-                                <div class="text-center">-</div>
                             </div>
 
                             <div class="divide-y divide-gray-200">
