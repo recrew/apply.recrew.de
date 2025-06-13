@@ -23,19 +23,18 @@
     };
 
     const characterTraitsList = [
-        "Freundlichkeit & Höflichkeit",
-        "Selbstbewusstsein",
+        "Umgangsformen (Höflichkeit, Respekt)",
         "Teamfähigkeit",
+        "Selbstbewusstsein",
+        "Auftreten",
         "Motivation",
-        "Engagement",
         "Selbstständigkeit / Eigeninitiative",
+        "Engagement im Allgemeinen",
+        "Kritikfähigkeit",
         "Zuverlässigkeit",
         "Organisation & Struktur",
         "Lernbereitschaft & Auffassungsgabe",
-        "Kritikfähigkeit",
         "Belastbarkeit / Stressresistenz",
-        "Auftreten",
-        "Umgangsformen",
     ];
     const characterTraitOptions = ["Positiv", "Negativ", "Nicht sicher"];
 
@@ -102,35 +101,31 @@
             <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">
                 <form on:submit|preventDefault={submit} class="mt-4">
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
-                        <h2
-                            class="text-gray-800 text-xl font-bold md:col-span-2"
-                        >
+                        <h2 class="text-gray-800 text-xl font-bold md:col-span-2">
                             Allgemeine Infos
                         </h2>
-                        <div>
-                            <p
-                                class="text-sm block text-gray-900 dark:text-gray-300 pb-1"
-                            >
-                                ReBuddy (du): {evaluation.generalInfo
-                                    .rebuddyName}
-                            </p>
-                            <p
-                                class="text-sm block text-gray-900 dark:text-gray-300 pb-1"
-                            >
-                                Starter: {evaluation.generalInfo.starterName}
-                            </p>
+                        <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6">
+                            <div>
+                                <Label class="text-gray-500">ReBuddy (du)</Label>
+                                <div class="mt-1 text-gray-900 dark:text-gray-300 font-medium">
+                                    {evaluation.generalInfo.rebuddyName}
+                                </div>
+                            </div>
+                            <div>
+                                <Label class="text-gray-500">Starter</Label>
+                                <div class="mt-1 text-gray-900 dark:text-gray-300 font-medium">
+                                    {evaluation.generalInfo.starterName}
+                                </div>
+                            </div>
                         </div>
                         <div class="md:col-span-2">
-                            <Label class=""
-                                >Welche Schichten hattest gemeinsam du mit
-                                {evaluation.generalInfo.starterName}?</Label
-                            >
-                            <p class="text-xs mb-2 text-gray-700">
-                                Wähle aus welche Schichten ihr zusammen hattet.
+                            <Label>
+                                Welche Schichten hattest du gemeinsam mit {evaluation.generalInfo.starterName}?
+                            </Label>
+                            <p class="text-xs text-gray-500 mb-2">
+                                Wähle aus, welche Schichten ihr zusammen hattet.
                             </p>
-                            <ShiftWizard
-                                bind:shifts={evaluation.generalInfo.shifts}
-                            />
+                            <ShiftWizard bind:shifts={evaluation.generalInfo.shifts} />
                         </div>
                         <hr class="md:col-span-2 my-4" />
                         <div class="md:col-span-2">
@@ -209,41 +204,42 @@
                             <h2 class="text-gray-800 text-xl font-bold">
                                 Charakter & Verhalten
                             </h2>
-                            <p class=" text-sm text-gray-500 mb-4">
+                            <p class="text-sm text-gray-500 mb-4">
                                 Bitte bewerte jede Eigenschaft mit Positiv,
                                 Negativ oder Nicht sicher.
                             </p>
-                        </div>
 
-                        <div
-                            class="md:col-span-2 grid grid-cols-[4fr_1fr_1fr_1fr] gap-4 items-center font-semibold mb-2"
-                        >
-                            <div></div>
-                            <div class="text-center">Positiv</div>
-                            <div class="text-center">Negativ</div>
-                            <div class="text-center">Nicht sicher</div>
-                        </div>
+                            <div
+                                class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center font-semibold text-gray-600 bg-gray-50 mb-3"
+                            >
+                                <div></div>
+                                <div class="text-center">Positiv</div>
+                                <div class="text-center">Negativ</div>
+                                <div class="text-center">Nicht sicher</div>
+                            </div>
 
-                        <div class="md:col-span-2">
-                            {#each characterTraitsList as trait, index}
-                                <div class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center py-4 min-w-0 {index !== characterTraitsList.length - 1 ? 'border-b border-gray-300' : ''}">
-                                    
-                                    <div>{trait}</div>
-                                    {#each characterTraitOptions as option}
-                                        <div class="text-center">
-                                            <Radio
-                                                name={trait}
-                                                value={option}
-                                                id={"radio-" +
-                                                    trait +
-                                                    "-" +
-                                                    option}
-                                                class="mx-auto"
-                                            />
-                                        </div>
-                                    {/each}
-                                </div>
-                            {/each}
+                            <div class="divide-y divide-gray-200">
+                                {#each characterTraitsList as trait}
+                                    <div
+                                        class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center py-3"
+                                    >
+                                        <div class="text-gray-700">{trait}</div>
+                                        {#each characterTraitOptions as option}
+                                            <div class="text-center">
+                                                <Radio
+                                                    name={trait}
+                                                    value={option}
+                                                    id={"radio-" +
+                                                        trait +
+                                                        "-" +
+                                                        option}
+                                                    class="mx-auto"
+                                                />
+                                            </div>
+                                        {/each}
+                                    </div>
+                                {/each}
+                            </div>
                         </div>
 
                         <hr class="md:col-span-2 my-4" />
