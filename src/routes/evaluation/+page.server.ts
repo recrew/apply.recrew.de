@@ -33,11 +33,11 @@ async function getRebuddyDataFromToken(token: string) {
     }
 
     return {
-        rebuddyName: 'Leonie',
+        rebuddyName: 'Leonie Müller',
         starterName: 'Max Mustermann',
         shifts: [
-            { date: '2025-06-01', role: 'Runner', location: 'Berlin' },
-            { date: '2025-06-02', role: 'Bar', location: 'Berlin' }
+            { date: '2025-06-01', name: 'Dallmayr' },
+            { date: '2025-06-02', name: 'Recrew' }
         ]
     };
 }

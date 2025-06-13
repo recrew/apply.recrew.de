@@ -17,9 +17,9 @@
 
     let evaluation = {
         generalInfo: {
-            rebuddyName: "",
-            starterName: "",
-            shifts: [] as Shift[],
+            rebuddyName: data.rebuddyData?.rebuddyName || "",
+            starterName: data.rebuddyData?.starterName || "",
+            shifts: data.rebuddyData?.shifts as Shift[],
             totalShifts: 0, //computed
         },
         recrewBasics: {
@@ -33,11 +33,10 @@
             doingExtra: 0,
             workEthic: 0,
             sendEnergy: 0,
-            additional: "",
         },
         whatsApp: {
-            starterResponse: "",
-            additionalComments: "",
+            starterResponse: 0,
+            additionalComments: 0,
         },
         additional: {
             friendGroup: "",
@@ -82,34 +81,25 @@
                             Allgemeine Infos
                         </h2>
                         <div>
-                            <Label for="rebuddyName" class="mb-2"
-                                >Dein Name</Label
+                            <p
+                                class="text-sm block text-gray-900 dark:text-gray-300 pb-1"
                             >
-                            <Input
-                                bind:value={evaluation.generalInfo.rebuddyName}
-                                type="text"
-                                id="rebuddyName"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <Label for="starterName" class="mb-2"
-                                >Name deines Starters</Label
+                                ReBuddy (du): {evaluation.generalInfo
+                                    .rebuddyName}
+                            </p>
+                            <p
+                                class="text-sm block text-gray-900 dark:text-gray-300 pb-1"
                             >
-                            <Input
-                                bind:value={evaluation.generalInfo.starterName}
-                                type="text"
-                                id="starterName"
-                                required
-                            />
+                                Starter: {evaluation.generalInfo.starterName}
+                            </p>
                         </div>
                         <div class="md:col-span-2">
                             <Label class=""
-                                >Welche Schichten hatte dein Starter?</Label
+                                >Welche Schichten hattest gemeinsam du mit
+                                {evaluation.generalInfo.starterName}?</Label
                             >
                             <p class="text-xs mb-2 text-gray-700">
-                                Wähle anschließend aus welche Schichten ihr
-                                zusammen hattet.
+                                Wähle aus welche Schichten ihr zusammen hattet.
                             </p>
                             <ShiftWizard
                                 bind:shifts={evaluation.generalInfo.shifts}
@@ -169,109 +159,47 @@
                                 zugehen, Kommunikation mit der Crew)"
                             bind:rating={evaluation.recrewBasics.sendEnergy}
                         />
-                        <div>
-                            <Label for="recrewBasicsAdditional" class="mb-2"
-                                >Anmwerkungen zu der Bewertung</Label
-                            >
-                            <Input
-                                bind:value={evaluation.recrewBasics.additional}
-                                type="text"
-                                id="recrewBasicsAdditional"
-                                required
-                            />
-                        </div>
                         <hr class="md:col-span-2 my-4" />
                         <h2
                             class="md:col-span-2 text-gray-800 text-xl font-bold"
                         >
-                            {evaluation.generalInfo.starterName ||
-                                "Dein Starter"} auf WhatsApp
+                            Kommunikation (WhatsApp, Email, etc.)
                         </h2>
 
-                        <div>
-                            <Label
-                                >Wie hat dein Starter auf deine Nachrichten auf
-                                WhatsApp reagiert?</Label
-                            >
-                            <p class="text-xs mb-2 text-gray-700">
-                                (Hat dein Starter reagiert? Was war sein
-                                Feedback auf Schichten?)
-                            </p>
-                            <Input
-                                bind:value={evaluation.whatsApp.starterResponse}
-                                type="text"
-                                required
-                            />
-                        </div>
+                        <StarRating
+                            label="Freundlichkeit"
+                            bind:rating={evaluation.whatsApp.starterResponse}
+                        />
 
-                        <div>
-                            <Label class="mb-2"
-                                >Hat sich dein Starter von sich aus bei dir
-                                gemeldet? Wenn ja, gibt es irgendetwas das wir
-                                wissen müssten?
-                            </Label>
-                            <Input
-                                bind:value={
-                                    evaluation.whatsApp.additionalComments
-                                }
-                                type="text"
-                                required
-                            />
-                        </div>
+                        <StarRating
+                            label="Zuverlässigkeit/ Schnelligkeit"
+                            bind:rating={evaluation.whatsApp.additionalComments}
+                        />
 
                         <hr class="md:col-span-2 my-4" />
 
                         <h2
                             class="text-gray-800 text-xl font-bold md:col-span-2"
                         >
-                            Abschließende Infos
+                            Charakter & Verhalten
                         </h2>
-                        <div>
-                            <Label class="mb-2"
-                                >Freundesgruppe deines Starter</Label
-                            >
-                            <Input
-                                bind:value={evaluation.additional.friendGroup}
-                                type="text"
-                            />
-                        </div>
-                        <div>
-                            <Label class="mb-2"
-                                >Gab es irgendwelche positiven / negativen
-                                Auffälligkeiten?
-                            </Label>
-                            <Input
-                                bind:value={evaluation.additional.observations}
-                                type="text"
-                            />
-                        </div>
-                        <div>
-                            <Label class="mb-2"
-                                >Wie würdest du den Charakter/ das Verhalten
-                                deines Starters beschreiben?
-                            </Label>
-                            <Input
-                                bind:value={evaluation.additional.character}
-                                type="text"
-                            />
-                        </div>
-                        <div>
-                            <Label class="mb-2"
-                                >Passt dein Starter zu einem Kunden besonders
-                                gut / gar nicht? Wenn ja, warum?
-                            </Label>
-                            <Input
-                                bind:value={evaluation.additional.customerFit}
-                                type="text"
-                            />
-                        </div>
+
+                        <hr class="md:col-span-2 my-4" />
+
+                        <h2
+                            class="text-gray-800 text-xl font-bold md:col-span-2"
+                        >
+                            Abschließende Bewertung
+                        </h2>
+
                         <StarRating
-                            label="Wie gut passt dein Starter in die Crew?"
+                            label="Wie gut passt {evaluation.generalInfo
+                                .starterName} in die Crew?"
                             bind:rating={evaluation.additional.crewFit}
                         />
                         <div class="md:col-span-2">
                             <Label class="mb-2"
-                                >Abschließende Bemerkungen zum Starter
+                                >Weitere Bemerkungen / Freundesgruppe
                             </Label>
                             <Input
                                 bind:value={
