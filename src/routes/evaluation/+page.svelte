@@ -1,13 +1,6 @@
 <script lang="ts">
-    import { page } from "$app/stores";
-    import {
-        Heading,
-        Label,
-        Input,
-        Button,
-        Star,
-        Radio,
-    } from "flowbite-svelte";
+    import { Label, Input, Button, Radio, Alert, StepIndicator } from "flowbite-svelte";
+    import { InfoCircleSolid } from "flowbite-svelte-icons";
     import StarRating from "$lib/components/StarRating.svelte";
     import ShiftWizard from "$lib/components/ShiftWizard.svelte";
     import type { Shift } from "$lib/components/ShiftWizard.svelte";
@@ -36,11 +29,40 @@
         "Lernbereitschaft & Auffassungsgabe",
         "Belastbarkeit / Stressresistenz",
     ];
-    // Use numeric codes for analysis: 1=Positiv, -1=Negativ; empty value (not stored)
+    // Use numeric codes for analysis: 1=Positiv, -1=Negativ; empty = Keine Angabe (not stored)
     const characterTraitOptions = [
         { label: "Positiv", value: "1" },
-        { label: "", value: "" },
+        { label: "Keine Angabe", value: "" },
         { label: "Negativ", value: "-1" },
+    ];
+
+    // List of recrew basics fields to DRY up the StarRating section
+    const recrewBasicsList = [
+        { key: "beingPrepared", label: "'Being Prepared'" },
+        { key: "beingOnTime", label: "'Being on time'" },
+        {
+            key: "showAttitude",
+            label: "'Show Attitude' (respektvoll und aufmerksam)",
+        },
+        {
+            key: "controlBodyLanguage",
+            label: "'Control Body language' (Aufrechte Haltung, positive Ausstrahlung, nicht den Clown spielen, selbstbewusst sein)",
+        },
+        { key: "keepCalmInMind", label: "'Keep Calm in mind' (Ruhe bewahren)" },
+        { key: "showEffort", label: "'Show Effort' (Eigeninitiative)" },
+        { key: "beCoachable", label: "'Be Coachable'" },
+        {
+            key: "doingExtra",
+            label: "'Doing extra' (Mitdenken, Kollegen helfen)",
+        },
+        {
+            key: "workEthic",
+            label: "'Work Ethic' (Selbstbewusst & Verantwortungsbewusst arbeiten, Handy weg)",
+        },
+        {
+            key: "sendEnergy",
+            label: "'Send Energy' (Motivation, Aktiv auf Gäste zugehen, Kommunikation mit der Crew)",
+        },
     ];
 
     let evaluation = {
@@ -94,12 +116,23 @@
     ).length;
 </script>
 
-<div class="w-full banner"></div>
-
 {#if data.errorMessage}
-    <p class="text-center my-10 text-red-500">{data.errorMessage}</p>
+    <div class="my-8 px-2 max-w-screen-lg mx-auto">
+        <Alert border color="red">
+            <InfoCircleSolid slot="icon" class="w-4 h-4" />
+            <p class="font-medium text-lg">Fehler!</p>
+            <p>Dieser Link ist entweder ungültig oder nicht mehr verfügbar.</p>
+        </Alert>
+        <p class="mt-3 dark:text-white">
+            Diese Meldung wird auch dann angezeigt, wenn du die Bewertung
+            bereits abgegeben hast. Solltest du von uns auf diesen Link
+            geschickt worden sein, bitte melde dich bei work@recrew.de.
+        </p>
+    </div>
 {:else}
+    <div class="w-full banner"></div>
     <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto mb-24">
+
         <section>
             <div
                 class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12"
@@ -161,50 +194,12 @@
                                 Anmerkungen unten an.
                             </p>
                         </div>
-                        <StarRating
-                            label="'Being Prepared'"
-                            bind:rating={evaluation.recrewBasics.beingPrepared}
-                        />
-                        <StarRating
-                            label="'Being on time'"
-                            bind:rating={evaluation.recrewBasics.beingOnTime}
-                        />
-                        <StarRating
-                            label="'Show Attitude' (respektvoll und aufmerksam)"
-                            bind:rating={evaluation.recrewBasics.showAttitude}
-                        />
-                        <StarRating
-                            label="'Control Body language' (Aufrechte Haltung, positive Ausstrahlung, nicht den Clown spielen, selbstbewusst sein)"
-                            bind:rating={
-                                evaluation.recrewBasics.controlBodyLanguage
-                            }
-                        />
-                        <StarRating
-                            label="'Keep Calm in mind' (Ruhe bewahren)"
-                            bind:rating={evaluation.recrewBasics.keepCalmInMind}
-                        />
-                        <StarRating
-                            label="'Show Effort' (Eigeninitiative)"
-                            bind:rating={evaluation.recrewBasics.showEffort}
-                        />
-                        <StarRating
-                            label="'Be Coachable'"
-                            bind:rating={evaluation.recrewBasics.beCoachable}
-                        />
-                        <StarRating
-                            label="'Doing extra' (Mitdenken, Kollegen helfen)"
-                            bind:rating={evaluation.recrewBasics.doingExtra}
-                        />
-                        <StarRating
-                            label="'Work Ethic' (Selbstbewusst &
-                                Verantwortungsbewusst arbeiten, Handy weg)"
-                            bind:rating={evaluation.recrewBasics.workEthic}
-                        />
-                        <StarRating
-                            label="'Send Energy' (Motivation, Aktiv auf Gäste
-                                zugehen, Kommunikation mit der Crew)"
-                            bind:rating={evaluation.recrewBasics.sendEnergy}
-                        />
+                        {#each recrewBasicsList as { key, label }}
+                            <StarRating
+                                {label}
+                                bind:rating={evaluation.recrewBasics[key]}
+                            />
+                        {/each}
                         <hr class="md:col-span-2 my-4" />
                         <h2
                             class="md:col-span-2 text-gray-800 text-xl font-bold"
@@ -323,7 +318,7 @@
                     </div>
 
                     <div class="grid gap-3">
-                        <Button type="submit">Submit</Button>
+                        <Button type="submit">Abschicken</Button>
                     </div>
                 </form>
             </div>

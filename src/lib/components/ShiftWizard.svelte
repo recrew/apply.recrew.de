@@ -19,7 +19,7 @@
       class="grid grid-cols-3 items-end {index !==
       shifts.length - 1
         ? 'border-b border-gray-200'
-        : ''} pb-2"
+        : ''} pb-3"
     >
       <div class="text-gray-900 text-sm">{shift.name}</div>
       <div class="text-gray-900 text-sm">
