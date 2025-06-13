@@ -9,6 +9,10 @@
 	"/docs": [
 		"src/routes/+layout.ts"
 	],
+	"/evaluation": [
+		"src/routes/evaluation/+page.server.ts",
+		"src/routes/+layout.ts"
+	],
 	"/schedule": [
 		"src/routes/+layout.ts"
 	],
