@@ -36,11 +36,11 @@
         "Lernbereitschaft & Auffassungsgabe",
         "Belastbarkeit / Stressresistenz",
     ];
-    // Use numeric codes for analysis: 1=Positiv, -1=Negativ; empty value = Keine Angabe (not stored)
+    // Use numeric codes for analysis: 1=Positiv, -1=Negativ; empty value (not stored)
     const characterTraitOptions = [
-        { label: "Positiv",       value: "1" },
-        { label: "Keine Angabe",  value: ""  },
-        { label: "Negativ",       value: "-1" },
+        { label: "Positiv", value: "1" },
+        { label: "", value: "" },
+        { label: "Negativ", value: "-1" },
     ];
 
     let evaluation = {
@@ -65,7 +65,6 @@
             starterResponse: 0,
             additionalComments: 0,
         },
-        // default to empty (no answer)
         characterTraits: Object.fromEntries(
             characterTraitsList.map((trait) => [trait, ""]),
         ),
@@ -80,11 +79,19 @@
         const normalizedTraits = Object.fromEntries(
             Object.entries(evaluation.characterTraits)
                 .filter(([, val]) => val !== "")
-                .map(([trait, val]) => [trait, Number(val)])
+                .map(([trait, val]) => [trait, Number(val)]),
         );
         const payload = { ...evaluation, characterTraits: normalizedTraits };
         console.log("Evaluation submitted:", payload);
     }
+
+    // derived counts to limit number of Positiv/Negativ selections
+    $: positiveCount = Object.values(evaluation.characterTraits).filter(
+        (v) => v === "1",
+    ).length;
+    $: negativeCount = Object.values(evaluation.characterTraits).filter(
+        (v) => v === "-1",
+    ).length;
 </script>
 
 <div class="w-full banner"></div>
@@ -226,17 +233,23 @@
                                 Charakter & Verhalten
                             </h2>
                             <p class="text-sm text-gray-500 mb-4">
-                                Bitte wähle bis zu 5 positive und bis zu 5 negative 
-                                Eigenschaften aus, die dir <span>besonders</span> aufgefallen sind.
+                                Bitte wähle bis zu 3 positive und bis zu 3
+                                negative Eigenschaften aus, die dir <span
+                                    >besonders</span
+                                > aufgefallen sind.
                             </p>
 
                             <div
                                 class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center font-semibold text-gray-600 bg-gray-50 mb-3"
                             >
                                 <div></div>
-                                <div class="text-center">Positiv</div>
-                                <div class="text-center"></div>
-                                <div class="text-center">Negativ</div>
+                                <div class="text-center">
+                                    Positiv ({positiveCount}/3)
+                                </div>
+                                <div class="text-center">Keine Angabe</div>
+                                <div class="text-center">
+                                    Negativ ({negativeCount}/3)
+                                </div>
                             </div>
 
                             <div class="divide-y divide-gray-200">
@@ -248,11 +261,34 @@
                                         {#each characterTraitOptions as option}
                                             <div class="text-center">
                                                 <Radio
-                                                    bind:group={evaluation.characterTraits[trait]}
+                                                    bind:group={
+                                                        evaluation
+                                                            .characterTraits[
+                                                            trait
+                                                        ]
+                                                    }
                                                     name={trait}
                                                     value={option.value}
-                                                    id={"radio-" + trait + "-" + option.value}
+                                                    id={"radio-" +
+                                                        trait +
+                                                        "-" +
+                                                        option.value}
                                                     class="mx-auto"
+                                                    disabled={(option.value ===
+                                                        "1" &&
+                                                        positiveCount >= 3 &&
+                                                        evaluation
+                                                            .characterTraits[
+                                                            trait
+                                                        ] !== "1") ||
+                                                        (option.value ===
+                                                            "-1" &&
+                                                            negativeCount >=
+                                                                3 &&
+                                                            evaluation
+                                                                .characterTraits[
+                                                                trait
+                                                            ] !== "-1")}
                                                 />
                                             </div>
                                         {/each}
