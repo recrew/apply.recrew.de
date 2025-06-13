@@ -233,10 +233,9 @@
                                 Charakter & Verhalten
                             </h2>
                             <p class="text-sm text-gray-500 mb-4">
-                                Bitte wähle bis zu 3 positive und bis zu 3
-                                negative Eigenschaften aus, die dir <span
-                                    >besonders</span
-                                > aufgefallen sind.
+                                Welche Eigenschaften sind dir besonders
+                                aufgefallen? Wähle bis zu 3 positive und bis zu
+                                3 negative.
                             </p>
 
                             <div
