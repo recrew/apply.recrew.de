@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { Label, Input, Button, Radio, Alert, StepIndicator } from "flowbite-svelte";
+    import { Label, Input, Button, Radio, Alert } from "flowbite-svelte";
     import { InfoCircleSolid } from "flowbite-svelte-icons";
     import StarRating from "$lib/components/StarRating.svelte";
     import ShiftWizard from "$lib/components/ShiftWizard.svelte";
     import type { Shift } from "$lib/components/ShiftWizard.svelte";
+    import Section from "$lib/components/Section.svelte";
 
     export let data: {
         token: string | null;
@@ -84,8 +85,8 @@
             sendEnergy: 0,
         },
         communication: {
-            starterResponse: 0,
-            additionalComments: 0,
+            friendliness: 0,
+            reliability: 0,
         },
         characterTraits: Object.fromEntries(
             characterTraitsList.map((trait) => [trait, ""]),
@@ -116,6 +117,12 @@
     ).length;
 </script>
 
+<svelte:head>
+    <title
+        >Bewertung {data.rebuddyData?.starterName || "Starter"} | ReCrew</title
+    >
+</svelte:head>
+
 {#if data.errorMessage}
     <div class="my-8 px-2 max-w-screen-lg mx-auto">
         <Alert border color="red">
@@ -130,199 +137,158 @@
         </p>
     </div>
 {:else}
-    <div class="w-full banner"></div>
-    <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto mb-24">
+    <!-- BANNER -->
+    <div class="w-full banner" />
 
-        <section>
-            <div
-                class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12"
-            >
-                <h1
-                    class="mb-4 text-3xl font-extrabold tracking-tight leading-none text-gray-700 md:text-4xl lg:text-5xl dark:text-white"
-                >
-                    Bewerte {data.rebuddyData?.starterName || "deinen ReBuddy"}!
-                </h1>
-            </div>
-            <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">
-                <form on:submit|preventDefault={submit} class="mt-4">
-                    <div class="grid gap-6 mb-6 md:grid-cols-2">
-                        <h2
-                            class="text-gray-800 text-xl font-bold md:col-span-2"
-                        >
-                            Allgemeine Infos
-                        </h2>
-                        <div
-                            class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
-                        >
-                            <div>
-                                <Label class="text-gray-500">ReBuddy (du)</Label
-                                >
-                                <div
-                                    class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
-                                >
-                                    {evaluation.generalInfo.rebuddyName}
-                                </div>
-                            </div>
-                            <div>
-                                <Label class="text-gray-500">Starter</Label>
-                                <div
-                                    class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
-                                >
-                                    {evaluation.generalInfo.starterName}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="md:col-span-2">
-                            <Label>
-                                Welche Schichten hattest du gemeinsam mit {evaluation
-                                    .generalInfo.starterName}?
-                            </Label>
-                            <p class="text-xs text-gray-500 mb-2">
-                                Wähle aus, welche Schichten ihr zusammen hattet.
-                            </p>
-                            <ShiftWizard
-                                bind:shifts={evaluation.generalInfo.shifts}
-                            />
-                        </div>
-                        <hr class="md:col-span-2 my-4" />
-                        <div class="md:col-span-2">
-                            <h2 class="text-gray-800 text-xl font-bold">
-                                Bewertung der Umsetzung der recrew Basics
-                            </h2>
-                            <p class="text-sm text-gray-500 mb-4">
-                                Bitte bewerte alles, was geht und gib eventuelle
-                                Anmerkungen unten an.
-                            </p>
-                        </div>
-                        {#each recrewBasicsList as { key, label }}
-                            <StarRating
-                                {label}
-                                bind:rating={evaluation.recrewBasics[key]}
-                            />
-                        {/each}
-                        <hr class="md:col-span-2 my-4" />
-                        <h2
-                            class="md:col-span-2 text-gray-800 text-xl font-bold"
-                        >
-                            Kommunikation (WhatsApp, Email, etc.)
-                        </h2>
-
-                        <StarRating
-                            label="Freundlichkeit"
-                            bind:rating={
-                                evaluation.communication.starterResponse
-                            }
-                        />
-
-                        <StarRating
-                            label="Zuverlässigkeit/ Schnelligkeit"
-                            bind:rating={
-                                evaluation.communication.additionalComments
-                            }
-                        />
-
-                        <hr class="md:col-span-2 my-4" />
-
-                        <div class="md:col-span-2">
-                            <h2 class="text-gray-800 text-xl font-bold">
-                                Charakter & Verhalten
-                            </h2>
-                            <p class="text-sm text-gray-500 mb-4">
-                                Welche Eigenschaften sind dir besonders
-                                aufgefallen? Wähle bis zu 3 positive und bis zu
-                                3 negative.
-                            </p>
-
+    <!-- PAGE-->
+    <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-24">
+        <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">
+            <form on:submit|preventDefault={submit} class="mt-4">
+                <Section title="Allgemeine Infos">
+                    <div
+                        class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
+                    >
+                        <div>
+                            <Label class="text-gray-500">ReBuddy (du)</Label>
                             <div
-                                class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center font-semibold text-gray-600 bg-gray-50 mb-3"
+                                class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
                             >
-                                <div></div>
-                                <div class="text-center">
-                                    Positiv ({positiveCount}/3)
-                                </div>
-                                <div class="text-center">Keine Angabe</div>
-                                <div class="text-center">
-                                    Negativ ({negativeCount}/3)
-                                </div>
-                            </div>
-
-                            <div class="divide-y divide-gray-200">
-                                {#each characterTraitsList as trait}
-                                    <div
-                                        class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center py-3"
-                                    >
-                                        <div class="text-gray-700">{trait}</div>
-                                        {#each characterTraitOptions as option}
-                                            <div class="text-center">
-                                                <Radio
-                                                    bind:group={
-                                                        evaluation
-                                                            .characterTraits[
-                                                            trait
-                                                        ]
-                                                    }
-                                                    name={trait}
-                                                    value={option.value}
-                                                    id={"radio-" +
-                                                        trait +
-                                                        "-" +
-                                                        option.value}
-                                                    class="mx-auto"
-                                                    disabled={(option.value ===
-                                                        "1" &&
-                                                        positiveCount >= 3 &&
-                                                        evaluation
-                                                            .characterTraits[
-                                                            trait
-                                                        ] !== "1") ||
-                                                        (option.value ===
-                                                            "-1" &&
-                                                            negativeCount >=
-                                                                3 &&
-                                                            evaluation
-                                                                .characterTraits[
-                                                                trait
-                                                            ] !== "-1")}
-                                                />
-                                            </div>
-                                        {/each}
-                                    </div>
-                                {/each}
+                                {evaluation.generalInfo.rebuddyName}
                             </div>
                         </div>
-
-                        <hr class="md:col-span-2 my-4" />
-
-                        <h2
-                            class="text-gray-800 text-xl font-bold md:col-span-2"
-                        >
-                            Abschließende Bewertung
-                        </h2>
-
-                        <StarRating
-                            label="Wie gut passt {evaluation.generalInfo
-                                .starterName} in die Crew?"
-                            bind:rating={evaluation.additional.crewFit}
+                        <div>
+                            <Label class="text-gray-500">Starter</Label>
+                            <div
+                                class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
+                            >
+                                {evaluation.generalInfo.starterName}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <Label>
+                            Welche Schichten hattest du gemeinsam mit {evaluation
+                                .generalInfo.starterName}?
+                        </Label>
+                        <p class="text-xs text-gray-500 mb-2">
+                            Wähle aus, welche Schichten ihr zusammen hattet.
+                        </p>
+                        <ShiftWizard
+                            bind:shifts={evaluation.generalInfo.shifts}
                         />
-                        <div class="md:col-span-2">
-                            <Label class="mb-2"
-                                >Weitere Bemerkungen / Freundesgruppe
-                            </Label>
-                            <Input
-                                bind:value={
-                                    evaluation.additional.additionalComments
-                                }
-                                type="text"
-                            />
+                    </div>
+                </Section>
+                <Section
+                    title="Bewertung der Umsetzung der recrew Basics"
+                    helpText="Bitte bewerte alles, was geht und gib eventuelle
+                        Anmerkungen unten an."
+                >
+                    {#each recrewBasicsList as { key, label }}
+                        <StarRating
+                            {label}
+                            bind:rating={evaluation.recrewBasics[key]}
+                        />
+                    {/each}
+                </Section>
+                <Section
+                    title="Kommunikation"
+                    helpText="Wie war die Kommunikation mit dem Starter? War er/sie
+                        freundlich und zuverlässig?"
+                >
+                    <StarRating
+                        label="Freundlichkeit"
+                        bind:rating={evaluation.communication.friendliness}
+                    />
+                    <StarRating
+                        label="Zuverlässigkeit / Schnelligkeit"
+                        bind:rating={evaluation.communication.reliability}
+                    />
+                </Section>
+                <Section
+                    title="Charakter & Verhalten"
+                    helpText="Welche Eigenschaften sind dir besonders aufgefallen?
+                        Wähle bis zu 3 positive und bis zu 3 negative."
+                >
+                    <div class="md:col-span-2">
+                        <div
+                            class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center font-semibold text-gray-600 bg-gray-50 mb-3"
+                        >
+                            <div></div>
+                            <div class="text-center">
+                                Positiv ({positiveCount}/3)
+                            </div>
+                            <div class="text-center">Keine Angabe</div>
+                            <div class="text-center">
+                                Negativ ({negativeCount}/3)
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="grid gap-3">
-                        <Button type="submit">Abschicken</Button>
+                        <div class="divide-y divide-gray-200">
+                            {#each characterTraitsList as trait}
+                                <div
+                                    class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center py-3"
+                                >
+                                    <div class="text-gray-700">{trait}</div>
+                                    {#each characterTraitOptions as option}
+                                        <div class="text-center">
+                                            <Radio
+                                                bind:group={
+                                                    evaluation.characterTraits[
+                                                        trait
+                                                    ]
+                                                }
+                                                name={trait}
+                                                value={option.value}
+                                                id={"radio-" +
+                                                    trait +
+                                                    "-" +
+                                                    option.value}
+                                                class="mx-auto"
+                                                disabled={(option.value ===
+                                                    "1" &&
+                                                    positiveCount >= 3 &&
+                                                    evaluation.characterTraits[
+                                                        trait
+                                                    ] !== "1") ||
+                                                    (option.value === "-1" &&
+                                                        negativeCount >= 3 &&
+                                                        evaluation
+                                                            .characterTraits[
+                                                            trait
+                                                        ] !== "-1")}
+                                            />
+                                        </div>
+                                    {/each}
+                                </div>
+                            {/each}
+                        </div>
+                    </div></Section
+                >
+
+                <Section title="Abschließende Bewertung">
+                    <StarRating
+                        label="Wie gut passt {evaluation.generalInfo
+                            .starterName} in die Crew?"
+                        bind:rating={evaluation.additional.crewFit}
+                    />
+                    <div class="md:col-span-2">
+                        <Label class="mb-2"
+                            >Weitere Bemerkungen / Freundesgruppe
+                        </Label>
+                        <Input
+                            bind:value={
+                                evaluation.additional.additionalComments
+                            }
+                            type="text"
+                        />
                     </div>
-                </form>
-            </div>
-        </section>
+                </Section>
+
+                <div class="grid gap-3">
+                    <Button type="submit">ABSCHICKEN</Button>
+                </div>
+            </form>
+        </div>
     </div>
 {/if}
 
