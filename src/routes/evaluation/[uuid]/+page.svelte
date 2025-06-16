@@ -20,7 +20,6 @@
             updatedAt: string;
             deletedAt: string | null;
         };
-        template: any[];
     };
 
     function capitalize(str: string): string {
@@ -29,12 +28,12 @@
             : str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    const baseTemplate = structuredClone(data.template[0]);
     let evaluation = structuredClone(data.evaluation);
     let selectedShifts: Shift[] = [];
 
     function getCleanCopy(src: typeof evaluation): typeof evaluation {
         const copy = structuredClone(src);
+        copy.shifts = selectedShifts;
 
         copy.sections = copy.sections
             .map((section: EvaluationSection) => {
