@@ -1,34 +1,53 @@
-<script context="module" lang="ts">
-  export interface Shift {
-    name: string;
-    date: string;
-    together: boolean;
+<script lang="ts">
+  /* --------------------------------------------------------------------
+   * Imports & types
+   * ------------------------------------------------------------------*/
+  import dayjs from "dayjs";
+  import { Checkbox } from "flowbite-svelte";
+  import type { Shift } from "$lib/types/evaluationTypes";
+
+  /* --------------------------------------------------------------------
+   * Props
+   * ------------------------------------------------------------------*/
+  /**
+   * Vollständige Liste aller Schichten (für das UI).
+   * Wird vom Parent ebenso als Input genutzt.
+   */
+  export let shifts: Shift[] = [];
+
+  /**
+   * Gefilterte Liste (nur together === true)
+   * Wird automatisch abgeleitet und kann im Parent via `bind:selected` gelesen werden.
+   */
+  export let selected: Shift[] = [];
+
+  /* --------------------------------------------------------------------
+   * Reactive derivation – whenever `shifts` changes, update `selected`.
+   * ------------------------------------------------------------------*/
+  $: selected = shifts.filter((s) => s.together);
+
+  /* --------------------------------------------------------------------
+   * Event helpers
+   * ------------------------------------------------------------------*/
+  function toggle(shift: Shift) {
+    shift.together = !shift.together;
+    // Reassign with a fresh array reference so the `$:` block runs again
+    shifts = [...shifts];
   }
 </script>
 
-<script lang="ts">
-  import dayjs from "dayjs";
-  import { Toggle, Label } from "flowbite-svelte";
-
-  export let shifts: Shift[] = [];
-</script>
-
-<div class="space-y-4 mt-4">
+<div class="mt-4">
   {#each shifts as shift, index}
-    <div
-      class="grid grid-cols-3 items-end {index !==
-      shifts.length - 1
-        ? 'border-b border-gray-200'
-        : ''} pb-3"
+    <button
+      type="button"
+      on:click={() => toggle(shift)}
+      class="w-full grid grid-cols-[auto_1fr_1fr] items-center {index !== shifts.length - 1 ? 'border-b border-gray-200' : ''} py-3 text-left"
     >
-      <div class="text-gray-900 text-sm">{shift.name}</div>
-      <div class="text-gray-900 text-sm">
+      <Checkbox bind:checked={shift.together} class="mr-3" />
+      <div class="text-gray-700 font-medium">{shift.name}</div>
+      <div class="text-gray-600 ml-auto">
         {dayjs(shift.date).format("DD.MM.YYYY")}
       </div>
-      <div class="flex">
-        <Label class="text-gray-900 font-normal text-sm">Gemeinsam</Label>
-        <Toggle class="ms-4" label="Erledigt" bind:checked={shift.together} />
-      </div>
-    </div>
+    </button>
   {/each}
 </div>

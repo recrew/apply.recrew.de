@@ -36,7 +36,7 @@
       {/if}
     {/each}
     <span class="ms-2 text-lg text-gray-700">
-      {rating} / {total}
+      {rating ? rating : 0} / {total}
     </span>
   </div>
 </div>

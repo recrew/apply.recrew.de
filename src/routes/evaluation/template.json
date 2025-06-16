@@ -1,0 +1,223 @@
+[
+    {
+        "id": "",
+        "submittedBy": {
+            "type": "employee",
+            "uuid": ""
+        },
+        "shifts": [],
+        "createdAt": "",
+        "updatedAt": "",
+        "deletedAt": null,
+        "title": "Bewerte deinen ReBuddy",
+        "sections": [
+            {
+                "id": "recrew_basics",
+                "title": "Bewertung der Umsetzung der recrew Basics",
+                "type": "rating-group",
+                "description": "Bitte bewerte beobachtbare Verhaltensweisen während der Schicht.",
+                "items": [
+                    {
+                        "id": "being_prepared",
+                        "label": "Being Prepared",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "being_on_time",
+                        "label": "Being on time",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "show_attitude",
+                        "label": "Show Attitude (respektvoll und aufmerksam)",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "control_body_language",
+                        "label": "Control Body language (aufrechte Haltung, positive Ausstrahlung…)",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "keep_calm_in_mind",
+                        "label": "Keep Calm in mind (Ruhe bewahren)",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "show_effort",
+                        "label": "Show Effort (Eigeninitiative)",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "be_coachable",
+                        "label": "Be Coachable",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "doing_extra",
+                        "label": "Doing extra (Mitdenken, Kollegen helfen)",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "work_ethic",
+                        "label": "Work Ethic (verantwortungsbewusst arbeiten, Handy weg)",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    },
+                    {
+                        "id": "send_energy",
+                        "label": "Send Energy (Motivation, aktiv auf Gäste zugehen, Crew-Kommunikation)",
+                        "type": "stars",
+                        "max": 5,
+                        "value": null
+                    }
+                ]
+            },
+            {
+                "id": "communication",
+                "title": "Kommunikation",
+                "description": "Wie war die Kommunikation außerhalb der Schichten?",
+                "type": "rating-group",
+                "items": [
+                    {
+                        "id": "freundlichkeit",
+                        "label": "Freundlichkeit",
+                        "type": "stars",
+                        "max": 5,
+                        "value": 0
+                    },
+                    {
+                        "id": "reliability",
+                        "label": "Zuverlässigkeit / Schnelligkeit",
+                        "type": "stars",
+                        "max": 5,
+                        "value": 0
+                    }
+                ]
+            },
+            {
+                "id": "character_traits",
+                "title": "Charakter & Verhalten",
+                "type": "choice-group",
+                "description": "Welche Eigenschaften sind dir besonders aufgefallen? Wähle bis zu 3 positive und bis zu 3 negative.",
+                "options": [
+                    "positiv",
+                    "",
+                    "negativ"
+                ],
+                "maxSelectionsPerType": 3,
+                "items": [
+                    {
+                        "id": "manners",
+                        "label": "Umgangsformen (Höflichkeit, Respekt)",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "teamwork",
+                        "label": "Teamfähigkeit",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "self_confidence",
+                        "label": "Selbstbewusstsein",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "appearance",
+                        "label": "Auftreten",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "motivation",
+                        "label": "Motivation",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "independence",
+                        "label": "Selbstständigkeit / Eigeninitiative",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "engagement",
+                        "label": "Engagement im Allgemeinen",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "criticism",
+                        "label": "Kritikfähigkeit",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "reliability_trait",
+                        "label": "Zuverlässigkeit",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "organization",
+                        "label": "Organisation & Struktur",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "learning_ability",
+                        "label": "Lernbereitschaft & Auffassungsgabe",
+                        "type": "trait-choice",
+                        "value": ""
+                    },
+                    {
+                        "id": "stress_resistance",
+                        "label": "Belastbarkeit / Stressresistenz",
+                        "type": "trait-choice",
+                        "value": ""
+                    }
+                ]
+            },
+            {
+                "id": "crew_fit",
+                "title": "Abschließende Bewertung",
+                "type": "rating-group",
+                "items": [
+                    {
+                        "id": "crew_fit",
+                        "label": "Wie gut passt der Mitarbeiter ins Team?",
+                        "type": "stars",
+                        "max": 5,
+                        "value": 0
+                    }
+                ]
+            },
+            {
+                "id": "final_comment",
+                "title": "",
+                "description": "Weitere Bemerkungen / Freundesgruppe",
+                "type": "text",
+                "value": ""
+            }
+        ]
+    }
+]

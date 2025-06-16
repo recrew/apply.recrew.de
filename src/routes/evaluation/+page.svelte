@@ -1,120 +1,94 @@
 <script lang="ts">
-    import { Label, Input, Button, Radio, Alert } from "flowbite-svelte";
+    import { Input, Button, Radio, Alert, Label } from "flowbite-svelte";
     import { InfoCircleSolid } from "flowbite-svelte-icons";
     import StarRating from "$lib/components/StarRating.svelte";
-    import ShiftWizard from "$lib/components/ShiftWizard.svelte";
-    import type { Shift } from "$lib/components/ShiftWizard.svelte";
+    import type {
+        EvaluationTemplate,
+        EvaluationSection,
+        ChoiceGroupSection,
+        Shift,
+    } from "$lib/types/evaluationTypes";
     import Section from "$lib/components/Section.svelte";
+    import ShiftWizard from "$lib/components/ShiftWizard.svelte";
 
     export let data: {
         token: string | null;
         rebuddyData?: {
             rebuddyName: string;
             starterName: string;
-            shifts: any[];
+            shifts: Shift[];
         };
         errorMessage?: string;
+        template: EvaluationTemplate[];
     };
 
-    const characterTraitsList = [
-        "Umgangsformen (Höflichkeit, Respekt)",
-        "Teamfähigkeit",
-        "Selbstbewusstsein",
-        "Auftreten",
-        "Motivation",
-        "Selbstständigkeit / Eigeninitiative",
-        "Engagement im Allgemeinen",
-        "Kritikfähigkeit",
-        "Zuverlässigkeit",
-        "Organisation & Struktur",
-        "Lernbereitschaft & Auffassungsgabe",
-        "Belastbarkeit / Stressresistenz",
-    ];
-    // Use numeric codes for analysis: 1=Positiv, -1=Negativ; empty = Keine Angabe (not stored)
-    const characterTraitOptions = [
-        { label: "Positiv", value: "1" },
-        { label: "Keine Angabe", value: "" },
-        { label: "Negativ", value: "-1" },
-    ];
-
-    // List of recrew basics fields to DRY up the StarRating section
-    const recrewBasicsList = [
-        { key: "beingPrepared", label: "'Being Prepared'" },
-        { key: "beingOnTime", label: "'Being on time'" },
-        {
-            key: "showAttitude",
-            label: "'Show Attitude' (respektvoll und aufmerksam)",
-        },
-        {
-            key: "controlBodyLanguage",
-            label: "'Control Body language' (Aufrechte Haltung, positive Ausstrahlung, nicht den Clown spielen, selbstbewusst sein)",
-        },
-        { key: "keepCalmInMind", label: "'Keep Calm in mind' (Ruhe bewahren)" },
-        { key: "showEffort", label: "'Show Effort' (Eigeninitiative)" },
-        { key: "beCoachable", label: "'Be Coachable'" },
-        {
-            key: "doingExtra",
-            label: "'Doing extra' (Mitdenken, Kollegen helfen)",
-        },
-        {
-            key: "workEthic",
-            label: "'Work Ethic' (Selbstbewusst & Verantwortungsbewusst arbeiten, Handy weg)",
-        },
-        {
-            key: "sendEnergy",
-            label: "'Send Energy' (Motivation, Aktiv auf Gäste zugehen, Kommunikation mit der Crew)",
-        },
-    ];
-
-    let evaluation = {
-        generalInfo: {
-            rebuddyName: data.rebuddyData?.rebuddyName || "",
-            starterName: data.rebuddyData?.starterName || "",
-            shifts: data.rebuddyData?.shifts as Shift[],
-        },
-        recrewBasics: {
-            beingPrepared: 0,
-            beingOnTime: 0,
-            showAttitude: 0,
-            controlBodyLanguage: 0,
-            keepCalmInMind: 0,
-            showEffort: 0,
-            beCoachable: 0,
-            doingExtra: 0,
-            workEthic: 0,
-            sendEnergy: 0,
-        },
-        communication: {
-            friendliness: 0,
-            reliability: 0,
-        },
-        characterTraits: Object.fromEntries(
-            characterTraitsList.map((trait) => [trait, ""]),
-        ),
-        additional: {
-            crewFit: 0,
-            additionalComments: "",
-        },
-    };
-
-    function submit() {
-        // normalize character traits: only include answered traits and cast to Number
-        const normalizedTraits = Object.fromEntries(
-            Object.entries(evaluation.characterTraits)
-                .filter(([, val]) => val !== "")
-                .map(([trait, val]) => [trait, Number(val)]),
-        );
-        const payload = { ...evaluation, characterTraits: normalizedTraits };
-        console.log("Evaluation submitted:", payload);
+    function capitalize(str: string): string {
+        return str.trim().length === 0
+            ? "Keine Angabe"
+            : str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    // derived counts to limit number of Positiv/Negativ selections
-    $: positiveCount = Object.values(evaluation.characterTraits).filter(
-        (v) => v === "1",
-    ).length;
-    $: negativeCount = Object.values(evaluation.characterTraits).filter(
-        (v) => v === "-1",
-    ).length;
+    const baseTemplate: EvaluationTemplate = structuredClone(data.template[0]);
+    baseTemplate.submittedBy.uuid = data.token ?? "";
+    baseTemplate.shifts = data.rebuddyData?.shifts ?? [];
+    baseTemplate.shifts = baseTemplate.shifts;
+
+    let evaluation: EvaluationTemplate = structuredClone(baseTemplate);
+
+    let traitSection: ChoiceGroupSection | undefined;
+    let positiveCount = 0;
+    let negativeCount = 0;
+
+    $: traitSection = evaluation.sections.find(
+        (s): s is ChoiceGroupSection => s.type === "choice-group",
+    );
+
+    $: if (traitSection) {
+        positiveCount = traitSection.items.filter(
+            (i) => i.value === traitSection.options[0],
+        ).length;
+        negativeCount = traitSection.items.filter(
+            (i) => i.value === traitSection.options[1],
+        ).length;
+    }
+
+    function getCleanCopy(src: EvaluationTemplate): EvaluationTemplate {
+        const copy = structuredClone(src);
+
+        copy.sections = copy.sections
+            .map((section) => {
+                switch (section.type) {
+                    case "rating-group": {
+                        section.items = section.items.filter(
+                            (item) =>
+                                item.value !== "" &&
+                                item.value !== 0 &&
+                                item.value !== null,
+                        );
+                        return section.items.length ? section : null;
+                    }
+                    case "choice-group": {
+                        section.items = section.items.filter(
+                            (item) => item.value !== "",
+                        );
+                        return section.items.length ? section : null;
+                    }
+                    case "text": {
+                        section.value = section.value.trim();
+                        return section.value ? section : null;
+                    }
+                }
+            })
+            .filter(Boolean) as EvaluationSection[];
+
+        return copy;
+    }
+
+    async function submit() {
+        const cleaned = getCleanCopy(evaluation);
+
+        console.log("Submitting evaluation", cleaned);
+    }
 </script>
 
 <svelte:head>
@@ -140,8 +114,14 @@
     <!-- BANNER -->
     <div class="w-full banner" />
 
-    <!-- PAGE-->
     <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-24">
+        {#if evaluation.title}
+            <h1
+                class="text-center mb-10 text-2xl font-extrabold tracking-tight leading-none text-gray-700 md:text-4xl lg:text-5xl dark:text-white"
+            >
+                {evaluation.title}
+            </h1>
+        {/if}
         <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">
             <form on:submit|preventDefault={submit} class="mt-4">
                 <Section title="Allgemeine Infos">
@@ -149,140 +129,102 @@
                         class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
                     >
                         <div>
-                            <Label class="text-gray-500">ReBuddy (du)</Label>
+                            <Label class="text-gray-500">Bewertender</Label>
                             <div
                                 class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
                             >
-                                {evaluation.generalInfo.rebuddyName}
+                                {data.rebuddyData?.rebuddyName || ""}
                             </div>
                         </div>
                         <div>
-                            <Label class="text-gray-500">Starter</Label>
+                            <Label class="text-gray-500">Zu bewerten</Label>
                             <div
                                 class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
                             >
-                                {evaluation.generalInfo.starterName}
+                                {data.rebuddyData?.starterName || ""}
                             </div>
                         </div>
                     </div>
                     <div class="md:col-span-2">
-                        <Label>
-                            Welche Schichten hattest du gemeinsam mit {evaluation
-                                .generalInfo.starterName}?
+                        <Label class="text-gray-900">
+                            Auf welche Schichten bezieht sich die Bewertung von
+                            {data.rebuddyData?.starterName}?
                         </Label>
-                        <p class="text-xs text-gray-500 mb-2">
-                            Wähle aus, welche Schichten ihr zusammen hattet.
-                        </p>
                         <ShiftWizard
-                            bind:shifts={evaluation.generalInfo.shifts}
+                            bind:shifts={evaluation.shifts}
                         />
                     </div>
                 </Section>
-                <Section
-                    title="Bewertung der Umsetzung der recrew Basics"
-                    helpText="Bitte bewerte alles, was geht und gib eventuelle
-                        Anmerkungen unten an."
-                >
-                    {#each recrewBasicsList as { key, label }}
-                        <StarRating
-                            {label}
-                            bind:rating={evaluation.recrewBasics[key]}
-                        />
-                    {/each}
-                </Section>
-                <Section
-                    title="Kommunikation"
-                    helpText="Wie war die Kommunikation mit dem Starter? War er/sie
-                        freundlich und zuverlässig?"
-                >
-                    <StarRating
-                        label="Freundlichkeit"
-                        bind:rating={evaluation.communication.friendliness}
-                    />
-                    <StarRating
-                        label="Zuverlässigkeit / Schnelligkeit"
-                        bind:rating={evaluation.communication.reliability}
-                    />
-                </Section>
-                <Section
-                    title="Charakter & Verhalten"
-                    helpText="Welche Eigenschaften sind dir besonders aufgefallen?
-                        Wähle bis zu 3 positive und bis zu 3 negative."
-                >
-                    <div class="md:col-span-2">
-                        <div
-                            class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center font-semibold text-gray-600 bg-gray-50 mb-3"
-                        >
-                            <div></div>
-                            <div class="text-center">
-                                Positiv ({positiveCount}/3)
-                            </div>
-                            <div class="text-center">Keine Angabe</div>
-                            <div class="text-center">
-                                Negativ ({negativeCount}/3)
-                            </div>
-                        </div>
-
-                        <div class="divide-y divide-gray-200">
-                            {#each characterTraitsList as trait}
+                {#each evaluation.sections as section}
+                    <Section
+                        title={section.title || ""}
+                        helpText={section.description}
+                    >
+                        {#if section.type === "rating-group"}
+                            {#each section.items as item}
+                                <StarRating
+                                    label={item.label}
+                                    bind:rating={item.value}
+                                    total={item.max}
+                                />
+                            {/each}
+                        {:else if section.type === "choice-group"}
+                            <div class="md:col-span-2">
                                 <div
-                                    class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center py-3"
+                                    class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center font-semibold text-gray-600 bg-gray-50 mb-3"
                                 >
-                                    <div class="text-gray-700">{trait}</div>
-                                    {#each characterTraitOptions as option}
+                                    <div />
+                                    {#each section.options as option}
                                         <div class="text-center">
-                                            <Radio
-                                                bind:group={
-                                                    evaluation.characterTraits[
-                                                        trait
-                                                    ]
-                                                }
-                                                name={trait}
-                                                value={option.value}
-                                                id={"radio-" +
-                                                    trait +
-                                                    "-" +
-                                                    option.value}
-                                                class="mx-auto"
-                                                disabled={(option.value ===
-                                                    "1" &&
-                                                    positiveCount >= 3 &&
-                                                    evaluation.characterTraits[
-                                                        trait
-                                                    ] !== "1") ||
-                                                    (option.value === "-1" &&
-                                                        negativeCount >= 3 &&
-                                                        evaluation
-                                                            .characterTraits[
-                                                            trait
-                                                        ] !== "-1")}
-                                            />
+                                            {capitalize(option)}
                                         </div>
                                     {/each}
                                 </div>
-                            {/each}
-                        </div>
-                    </div></Section
-                >
-
-                <Section title="Abschließende Bewertung">
-                    <StarRating
-                        label="Wie gut passt {evaluation.generalInfo
-                            .starterName} in die Crew?"
-                        bind:rating={evaluation.additional.crewFit}
-                    />
-                    <div class="md:col-span-2">
-                        <Label class="mb-2"
-                            >Weitere Bemerkungen / Freundesgruppe
-                        </Label>
-                        <Input
-                            bind:value={
-                                evaluation.additional.additionalComments
-                            }
-                            type="text"
-                        />
-                    </div>
-                </Section>
+                                <div class="divide-y divide-gray-200">
+                                    {#each section.items as trait}
+                                        <div
+                                            class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center py-3"
+                                        >
+                                            <div class="text-gray-700">
+                                                {trait.label}
+                                            </div>
+                                            {#each section.options as option}
+                                                <div class="text-center">
+                                                    <Radio
+                                                        bind:group={trait.value}
+                                                        value={option}
+                                                        id={`radio-${trait.id}-${option}`}
+                                                        class="mx-auto"
+                                                        disabled={(option ===
+                                                            section
+                                                                .options[0] &&
+                                                            positiveCount >=
+                                                                3 &&
+                                                            trait.value !==
+                                                                section
+                                                                    .options[0]) ||
+                                                            (option ===
+                                                                section
+                                                                    .options[1] &&
+                                                                negativeCount >=
+                                                                    3 &&
+                                                                trait.value !==
+                                                                    section
+                                                                        .options[1])}
+                                                    />
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    {/each}
+                                </div>
+                            </div>
+                        {:else if section.type === "text"}
+                            <div class="md:col-span-2">
+                                <Input bind:value={section.value} type="text" />
+                            </div>
+                        {/if}
+                    </Section>
+                {/each}
 
                 <div class="grid gap-3">
                     <Button type="submit">ABSCHICKEN</Button>

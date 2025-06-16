@@ -1,5 +1,6 @@
 // +page.server.ts
 import { get } from 'svelte/store';
+import template from './template.json';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, fetch }) => {
@@ -7,7 +8,8 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
     if (!token) {
         return {
             token: null,
-            errorMessage: 'Kein Token übergeben.'
+            errorMessage: 'Kein Token übergeben.',
+            template
         };
     }
 
@@ -16,13 +18,15 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 
         return {
             token,
-            rebuddyData
+            rebuddyData,
+            template
         };
     } catch (err) {
         console.error('API-Fehler:', err);
         return {
             token,
-            errorMessage: 'Unerwarteter Fehler beim Laden der Daten.'
+            errorMessage: 'Unerwarteter Fehler beim Laden der Daten.',
+            template
         };
     }
 };
