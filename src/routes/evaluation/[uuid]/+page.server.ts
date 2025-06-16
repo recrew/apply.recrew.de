@@ -43,10 +43,18 @@ async function getEvaluation(uuid: string) {
     }
 
     const baseTemplate = structuredClone(template[0]);
-    
+
     const evalFromServer = {
         ...baseTemplate,
         id: uuid,
+        reviewer: {
+            name: 'Max Mustermann',
+        uuid: 'reviewer-123',
+        },
+        reviewee: {
+            name: 'Erika Mustermann',
+            uuid: 'reviewee-456',
+        },
         shifts: [
             { date: '2025-06-01', name: 'Dallmayr', id: 'shift1' },
             { date: '2025-06-01', name: 'Dallmayr', id: 'shift2' },

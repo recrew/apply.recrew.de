@@ -111,6 +111,33 @@
         <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">
             <form on:submit|preventDefault={submit} class="mt-4">
                 <Section title="Allgemeine Infos">
+                    <div
+                        class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
+                    >
+                        <div>
+                            <Label class="text-gray-500">Bewertender / Bewertende</Label>
+                            <div
+                                class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
+                            >
+                                {evaluation.reviewer?.name || ""}
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <Label class="text-gray-500">Zu bewerten</Label>
+                            <div
+                                class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
+                            >
+                                {evaluation.reviewee?.name || ""}
+                            </div>
+                        </div>
+                    </div>
                     <div class="md:col-span-2">
                         <Label class="text-gray-900">
                             Auf welche Schichten bezieht sich die Bewertung?
