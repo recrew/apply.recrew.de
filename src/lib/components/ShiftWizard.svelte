@@ -13,26 +13,20 @@
    * Vollständige Liste aller Schichten (für das UI).
    * Wird vom Parent ebenso als Input genutzt.
    */
+  /** Alle verfügbaren Schichten für die Auswahl */
   export let shifts: Shift[] = [];
 
-  /**
-   * Gefilterte Liste (nur together === true)
-   * Wird automatisch abgeleitet und kann im Parent via `bind:selected` gelesen werden.
-   */
+  /** Ausgewählte Schichten (bind:selected) */
   export let selected: Shift[] = [];
 
-  /* --------------------------------------------------------------------
-   * Reactive derivation – whenever `shifts` changes, update `selected`.
-   * ------------------------------------------------------------------*/
-  $: selected = shifts.filter((s) => s.together);
-
-  /* --------------------------------------------------------------------
-   * Event helpers
-   * ------------------------------------------------------------------*/
+  /** Umschalten in der Auswahlliste */
   function toggle(shift: Shift) {
-    shift.together = !shift.together;
-    // Reassign with a fresh array reference so the `$:` block runs again
-    shifts = [...shifts];
+    const idx = selected.findIndex((s) => s.id === shift.id);
+    if (idx >= 0) {
+      selected = [...selected.slice(0, idx), ...selected.slice(idx + 1)];
+    } else {
+      selected = [...selected, shift];
+    }
   }
 </script>
 
@@ -43,7 +37,7 @@
       on:click={() => toggle(shift)}
       class="w-full grid grid-cols-[auto_1fr_1fr] items-center {index !== shifts.length - 1 ? 'border-b border-gray-200' : ''} py-3 text-left"
     >
-      <Checkbox bind:checked={shift.together} class="mr-3" />
+      <Checkbox checked={selected.some((s) => s.id === shift.id)} class="mr-3" />
       <div class="text-gray-700 font-medium">{shift.name}</div>
       <div class="text-gray-600 ml-auto">
         {dayjs(shift.date).format("DD.MM.YYYY")}

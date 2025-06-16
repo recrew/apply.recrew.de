@@ -151,7 +151,8 @@
                             {data.rebuddyData?.starterName}?
                         </Label>
                         <ShiftWizard
-                            bind:shifts={evaluation.shifts}
+                            shifts={data.rebuddyData?.shifts}
+                            bind:selected={evaluation.shifts}
                         />
                     </div>
                 </Section>
@@ -176,7 +177,7 @@
                                     <div />
                                     {#each section.options as option}
                                         <div class="text-center">
-                                            {capitalize(option)}
+                                            {capitalize(option)} ({positiveCount})
                                         </div>
                                     {/each}
                                 </div>

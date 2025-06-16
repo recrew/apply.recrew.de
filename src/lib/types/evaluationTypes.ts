@@ -55,5 +55,5 @@ export interface EvaluationTemplate {
 export interface Shift {
     name: string;
     date: string;
-    together: boolean;
+    id: string;
   }
