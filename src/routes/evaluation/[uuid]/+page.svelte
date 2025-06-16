@@ -3,7 +3,6 @@
     import { InfoCircleSolid } from "flowbite-svelte-icons";
     import StarRating from "$lib/components/StarRating.svelte";
     import type {
-        EvaluationTemplate,
         EvaluationSection,
         ChoiceGroupSection,
         Shift,
@@ -12,14 +11,16 @@
     import ShiftWizard from "$lib/components/ShiftWizard.svelte";
 
     export let data: {
-        token: string | null;
-        rebuddyData?: {
-            rebuddyName: string;
-            starterName: string;
-            shifts: Shift[];
-        };
         errorMessage?: string;
-        template: EvaluationTemplate[];
+        evaluation: {
+            id: string;
+            shifts: Shift[];
+            sections: EvaluationSection[];
+            createdAt: string;
+            updatedAt: string;
+            deletedAt: string | null;
+        };
+        template: any[];
     };
 
     function capitalize(str: string): string {
@@ -28,39 +29,19 @@
             : str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    const baseTemplate: EvaluationTemplate = structuredClone(data.template[0]);
-    baseTemplate.submittedBy.uuid = data.token ?? "";
-    baseTemplate.shifts = data.rebuddyData?.shifts ?? [];
-    baseTemplate.shifts = baseTemplate.shifts;
+    const baseTemplate = structuredClone(data.template[0]);
+    let evaluation = structuredClone(data.evaluation);
+    let selectedShifts: Shift[] = [];
 
-    let evaluation: EvaluationTemplate = structuredClone(baseTemplate);
-
-    let traitSection: ChoiceGroupSection | undefined;
-    let positiveCount = 0;
-    let negativeCount = 0;
-
-    $: traitSection = evaluation.sections.find(
-        (s): s is ChoiceGroupSection => s.type === "choice-group",
-    );
-
-    $: if (traitSection) {
-        positiveCount = traitSection.items.filter(
-            (i) => i.value === traitSection.options[0],
-        ).length;
-        negativeCount = traitSection.items.filter(
-            (i) => i.value === traitSection.options[1],
-        ).length;
-    }
-
-    function getCleanCopy(src: EvaluationTemplate): EvaluationTemplate {
+    function getCleanCopy(src: typeof evaluation): typeof evaluation {
         const copy = structuredClone(src);
 
         copy.sections = copy.sections
-            .map((section) => {
+            .map((section: EvaluationSection) => {
                 switch (section.type) {
                     case "rating-group": {
                         section.items = section.items.filter(
-                            (item) =>
+                            (item: any) =>
                                 item.value !== "" &&
                                 item.value !== 0 &&
                                 item.value !== null,
@@ -69,7 +50,7 @@
                     }
                     case "choice-group": {
                         section.items = section.items.filter(
-                            (item) => item.value !== "",
+                            (item: any) => item.value !== "",
                         );
                         return section.items.length ? section : null;
                     }
@@ -84,17 +65,22 @@
         return copy;
     }
 
+    function optionCount(section: ChoiceGroupSection, option: string): number {
+        return section.items.filter((i) => i.value === option).length;
+    }
+
+    function maxPerOption(section: ChoiceGroupSection): number {
+        return (section as any).maxPerOption ?? 3;
+    }
+
     async function submit() {
         const cleaned = getCleanCopy(evaluation);
-
         console.log("Submitting evaluation", cleaned);
     }
 </script>
 
 <svelte:head>
-    <title
-        >Bewertung {data.rebuddyData?.starterName || "Starter"} | ReCrew</title
-    >
+    <title>Bewertung | ReCrew</title>
 </svelte:head>
 
 {#if data.errorMessage}
@@ -125,34 +111,13 @@
         <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">
             <form on:submit|preventDefault={submit} class="mt-4">
                 <Section title="Allgemeine Infos">
-                    <div
-                        class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
-                    >
-                        <div>
-                            <Label class="text-gray-500">Bewertender</Label>
-                            <div
-                                class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
-                            >
-                                {data.rebuddyData?.rebuddyName || ""}
-                            </div>
-                        </div>
-                        <div>
-                            <Label class="text-gray-500">Zu bewerten</Label>
-                            <div
-                                class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
-                            >
-                                {data.rebuddyData?.starterName || ""}
-                            </div>
-                        </div>
-                    </div>
                     <div class="md:col-span-2">
                         <Label class="text-gray-900">
-                            Auf welche Schichten bezieht sich die Bewertung von
-                            {data.rebuddyData?.starterName}?
+                            Auf welche Schichten bezieht sich die Bewertung?
                         </Label>
                         <ShiftWizard
-                            shifts={data.rebuddyData?.shifts}
-                            bind:selected={evaluation.shifts}
+                            shifts={evaluation.shifts}
+                            bind:selected={selectedShifts}
                         />
                     </div>
                 </Section>
@@ -172,23 +137,37 @@
                         {:else if section.type === "choice-group"}
                             <div class="md:col-span-2">
                                 <div
-                                    class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center font-semibold text-gray-600 bg-gray-50 mb-3"
+                                    class="font-semibold text-gray-600 bg-gray-50 mb-3"
+                                    style={`display:grid;grid-template-columns:4fr repeat(${section.options.length},1fr);`}
                                 >
                                     <div />
                                     {#each section.options as option}
                                         <div class="text-center">
-                                            {capitalize(option)} ({positiveCount})
+                                            {#if option}
+                                                {capitalize(option)}
+                                                <span class="text-gray-500">
+                                                    ({optionCount(
+                                                        section,
+                                                        option,
+                                                    )}/{maxPerOption(section)})
+                                                </span>
+                                            {:else}
+                                                {capitalize(option)}
+                                            {/if}
                                         </div>
                                     {/each}
                                 </div>
+
                                 <div class="divide-y divide-gray-200">
                                     {#each section.items as trait}
                                         <div
-                                            class="grid grid-cols-[4fr_1fr_1fr_1fr] items-center py-3"
+                                            class="py-3"
+                                            style={`display:grid;grid-template-columns:4fr repeat(${section.options.length},1fr);`}
                                         >
                                             <div class="text-gray-700">
                                                 {trait.label}
                                             </div>
+
                                             {#each section.options as option}
                                                 <div class="text-center">
                                                     <Radio
@@ -196,22 +175,15 @@
                                                         value={option}
                                                         id={`radio-${trait.id}-${option}`}
                                                         class="mx-auto"
-                                                        disabled={(option ===
-                                                            section
-                                                                .options[0] &&
-                                                            positiveCount >=
-                                                                3 &&
+                                                        disabled={optionCount(
+                                                            section,
+                                                            option,
+                                                        ) >=
+                                                            maxPerOption(
+                                                                section,
+                                                            ) &&
                                                             trait.value !==
-                                                                section
-                                                                    .options[0]) ||
-                                                            (option ===
-                                                                section
-                                                                    .options[1] &&
-                                                                negativeCount >=
-                                                                    3 &&
-                                                                trait.value !==
-                                                                    section
-                                                                        .options[1])}
+                                                                option}
                                                     />
                                                 </div>
                                             {/each}

@@ -1,21 +1,15 @@
 [
     {
-        "id": "",
-        "submittedBy": {
-            "type": "employee",
-            "uuid": ""
-        },
-        "shifts": [],
         "createdAt": "",
         "updatedAt": "",
         "deletedAt": null,
-        "title": "Bewerte deinen ReBuddy",
+        "title": "Bewerte deinen Starter",
         "sections": [
             {
                 "id": "recrew_basics",
-                "title": "Bewertung der Umsetzung der recrew Basics",
+                "title": "Umsetzung der recrew Basics",
                 "type": "rating-group",
-                "description": "Bitte bewerte beobachtbare Verhaltensweisen während der Schicht.",
+                "description": "Bitte bewerte beobachtbare Verhaltensweisen während der Schicht im Bezug auf die recrew Basics.",
                 "items": [
                     {
                         "id": "being_prepared",

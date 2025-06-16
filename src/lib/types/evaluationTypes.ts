@@ -44,14 +44,6 @@ export type EvaluationSection =
     | ChoiceGroupSection
     | TextSection;
 
-export interface EvaluationTemplate {
-    submittedBy: {
-        uuid: string;
-    };
-    shifts: Shift[];
-    sections: EvaluationSection[];
-    [key: string]: unknown;
-}
 export interface Shift {
     name: string;
     date: string;
