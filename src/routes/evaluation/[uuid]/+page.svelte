@@ -1,68 +1,48 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import { Input, Button, Radio, Alert, Label } from "flowbite-svelte";
     import { InfoCircleSolid } from "flowbite-svelte-icons";
+    import Section from "$lib/components/Section.svelte";
+    import ShiftWizard from "$lib/components/ShiftWizard.svelte";
     import StarRating from "$lib/components/StarRating.svelte";
+
     import type {
         EvaluationSection,
         ChoiceGroupSection,
         Shift,
     } from "$lib/types/evaluationTypes";
-    import Section from "$lib/components/Section.svelte";
-    import ShiftWizard from "$lib/components/ShiftWizard.svelte";
+    import { put } from "$lib/api";
 
     export let data: {
         errorMessage?: string;
         evaluation: {
             id: string;
+            uuid: string;
+            employeeId: number;
+            ratingEmployeeId: number;
+            employeeData: {
+                id: number;
+                uuid: string;
+                name: string;
+            };
+            ratingEmployeeData: {
+                id: number;
+                uuid: string;
+                name: string;
+            };
             shifts: Shift[];
-            sections: EvaluationSection[];
+            ratingJson: string | null;
+            rating: EvaluationSection[];
+            title: string | null;
             createdAt: string;
             updatedAt: string;
             deletedAt: string | null;
         };
     };
 
-    function capitalize(str: string): string {
-        return str.trim().length === 0
-            ? "Keine Angabe"
-            : str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    let evaluation = structuredClone(data.evaluation);
+    const { errorMessage, evaluation: initialEval } = data;
+    let evaluation = structuredClone(initialEval);
     let selectedShifts: Shift[] = [];
-
-    function getCleanCopy(src: typeof evaluation): typeof evaluation {
-        const copy = structuredClone(src);
-        copy.shifts = selectedShifts;
-
-        copy.sections = copy.sections
-            .map((section: EvaluationSection) => {
-                switch (section.type) {
-                    case "rating-group": {
-                        section.items = section.items.filter(
-                            (item: any) =>
-                                item.value !== "" &&
-                                item.value !== 0 &&
-                                item.value !== null,
-                        );
-                        return section.items.length ? section : null;
-                    }
-                    case "choice-group": {
-                        section.items = section.items.filter(
-                            (item: any) => item.value !== "",
-                        );
-                        return section.items.length ? section : null;
-                    }
-                    case "text": {
-                        section.value = section.value.trim();
-                        return section.value ? section : null;
-                    }
-                }
-            })
-            .filter(Boolean) as EvaluationSection[];
-
-        return copy;
-    }
 
     function optionCount(section: ChoiceGroupSection, option: string): number {
         return section.items.filter((i) => i.value === option).length;
@@ -73,8 +53,31 @@
     }
 
     async function submit() {
-        const cleaned = getCleanCopy(evaluation);
-        console.log("Submitting evaluation", cleaned);
+        try {
+            const payload = {
+                employeeUuid: evaluation.employeeData.uuid,
+                ratingEmployeeUuid: evaluation.ratingEmployeeData.uuid,
+                ratingUuid: evaluation.uuid,
+                ratingJson: evaluation.rating,
+            };
+
+            const result = await put(
+                `/employee/${payload.employeeUuid}/rating/${payload.ratingUuid}`,
+                payload,
+            );
+            console.log("Bewertung erfolgreich übermittelt", result);
+        } catch (err) {
+            console.error("Fehler beim Absenden der Bewertung:", err);
+            alert(
+                "Fehler beim Absenden der Bewertung. Bitte versuche es später erneut.",
+            );
+        }
+    }
+
+    function capitalize(str: string): string {
+        return str.trim().length === 0
+            ? "Keine Angabe"
+            : str.charAt(0).toUpperCase() + str.slice(1);
     }
 </script>
 
@@ -82,19 +85,27 @@
     <title>Bewertung | ReCrew</title>
 </svelte:head>
 
-{#if data.errorMessage}
+{#if errorMessage}
     <div class="my-8 px-2 max-w-screen-lg mx-auto">
-        <Alert border color="red">
+        <Alert color="red" border>
             <InfoCircleSolid slot="icon" class="w-4 h-4" />
             <p class="font-medium text-lg">Fehler!</p>
-            <p>Dieser Link ist entweder ungültig oder nicht mehr verfügbar.</p>
+            <p>
+                Der Link ist ungültig oder abgelaufen. Falls die Bewertung
+                bereits erfolgt ist, bitte work@recrew.de kontaktieren.
+            </p>
         </Alert>
-        <p class="mt-3 dark:text-white">
-            Diese Meldung wird auch dann angezeigt, wenn du die Bewertung
-            bereits abgegeben hast. Solltest du von uns auf diesen Link
-            geschickt worden sein, bitte melde dich bei work@recrew.de.
-        </p>
     </div>
+{:else if evaluation.doneAt.value !== null}
+<div class="my-8 px-2 max-w-screen-lg mx-auto">
+    <Alert color="green" border>
+        <InfoCircleSolid slot="icon" class="w-4 h-4" />
+        <p class="font-medium text-lg">Bewertung erfolgreich!</p>
+        <p>
+            Vielen Dank für deine Bewertung! Sie wurde erfolgreich übermittelt.
+        </p>
+    </Alert>
+</div>
 {:else}
     <!-- BANNER -->
     <div class="w-full banner" />
@@ -114,17 +125,28 @@
                         class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
                     >
                         <div>
-                            <Label class="text-gray-500">Bewertender / Bewertende</Label>
+                            <Label class="text-gray-500">Bewertende(r)</Label>
                             <div
                                 class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
                             >
-                                {evaluation.reviewer?.name || ""}
+                                {evaluation.ratingEmployeeData?.name || ""}
                             </div>
                         </div>
                         <div class="flex items-center justify-center">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            <div
+                                class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 text-gray-500"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                                        clip-rule="evenodd"
+                                    />
                                 </svg>
                             </div>
                         </div>
@@ -133,21 +155,17 @@
                             <div
                                 class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
                             >
-                                {evaluation.reviewee?.name || ""}
+                                {evaluation.employeeData?.name || ""}
                             </div>
                         </div>
                     </div>
-                    <div class="md:col-span-2">
-                        <Label class="text-gray-900">
-                            Auf welche Schichten bezieht sich die Bewertung?
-                        </Label>
-                        <ShiftWizard
-                            shifts={evaluation.shifts}
-                            bind:selected={selectedShifts}
-                        />
-                    </div>
+
+                    <ShiftWizard
+                        shifts={evaluation.shifts}
+                        bind:selected={selectedShifts}
+                    />
                 </Section>
-                {#each evaluation.sections as section}
+                {#each evaluation.rating as section}
                     <Section
                         title={section.title || ""}
                         helpText={section.description}
