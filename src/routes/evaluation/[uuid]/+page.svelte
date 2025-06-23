@@ -1,48 +1,41 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { page } from "$app/stores";
     import { Input, Button, Radio, Alert, Label } from "flowbite-svelte";
     import { InfoCircleSolid } from "flowbite-svelte-icons";
     import Section from "$lib/components/Section.svelte";
     import ShiftWizard from "$lib/components/ShiftWizard.svelte";
     import StarRating from "$lib/components/StarRating.svelte";
-
     import type {
         EvaluationSection,
         ChoiceGroupSection,
         Shift,
     } from "$lib/types/evaluationTypes";
-    import { put } from "$lib/api";
+    import { get, put } from "$lib/api";
 
-    export let data: {
-        errorMessage?: string;
-        evaluation: {
-            id: string;
-            uuid: string;
-            employeeId: number;
-            ratingEmployeeId: number;
-            employeeData: {
-                id: number;
-                uuid: string;
-                name: string;
-            };
-            ratingEmployeeData: {
-                id: number;
-                uuid: string;
-                name: string;
-            };
-            shifts: Shift[];
-            ratingJson: string | null;
-            rating: EvaluationSection[];
-            title: string | null;
-            createdAt: string;
-            updatedAt: string;
-            deletedAt: string | null;
-        };
-    };
-
-    const { errorMessage, evaluation: initialEval } = data;
-    let evaluation = structuredClone(initialEval);
+    let evaluation: any = null;
     let selectedShifts: Shift[] = [];
+    let loading = true;
+    let submitting = false;
+    let error = false;
+
+    onMount(() => {
+        fetchEvaluation();
+    });
+
+    async function fetchEvaluation() {
+        loading = true;
+        error = false;
+        try {
+            const uuid = $page.params.uuid;
+            evaluation = await get(`/rating/${uuid}`);
+        } catch (err) {
+            console.error(err);
+            error = true;
+        } finally {
+            loading = false;
+        }
+    }
 
     function optionCount(section: ChoiceGroupSection, option: string): number {
         return section.items.filter((i) => i.value === option).length;
@@ -52,7 +45,15 @@
         return (section as any).maxPerOption ?? 3;
     }
 
+    function capitalize(str: string): string {
+        return str.trim()
+            ? str[0].toUpperCase() + str.slice(1)
+            : "Keine Angabe";
+    }
+
     async function submit() {
+        if (!evaluation) return;
+        submitting = true;
         try {
             const payload = {
                 employeeUuid: evaluation.employeeData.uuid,
@@ -60,24 +61,17 @@
                 ratingUuid: evaluation.uuid,
                 ratingJson: evaluation.rating,
             };
-
-            const result = await put(
+            await put(
                 `/employee/${payload.employeeUuid}/rating/${payload.ratingUuid}`,
                 payload,
             );
-            console.log("Bewertung erfolgreich übermittelt", result);
+            evaluation.doneAt.value = new Date().toISOString();
         } catch (err) {
-            console.error("Fehler beim Absenden der Bewertung:", err);
-            alert(
-                "Fehler beim Absenden der Bewertung. Bitte versuche es später erneut.",
-            );
+            console.error(err);
+            alert("Fehler beim Absenden. Bitte später erneut versuchen.");
+        } finally {
+            submitting = false;
         }
-    }
-
-    function capitalize(str: string): string {
-        return str.trim().length === 0
-            ? "Keine Angabe"
-            : str.charAt(0).toUpperCase() + str.slice(1);
     }
 </script>
 
@@ -85,7 +79,18 @@
     <title>Bewertung | ReCrew</title>
 </svelte:head>
 
-{#if errorMessage}
+{#if loading}
+    <div class="w-full banner" />
+    <div class="p-4 max-w-screen-lg mx-auto my-8">
+        <div class="animate-pulse space-y-4">
+            <div class="h-8 bg-gray-200 rounded w-2/5"></div>
+            <div class="h-6 bg-gray-200 rounded"></div>
+            <div class="h-6 bg-gray-200 rounded"></div>
+            <div class="h-6 bg-gray-200 rounded"></div>
+            <div class="h-10 bg-gray-200 rounded w-1/3"></div>
+        </div>
+    </div>
+{:else if error}
     <div class="my-8 px-2 max-w-screen-lg mx-auto">
         <Alert color="red" border>
             <InfoCircleSolid slot="icon" class="w-4 h-4" />
@@ -96,45 +101,38 @@
             </p>
         </Alert>
     </div>
-{:else if evaluation.doneAt.value !== null}
-<div class="my-8 px-2 max-w-screen-lg mx-auto">
-    <Alert color="green" border>
-        <InfoCircleSolid slot="icon" class="w-4 h-4" />
-        <p class="font-medium text-lg">Bewertung erfolgreich!</p>
-        <p>
-            Vielen Dank für deine Bewertung! Sie wurde erfolgreich übermittelt.
-        </p>
-    </Alert>
-</div>
-{:else}
-    <!-- BANNER -->
+{:else if evaluation && evaluation.doneAt.value !== null}
+    <div class="my-8 px-2 max-w-screen-lg mx-auto">
+        <Alert color="green" border>
+            <InfoCircleSolid slot="icon" class="w-4 h-4" />
+            <p class="font-medium text-lg">Bewertung erfolgreich!</p>
+            <p>Vielen Dank für deine Bewertung!</p>
+        </Alert>
+    </div>
+{:else if evaluation}
     <div class="w-full banner" />
-
-    <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-24">
+    <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-12">
         {#if evaluation.title}
-            <h1
-                class="text-center mb-10 text-2xl font-extrabold tracking-tight leading-none text-gray-700 md:text-4xl lg:text-5xl dark:text-white"
-            >
+            <h1 class="text-center text-3xl font-extrabold mb-8">
                 {evaluation.title}
             </h1>
         {/if}
-        <div class="rounded-lg shadow shadow-primary-400 py-3 px-4">
-            <form on:submit|preventDefault={submit} class="mt-4">
-                <Section title="Allgemeine Infos">
-                    <div
-                        class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
-                    >
-                        <div>
-                            <Label class="text-gray-500">Bewertende(r)</Label>
-                            <div
-                                class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
-                            >
-                                {evaluation.ratingEmployeeData?.name || ""}
-                            </div>
+
+        <form on:submit|preventDefault={submit} class="space-y-6">
+            <Section title="Allgemeine Infos">
+                <div
+                    class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded mb-6"
+                >
+                    <div>
+                        <Label class="text-gray-500">Bewertende(r)</Label>
+                        <div class="mt-1 font-medium">
+                            {evaluation.ratingEmployeeData.name}
                         </div>
-                        <div class="flex items-center justify-center">
+                    </div>
+                    <div class="flex justify-center items-center">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full">
                             <div
-                                class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                                class="flex items-center justify-center h-full w-full"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -150,104 +148,103 @@
                                 </svg>
                             </div>
                         </div>
-                        <div>
-                            <Label class="text-gray-500">Zu bewerten</Label>
-                            <div
-                                class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
-                            >
-                                {evaluation.employeeData?.name || ""}
-                            </div>
+                    </div>
+                    <div>
+                        <Label class="text-gray-500">Zu bewerten</Label>
+                        <div
+                            class="mt-1 text-gray-900 dark:text-gray-300 font-medium"
+                        >
+                            {evaluation.employeeData?.name || ""}
                         </div>
                     </div>
+                </div>
 
-                    <ShiftWizard
-                        shifts={evaluation.shifts}
-                        bind:selected={selectedShifts}
-                    />
-                </Section>
-                {#each evaluation.rating as section}
-                    <Section
-                        title={section.title || ""}
-                        helpText={section.description}
-                    >
-                        {#if section.type === "rating-group"}
-                            {#each section.items as item}
-                                <StarRating
-                                    label={item.label}
-                                    bind:rating={item.value}
-                                    total={item.max}
-                                />
-                            {/each}
-                        {:else if section.type === "choice-group"}
-                            <div class="md:col-span-2">
-                                <div
-                                    class="font-semibold text-gray-600 bg-gray-50 mb-3"
-                                    style={`display:grid;grid-template-columns:4fr repeat(${section.options.length},1fr);`}
-                                >
-                                    <div />
-                                    {#each section.options as option}
-                                        <div class="text-center">
-                                            {#if option}
-                                                {capitalize(option)}
-                                                <span class="text-gray-500">
-                                                    ({optionCount(
+                <ShiftWizard
+                    shifts={evaluation.shifts}
+                    bind:selected={selectedShifts}
+                />
+            </Section>
+            {#each evaluation.rating as section}
+                <Section
+                    title={section.title || ""}
+                    helpText={section.description}
+                >
+                    {#if section.type === "rating-group"}
+                        {#each section.items as item}
+                            <StarRating
+                                label={item.label}
+                                bind:rating={item.value}
+                                total={item.max}
+                            />
+                        {/each}
+                    {:else if section.type === "choice-group"}
+                        <div class="md:col-span-2">
+                            <div
+                                class="font-semibold text-gray-600 bg-gray-50 mb-3"
+                                style={`display:grid;grid-template-columns:4fr repeat(${section.options.length},1fr);`}
+                            >
+                                <div />
+                                {#each section.options as option}
+                                    <div class="text-center">
+                                        {#if option}
+                                            {capitalize(option)}
+                                            <span class="text-gray-500">
+                                                ({optionCount(
+                                                    section,
+                                                    option,
+                                                )}/{maxPerOption(section)})
+                                            </span>
+                                        {:else}
+                                            {capitalize(option)}
+                                        {/if}
+                                    </div>
+                                {/each}
+                            </div>
+
+                            <div class="divide-y divide-gray-200">
+                                {#each section.items as trait}
+                                    <div
+                                        class="py-3"
+                                        style={`display:grid;grid-template-columns:4fr repeat(${section.options.length},1fr);`}
+                                    >
+                                        <div class="text-gray-700">
+                                            {trait.label}
+                                        </div>
+
+                                        {#each section.options as option}
+                                            <div class="text-center">
+                                                <Radio
+                                                    bind:group={trait.value}
+                                                    value={option}
+                                                    id={`radio-${trait.id}-${option}`}
+                                                    class="mx-auto"
+                                                    disabled={optionCount(
                                                         section,
                                                         option,
-                                                    )}/{maxPerOption(section)})
-                                                </span>
-                                            {:else}
-                                                {capitalize(option)}
-                                            {/if}
-                                        </div>
-                                    {/each}
-                                </div>
-
-                                <div class="divide-y divide-gray-200">
-                                    {#each section.items as trait}
-                                        <div
-                                            class="py-3"
-                                            style={`display:grid;grid-template-columns:4fr repeat(${section.options.length},1fr);`}
-                                        >
-                                            <div class="text-gray-700">
-                                                {trait.label}
+                                                    ) >=
+                                                        maxPerOption(section) &&
+                                                        trait.value !== option}
+                                                />
                                             </div>
-
-                                            {#each section.options as option}
-                                                <div class="text-center">
-                                                    <Radio
-                                                        bind:group={trait.value}
-                                                        value={option}
-                                                        id={`radio-${trait.id}-${option}`}
-                                                        class="mx-auto"
-                                                        disabled={optionCount(
-                                                            section,
-                                                            option,
-                                                        ) >=
-                                                            maxPerOption(
-                                                                section,
-                                                            ) &&
-                                                            trait.value !==
-                                                                option}
-                                                    />
-                                                </div>
-                                            {/each}
-                                        </div>
-                                    {/each}
-                                </div>
+                                        {/each}
+                                    </div>
+                                {/each}
                             </div>
-                        {:else if section.type === "text"}
-                            <div class="md:col-span-2">
-                                <Input bind:value={section.value} type="text" />
-                            </div>
-                        {/if}
-                    </Section>
-                {/each}
+                        </div>
+                    {:else if section.type === "text"}
+                        <div class="md:col-span-2">
+                            <Input bind:value={section.value} type="text" />
+                        </div>
+                    {/if}
+                </Section>
+            {/each}
 
-                <div class="grid gap-3">
-                    <Button type="submit">ABSCHICKEN</Button>
-                </div>
-            </form>
-        </div>
+            <div class="grid gap-3">
+                <Button type="submit" disabled={submitting}>
+                    {submitting ? "Sende..." : "Absenden"}
+                </Button>
+            </div>
+        </form>
     </div>
 {/if}
 
