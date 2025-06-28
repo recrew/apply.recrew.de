@@ -1,11 +1,12 @@
 <script lang="ts">
     import {createWorker, PSM} from 'tesseract.js';
-    import {Button, Fileupload, Label, Modal, Select, Spinner, Tooltip} from "flowbite-svelte";
+    import {Button, Fileupload, Label, Modal, Select, Spinner, Tooltip, Alert} from "flowbite-svelte";
     import {createEventDispatcher, onMount} from "svelte";
-    import {CloseCircleSolid, ImageOutline, QuestionCircleOutline} from "flowbite-svelte-icons";
+    import {CloseCircleSolid, ImageOutline, QuestionCircleOutline, InfoCircleSolid} from "flowbite-svelte-icons";
     import {modalStore} from "$lib/stores/modal";
     import UploadTips from "$lib/partials/UploadTips.svelte";
     import ImageCropper from "$lib/components/ImageCropper.svelte";
+
 
     export let options = [{
         name: 'Personalausweis',
@@ -22,6 +23,8 @@
 
     export let noRead = false;
 
+    export let alert = null;
+
     let text = '';
     let input;
     let files: FileList;
@@ -30,10 +33,12 @@
     let loading = false;
     let cropperModal = false
 
-    let expressions = {
+    let expressions: Record<string, RegExp> = {
         'passport': /^(?=.*\d)[A-Z0-9]+(?=<)/,
         'id-card': /^(?=.*\d)[A-Z0-9]+$/,
-        'license': /^\s*(?=.*\d)[A-Z0-9]+$/
+        'license': /^\s*(?=.*\d)[A-Z0-9]+$/,
+        // Health certificate expiration date (DD.MM.YYYY)
+        'health-certificate': /\b(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.\d{4}\b/
     }
 
     const dispatch = createEventDispatcher();
@@ -65,25 +70,54 @@
         })
         const ret = await worker.recognize(preview);
         text = '';
-        ret.data.paragraphs.forEach((p) => {
-            const clean = p.text.replace('\n', '').trim()
-            const match = clean.match(expressions[type])
-            if (match && clean.length > 4 && text.length === 0) {
-                text = match[0]
-                dispatch('ocr', {
-                    text,
-                    file: files[0],
-                    type
-                })
+
+        if (type === 'health-certificate') {
+            const allText = ret.data.paragraphs.map(p => p.text.replace('\n', '').trim()).join(' ');
+
+            const dateRegex = /(\d{2}\.\d{2}\.\d{2,4})/g;
+            const matches = allText.match(dateRegex) || [];
+
+            const dates = matches.map(dateStr => {
+                const [day, month, year] = dateStr.split('.').map(Number);
+                const fullYear = year < 100 ? (year < 30 ? 2000 + year : 1900 + year) : year;
+                return {
+                    raw: dateStr,
+                    date: new Date(fullYear, month - 1, day),
+                };
+            });
+
+            if (dates.length > 1) {
+                dates.sort((a, b) => a.date - b.date);
+                const latest = dates[dates.length - 1];
+                text = latest.raw;
+            } else if (dates.length === 1) {
+                const { raw, date } = dates[0];
+                const today = new Date();
+                const fiveYearsAgo = new Date();
+                fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+
+                if (date >= fiveYearsAgo && date <= today) {
+                    text = raw; // plausibel als Ausstellungsdatum
+                } else {
+                    text = ''; // vermutlich Geburtsdatum → ignorieren
+                }
+            } else {
+                text = '';
             }
-        })
-        if(text === ''){
-            dispatch('ocr', {
-                text,
-                file: files[0],
-                type
+        } else {
+            ret.data.paragraphs.forEach((p) => {
+                const clean = p.text.replace('\n', '').trim()
+                const match = clean.match(expressions[type])
+                if (match && clean.length > 4 && text.length === 0) {
+                    text = match[0]
+                }
             })
         }
+        dispatch('ocr', {
+            text,
+            file: files[0],
+            type
+        })
         await worker.terminate();
         loading = false;
     }
@@ -93,6 +127,14 @@
             title: ""
         })
         $modalStore.toggle()
+    }
+
+    const getAspect = () => {
+        if (type === 'passport') {
+            return 1.53
+        }
+        // DIN A4
+        return 0.707
     }
 
     const showPreviewLightbox = () => {
@@ -132,17 +174,29 @@
         {/if}
         {#if type}
             <div class="mb-2">
-                <Label  class="mb-2">{options.find(x => x.value === type)?.name || 'Dokument'} <QuestionCircleOutline size="xs" class="inline cursor-pointer" on:click={showHelp}/></Label>
-                <Button on:click={() => cropperModal = true}>Hochladen</Button>
-                <Modal title="Hochladen" bind:open={cropperModal} autoclose={false}>
-                    <div class="my-5">
-                        <ImageCropper aspect={type === 'passport'? 1.53 : 1.6} on:cropped={({detail}) => {
-                            files = detail.files
-                            cropperModal = false
-                        }}/>
-                    </div>
-                </Modal>
-<!--                <Fileupload accept="image/*, application/pdf" bind:files  bind:value={input}/>-->
+                <Label class="mb-2">
+                    {options.find(x => x.value === type)?.name || 'Dokument'}
+                    <QuestionCircleOutline size="xs" class="inline cursor-pointer" on:click={showHelp}/>
+                </Label>
+                {#if alert !== null}
+                    <Alert border color="yellow" class="mb-4">
+                        <InfoCircleSolid slot="icon" class="w-5 h-5" />
+                        <p class="text-sm">{alert}</p>
+                    </Alert>
+                {/if}
+                <Button on:click={() => (cropperModal = true)}>Hochladen</Button>
+                    <Modal title="Hochladen" bind:open={cropperModal} autoclose={false}>
+                        <div class="my-5">
+                            <ImageCropper
+                                previewOnly={type === 'health-certificate'}
+                                aspect={getAspect()}
+                                on:cropped={({ detail }) => {
+                                    files = detail.files;
+                                    cropperModal = false;
+                                }}
+                            />
+                        </div>
+                    </Modal>
             </div>
         {/if}
     </div>
@@ -165,4 +219,3 @@
         <Spinner class="m-5"/>
     {/if}
 </article>
-
