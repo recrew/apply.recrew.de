@@ -23,7 +23,7 @@
 
     export let noRead = false;
 
-    export let alert = null;
+    export let alert:any = "";
 
     let text = '';
     let input;
@@ -37,7 +37,6 @@
         'passport': /^(?=.*\d)[A-Z0-9]+(?=<)/,
         'id-card': /^(?=.*\d)[A-Z0-9]+$/,
         'license': /^\s*(?=.*\d)[A-Z0-9]+$/,
-        // Health certificate expiration date (DD.MM.YYYY)
         'health-certificate': /\b(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.\d{4}\b/
     }
 
@@ -178,10 +177,12 @@
                     {options.find(x => x.value === type)?.name || 'Dokument'}
                     <QuestionCircleOutline size="xs" class="inline cursor-pointer" on:click={showHelp}/>
                 </Label>
-                {#if alert !== null}
+                {#if alert || $$slots.alert}
                     <Alert border color="yellow" class="mb-4">
                         <InfoCircleSolid slot="icon" class="w-5 h-5" />
+                        <slot name="alert">
                         <p class="text-sm">{alert}</p>
+                        </slot>
                     </Alert>
                 {/if}
                 <Button on:click={() => (cropperModal = true)}>Hochladen</Button>
