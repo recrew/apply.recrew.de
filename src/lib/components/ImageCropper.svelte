@@ -1,10 +1,9 @@
 <script lang="ts">
     import Cropper from "svelte-easy-crop";
-    import {Avatar, Button, Fileupload, Heading, Hr} from "flowbite-svelte";
-    import getCroppedImg, {createImage} from "$lib/utils/canvasUtils.js";
+    import {Button, Fileupload, Heading, Hr} from "flowbite-svelte";
+    import getCroppedImg from "$lib/utils/canvasUtils.js";
     import {createEventDispatcher} from "svelte";
-    import convertPdfToImage, {convertPdfToImageFromFileInput} from "$lib/utils/convertPdfToImage";
-    import {RedoOutline} from "flowbite-svelte-icons";
+    import {convertPdfToImageFromFileInput} from "$lib/utils/convertPdfToImage";
 
     export let aspect:number = 1.6;
     export let name = 'avatar';
@@ -22,29 +21,32 @@
 
     let rotation = 0;
 
-    async function onFileSelected() {
-        // 4 MB
-        if (files[0].size > (1048576 * 4)) {
-            alert('Die Datei ist zu groß!');
+    async function handleFileSelection() {
+        if (!files?.[0]) return;
+
+        if (files[0].size > 1048576 * 4) {
+            alert("Die Datei ist zu groß! (max. 4 MB)");
             return;
         }
-        let file;
 
-        if(files[0].type === 'application/pdf') {
-            file = await convertPdfToImageFromFileInput(files)
+        let file: File;
+
+        if (files[0].type === "application/pdf") {
+            const imgBlob = await convertPdfToImageFromFileInput(files);
+            file = new File([imgBlob], files[0].name.replace(/\.pdf$/i, ".png"), { type: "image/png" });
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            files = dt.files;
         } else {
             file = files[0];
-
         }
-        let reader = new FileReader();
-        reader.onload = e => {
-            image = e.target.result;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            image = e.target?.result as string;
+            preview = previewOnly ? image : URL.createObjectURL(file);
         };
         reader.readAsDataURL(file);
-
-        if (previewOnly) {
-            preview = URL.createObjectURL(file);
-        }
     }
 
     const rotate = () => {
@@ -91,12 +93,10 @@
 
 <div class="flex gap-2">
     {#if !preview}
-    <Fileupload bind:files accept="image/*,application/pdf" {name}/>
-    <Button type="button"
-            on:click={() => {
-                onFileSelected()
-            }}>{previewOnly ? 'Vorschau' : 'Zuschneiden'}
-    </Button>
+        <Fileupload bind:files accept="image/*,application/pdf" {name}/>
+        <Button type="button"
+                on:click={handleFileSelection}>{previewOnly ? 'Vorschau' : 'Zuschneiden'}
+        </Button>
     {/if}
 </div>
 

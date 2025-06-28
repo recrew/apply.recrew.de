@@ -20,6 +20,7 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
 
     let graduations : any[] = [];
     let licenseIndex = 0;
+    let healthCertificateIndex = -1;
     let loading = false;
 
     let degrees = [
@@ -69,6 +70,36 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
         } else {
             employee.images[preExisting].name = name
             employee.images[preExisting].file = ev.detail.file
+        }
+    }
+    const bindHealthCert = (ev: CustomEvent) => {
+        const tag = 'health-certificate';
+        let idx   = employee.images.findIndex(i => i.imageTag === tag);
+        if (idx < 0) {
+            employee.images = [
+            ...employee.images,
+            { imageTag: tag, file: null, issueDate: '' }
+            ];
+            idx = employee.images.length - 1;
+        }
+
+        employee.images[idx].name = fileNameGenerator(ev.detail.file, employee, tag);
+        employee.images[idx].file = ev.detail.file;
+
+    
+        dayjs.extend(customParseFormat);
+        employee.images[idx].issueDate = ev.detail.text;
+    };
+
+    $: {
+        healthCertificateIndex = employee.images.findIndex(i => i.imageTag === 'health-certificate');
+        console.log(employee.images, healthCertificateIndex)
+        if (healthCertificateIndex === -1) {
+            employee.images = [
+                ...employee.images,
+                { imageTag: 'health-certificate', file: null, issueDate: '' }
+            ];
+            healthCertificateIndex = employee.images.length - 1;
         }
     }
 
@@ -181,24 +212,31 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
     <!-- Gesundheitszeugnis Upload -->
     <div class="mt-4">
         <Tesseract
-            alert="Du kannst das Gesundheitszeugnis nachreichen, musst es aber spätestens beim Get-to-Know-Treffen vorlegen."
-            options={[{ name: 'Gesundheitszeugnis hochladen', value: 'health-certificate' }]}
-            bind:files={employee.healthCertificates}
-            on:ocr={ev => {
-                dayjs.extend(customParseFormat);
-                const date = dayjs(ev.detail.text, "DD.MM.YYYY").add(2, 'year');
-                employee.healthCertificateExpiry = date.format('DD.MM.YYYY');
-            }}
-            />
-        {#if employee.healthCertificateExpiry && employee.healthCertificateExpiry.length > 0}
+            value={employee.images.find((n) => (n.imageTag === 'health-certificate' && n.issueDate))}
+            options={[{ name: 'Gesundheitszeugnis', value: 'health-certificate' }]}
+            on:ocr={bindHealthCert} >
+                <p slot="alert" class="text-sm">
+                    Du kannst das Gesundheitszeugnis nachreichen, musst es jedoch <strong>spätestens</strong> zum Get-to-Know-Treffen vorlegen.<br>
+                    Das Gesundheitszeugnis lässt sich schnell und unkompliziert online beantragen. <br>
+                    <a
+                    href="https://www.google.com/search?q=gesundheitszeugnis+online"
+                    class=" text-primary-800 hover:text-primary-900"
+                    target="_blank">
+                        Eine passende Stelle findest du hier!
+                    </a>
+                </p>
+        </Tesseract>
+        {#if employee.images[healthCertificateIndex].file}
             <div class="mt-2">
-                <Label for="certificate-expiry" class="mb-2">Ablaufdatum</Label>
-                <Input id="certificate-expiry" bind:value={employee.healthCertificateExpiry} />
+                <Label for="certificate-expiry" class="mb-2">Ausstellungsdatum</Label>
+                <Input id="certificate-expiry"
+                    bind:value={employee.images[healthCertificateIndex].issueDate} />
+                <Helper class="mt-2" color="green">
+                    Bitte maschinell gescanntes Ergebnis überprüfen!
+                </Helper>
             </div>
         {/if}
     </div>
-
-    <!-- OCR für Ablaufdatum Gesundheitszeugnis -->
 
 
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
