@@ -1,18 +1,20 @@
 <script lang="ts">
-    import Box from "$lib/components/Box.svelte";
-    import {Button, Helper, Input, Label, Modal, Select, Toggle} from "flowbite-svelte";
-    import {onMount} from "svelte";
-    import {get} from "$lib/api";
-    import Tesseract from "$lib/components/Tesseract.svelte";
-    import {reactToBoxInteraction} from "$lib/utils/openStep";
-    import {currentStep} from "$lib/stores/currentStep";
-    import {BellRingOutline, CheckCircleOutline} from "flowbite-svelte-icons";
+import Box from "$lib/components/Box.svelte";
+import {Button, Helper, Input, Label, Modal, Select, Toggle, Fileupload, Alert} from "flowbite-svelte";
+import {onMount} from "svelte";
+import {get} from "$lib/api";
+import Tesseract from "$lib/components/Tesseract.svelte";
+import {reactToBoxInteraction} from "$lib/utils/openStep";
+import {currentStep} from "$lib/stores/currentStep";
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-svelte-icons";
     import {fileNameGenerator} from "$lib/utils/fileNameGenerator.js";
     import {blocked} from "$lib/stores/blocked";
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import uploadImages from "$lib/utils/uploadImages";
     import {page} from "$app/stores";
     import updateCall from "$lib/utils/updateCall";
+    import dayjs from "dayjs";
     export let employee: any;
 
 
@@ -101,6 +103,9 @@
         //markEmptyFields();
 
 
+        if (!employee.healthCertificates) {
+            employee.healthCertificates = [];
+        }
         graduations = (await get('/hr/reference/Schulabschluss')).map((n) => ({...n, name: n.value}));
         stati = (await get('/hr/references/stati')).map((n) => ({name: n, value: n}));
     })
@@ -172,5 +177,29 @@
             <Input id="graduation" bind:value={employee.cv.hairColor} required/>
         </div>
     </div>
+
+    <!-- Gesundheitszeugnis Upload -->
+    <div class="mt-4">
+        <Tesseract
+            alert="Du kannst das Gesundheitszeugnis nachreichen, musst es aber spätestens beim Get-to-Know-Treffen vorlegen."
+            options={[{ name: 'Gesundheitszeugnis hochladen', value: 'health-certificate' }]}
+            bind:files={employee.healthCertificates}
+            on:ocr={ev => {
+                dayjs.extend(customParseFormat);
+                const date = dayjs(ev.detail.text, "DD.MM.YYYY").add(2, 'year');
+                employee.healthCertificateExpiry = date.format('DD.MM.YYYY');
+            }}
+            />
+        {#if employee.healthCertificateExpiry && employee.healthCertificateExpiry.length > 0}
+            <div class="mt-2">
+                <Label for="certificate-expiry" class="mb-2">Ablaufdatum</Label>
+                <Input id="certificate-expiry" bind:value={employee.healthCertificateExpiry} />
+            </div>
+        {/if}
+    </div>
+
+    <!-- OCR für Ablaufdatum Gesundheitszeugnis -->
+
+
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>
