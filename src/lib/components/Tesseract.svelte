@@ -1,8 +1,8 @@
 <script lang="ts">
     import {createWorker, PSM} from 'tesseract.js';
-    import {Button, Fileupload, Label, Modal, Select, Spinner, Tooltip, Alert} from "flowbite-svelte";
+    import {Button, Fileupload, Label, Modal, Select, Spinner, Tooltip} from "flowbite-svelte";
     import {createEventDispatcher, onMount} from "svelte";
-    import {CloseCircleSolid, ImageOutline, QuestionCircleOutline, InfoCircleSolid} from "flowbite-svelte-icons";
+    import {CloseCircleSolid, ImageOutline, QuestionCircleOutline} from "flowbite-svelte-icons";
     import {modalStore} from "$lib/stores/modal";
     import UploadTips from "$lib/partials/UploadTips.svelte";
     import ImageCropper from "$lib/components/ImageCropper.svelte";
@@ -22,8 +22,6 @@
     export let value: string;
 
     export let noRead = false;
-
-    export let alert:any = "";
 
     let text = '';
     let input;
@@ -74,7 +72,7 @@
             const allText = ret.data.paragraphs.map(p => p.text.replace('\n', '').trim()).join(' ');
 
             const dateRegex = /(\d{2}\.\d{2}\.\d{2,4})/g;
-            const matches = allText.match(dateRegex) || [];
+            let matches = allText.match(dateRegex) || [];
 
             const dates = matches.map(dateStr => {
                 const [day, month, year] = dateStr.split('.').map(Number);
@@ -85,10 +83,13 @@
                 };
             });
 
+            let selectedDate = null;
+
             if (dates.length > 1) {
                 dates.sort((a, b) => a.date - b.date);
                 const latest = dates[dates.length - 1];
                 text = latest.raw;
+                selectedDate = latest.date;
             } else if (dates.length === 1) {
                 const { raw, date } = dates[0];
                 const today = new Date();
@@ -97,11 +98,23 @@
 
                 if (date >= fiveYearsAgo && date <= today) {
                     text = raw; // plausibel als Ausstellungsdatum
+                    selectedDate = date;
                 } else {
                     text = ''; // vermutlich Geburtsdatum → ignorieren
                 }
             } else {
                 text = '';
+            }
+
+            // Prüfen, ob das gefundene Datum älter als 3 Monate ist
+            if (selectedDate) {
+                const today = new Date();
+                const threeMonthsAgo = new Date();
+                threeMonthsAgo.setMonth(today.getMonth() - 3);
+
+                if (selectedDate < threeMonthsAgo) {
+                    preview = null;
+                }
             }
         } else {
             ret.data.paragraphs.forEach((p) => {
@@ -177,14 +190,6 @@
                     {options.find(x => x.value === type)?.name || 'Dokument'}
                     <QuestionCircleOutline size="xs" class="inline cursor-pointer" on:click={showHelp}/>
                 </Label>
-                {#if alert || $$slots.alert}
-                    <Alert border color="yellow" class="mb-4">
-                        <InfoCircleSolid slot="icon" class="w-5 h-5" />
-                        <slot name="alert">
-                        <p class="text-sm">{alert}</p>
-                        </slot>
-                    </Alert>
-                {/if}
                 <Button on:click={() => (cropperModal = true)}>Hochladen</Button>
                     <Modal title="Hochladen" bind:open={cropperModal} autoclose={false}>
                         <div class="my-5">
