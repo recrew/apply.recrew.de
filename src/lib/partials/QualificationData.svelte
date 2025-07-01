@@ -21,6 +21,7 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
     let graduations : any[] = [];
     let licenseIndex = 0;
     let healthCertificateIndex = -1;
+    let healthCertificateError = false;
     let loading = false;
 
     let degrees = [
@@ -72,9 +73,24 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
             employee.images[preExisting].file = ev.detail.file
         }
     }
+
     const bindHealthCert = (ev: CustomEvent) => {
+        healthCertificateError = false;
+        dayjs.extend(customParseFormat);
+
+        const issueDate = dayjs(ev.detail.text, 'DD.MM.YYYY', true);
+        const threeMonthsAgo = dayjs().subtract(3, 'month');
+
+        const dateIsInvalid = !issueDate.isValid() || issueDate.isBefore(threeMonthsAgo);
+
+        if (dateIsInvalid) {
+            resetHealthCert();
+            return;
+        }
+
         const tag = 'health-certificate';
-        let idx   = employee.images.findIndex(i => i.imageTag === tag);
+        let idx = employee.images.findIndex(img => img.imageTag === tag);
+
         if (idx < 0) {
             employee.images = [
             ...employee.images,
@@ -91,6 +107,18 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
         employee.images[idx].issueDate = ev.detail.text;
     };
 
+    function resetHealthCert() {
+        healthCertificateError = true;
+
+        const idx = employee.images.findIndex(img => img.imageTag === 'health-certificate');
+
+        if (idx >= 0) {
+            employee.images[idx].file = null;
+            employee.images[idx].issueDate = '';
+            employee.images[idx].name = '';
+        }
+    }
+
     $: {
         healthCertificateIndex = employee.images.findIndex(i => i.imageTag === 'health-certificate');
         console.log(employee.images, healthCertificateIndex)
@@ -102,6 +130,24 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
             healthCertificateIndex = employee.images.length - 1;
         }
     }
+
+    $: {
+        if (healthCertificateIndex >= 0 && employee.images[healthCertificateIndex]?.issueDate) {
+            dayjs.extend(customParseFormat);
+            
+            const dateString = employee.images[healthCertificateIndex].issueDate;
+            const issueDate = dayjs(dateString, 'DD.MM.YYYY', true);
+            const threeMonthsAgo = dayjs().subtract(3, 'month');
+            
+            // Nur Fehler anzeigen wenn Datum vollständig (10 Zeichen) und gültig, aber älter als 3 Monate
+            if (dateString.length === 10 && issueDate.isValid() && issueDate.isBefore(threeMonthsAgo)) {
+                healthCertificateError = true;
+            } else {
+                healthCertificateError = false;
+            }
+        }
+    }
+
 
     $: {
         if(employee.cv.motorVehicleLicense) {
@@ -210,34 +256,60 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
     </div>
 
     <!-- Gesundheitszeugnis Upload -->
-    <div class="mt-4">
+    <div class="mt-6">
         <Tesseract
             value={employee.images.find((n) => (n.imageTag === 'health-certificate' && n.issueDate))}
             options={[{ name: 'Gesundheitszeugnis', value: 'health-certificate' }]}
             on:ocr={bindHealthCert} >
-                <p slot="alert" class="text-sm">
-                    Du kannst das Gesundheitszeugnis nachreichen, musst es jedoch <strong>spätestens</strong> zum Get-to-Know-Treffen vorlegen.<br>
-                    Das Gesundheitszeugnis lässt sich schnell und unkompliziert online beantragen. <br>
-                    <a
-                    href="https://www.google.com/search?q=gesundheitszeugnis+online"
-                    class=" text-primary-800 hover:text-primary-900"
-                    target="_blank">
-                        Eine passende Stelle findest du hier!
-                    </a>
-                </p>
         </Tesseract>
-        {#if employee.images[healthCertificateIndex].file}
-            <div class="mt-2">
-                <Label for="certificate-expiry" class="mb-2">Ausstellungsdatum</Label>
-                <Input id="certificate-expiry"
-                    bind:value={employee.images[healthCertificateIndex].issueDate} />
+
+        {#if healthCertificateIndex >= 0 && employee.images[healthCertificateIndex]?.file}
+            <div class="mt-3">
+                <Label for="certificateDate" class="mb-2">Ausstellungsdatum</Label>
+                <Input 
+                    id="certificateDate"
+                    bind:value={employee.images[healthCertificateIndex].issueDate}
+                    placeholder="DD.MM.YYYY"
+                />
                 <Helper class="mt-2" color="green">
                     Bitte maschinell gescanntes Ergebnis überprüfen!
                 </Helper>
             </div>
         {/if}
+        
+        {#if healthCertificateError}
+            <Alert color="red" class="mt-3">
+                <InfoCircleSolid slot="icon" class="w-5 h-5" />
+                <p class="text-sm">
+                    Das Ausstellungsdatum des Gesundheitszeugnisses darf maximal 3 Monate zurück liegen.<br>
+                    Falls du ein neues benötigst, 
+                    <a
+                        href="https://www.google.com/search?q=gesundheitszeugnis+online"
+                        class="text-primary-900 hover:text-primary-800 underline"
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        klicke hier!
+                    </a>
+                </p>
+            </Alert>
+        {:else if healthCertificateIndex >= 0 && !employee.images[healthCertificateIndex]?.file}
+            <Alert border color="yellow" class="mt-3">
+                <InfoCircleSolid slot="icon" class="w-5 h-5" />
+                <p class="text-sm">
+                    Du kannst das Gesundheitszeugnis nachreichen, musst es jedoch <strong>spätestens</strong> zum Get-to-Know-Treffen vorlegen.<br>
+                    Das Gesundheitszeugnis lässt sich schnell und unkompliziert online beantragen.<br>
+                    <a
+                        href="https://www.google.com/search?q=gesundheitszeugnis+online"
+                        class="text-primary-800 hover:text-primary-900 underline"
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        Eine passende Stelle findest du hier!
+                    </a>
+                </p>
+            </Alert>
+        {/if}
+        
     </div>
-
 
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>
