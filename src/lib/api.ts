@@ -1,5 +1,7 @@
 import { PUBLIC_API_PATH } from '$env/static/public';
 import { token } from '$lib/stores/auth';
+import dayjs from "dayjs";
+
 interface fetchObject {
     method:string,
     headers:any,
@@ -62,24 +64,38 @@ export const formDataPost = async (url:string, postData:any) => {
     throw Error(call.status + ' - ' + call.statusText + ' - ' + JSON.stringify(await call.json()))
 }
 
+const DATE_REGEX = /^\d{2}\.\d{2}\.\d{4}$/;
+const parseGermanDate = (value: string): string =>
+    dayjs(value.split('.').reverse().join('-')).format('YYYY-MM-DD');
 
-const formConverter = (data:any, form:FormData): FormData => {
+const formConverter = (data: any, form: FormData): FormData => {
     Object.keys(data).forEach(key => {
-        if(data[key] instanceof File) {
-            form.append(key, data[key]);
-        } else if (typeof data[key] === 'object' && data[key] !== null) {
-            Object.keys(data[key]).forEach(subKey => {
-                if(typeof data[key][subKey] === 'object' && data[key][subKey] !== null) {
-                    Object.keys(data[key][subKey]).forEach(subSubKey => {
-                        form.append(`${key}[${subKey}][${subSubKey}]`, data[key][subKey][subSubKey]);
-                    })
-
+        let value = data[key];
+        if (typeof value === 'string' && DATE_REGEX.test(value)) {
+            value = parseGermanDate(value);
+        }
+        if (value instanceof File) {
+            form.append(key, value);
+        } else if (typeof value === 'object' && value !== null) {
+            Object.keys(value).forEach(subKey => {
+                let subValue = value[subKey];
+                if (typeof subValue === 'string' && DATE_REGEX.test(subValue)) {
+                    subValue = parseGermanDate(subValue);
+                }
+                if (typeof subValue === 'object' && subValue !== null) {
+                    Object.keys(subValue).forEach(subSubKey => {
+                        let subSubValue = subValue[subSubKey];
+                        if (typeof subSubValue === 'string' && DATE_REGEX.test(subSubValue)) {
+                            subSubValue = parseGermanDate(subSubValue);
+                        }
+                        form.append(`${key}[${subKey}][${subSubKey}]`, subSubValue);
+                    });
                 } else {
-                    form.append(`${key}[${subKey}]`, data[key][subKey]);
+                    form.append(`${key}[${subKey}]`, subValue);
                 }
             });
         } else {
-            form.append(key, data[key]);
+            form.append(key, value);
         }
     });
     return form;

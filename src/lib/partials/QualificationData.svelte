@@ -1,6 +1,6 @@
 <script lang="ts">
 import Box from "$lib/components/Box.svelte";
-import {Button, Helper, Input, Label, Modal, Select, Toggle, Fileupload, Alert} from "flowbite-svelte";
+import {Button, Helper, Input, Label, Modal, Select, Toggle, Alert} from "flowbite-svelte";
 import {onMount} from "svelte";
 import {get} from "$lib/api";
 import Tesseract from "$lib/components/Tesseract.svelte";
@@ -12,7 +12,6 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
     import {blocked} from "$lib/stores/blocked";
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import uploadImages from "$lib/utils/uploadImages";
-    import {page} from "$app/stores";
     import updateCall from "$lib/utils/updateCall";
     import dayjs from "dayjs";
     export let employee: any;
@@ -76,17 +75,6 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
 
     const bindHealthCert = (ev: CustomEvent) => {
         healthCertificateError = false;
-        dayjs.extend(customParseFormat);
-
-        const issueDate = dayjs(ev.detail.text, 'DD.MM.YYYY', true);
-        const threeMonthsAgo = dayjs().subtract(3, 'month');
-
-        const dateIsInvalid = !issueDate.isValid() || issueDate.isBefore(threeMonthsAgo);
-
-        if (dateIsInvalid) {
-            resetHealthCert();
-            return;
-        }
 
         const tag = 'health-certificate';
         let idx = employee.images.findIndex(img => img.imageTag === tag);
@@ -102,22 +90,8 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
         employee.images[idx].name = fileNameGenerator(ev.detail.file, employee, tag);
         employee.images[idx].file = ev.detail.file;
 
-    
-        dayjs.extend(customParseFormat);
         employee.images[idx].issueDate = ev.detail.text;
     };
-
-    function resetHealthCert() {
-        healthCertificateError = true;
-
-        const idx = employee.images.findIndex(img => img.imageTag === 'health-certificate');
-
-        if (idx >= 0) {
-            employee.images[idx].file = null;
-            employee.images[idx].issueDate = '';
-            employee.images[idx].name = '';
-        }
-    }
 
     $: {
         healthCertificateIndex = employee.images.findIndex(i => i.imageTag === 'health-certificate');
@@ -138,8 +112,7 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
             const dateString = employee.images[healthCertificateIndex].issueDate;
             const issueDate = dayjs(dateString, 'DD.MM.YYYY', true);
             const threeMonthsAgo = dayjs().subtract(3, 'month');
-            
-            // Nur Fehler anzeigen wenn Datum vollständig (10 Zeichen) und gültig, aber älter als 3 Monate
+
             if (dateString.length === 10 && issueDate.isValid() && issueDate.isBefore(threeMonthsAgo)) {
                 healthCertificateError = true;
             } else {
