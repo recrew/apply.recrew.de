@@ -9,6 +9,10 @@
 	"/docs": [
 		"src/routes/+layout.ts"
 	],
+	"/evaluation/[uuid]": [
+		"src/routes/evaluation/[uuid]/+page.ts",
+		"src/routes/+layout.ts"
+	],
 	"/schedule": [
 		"src/routes/+layout.ts"
 	],
