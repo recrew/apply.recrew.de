@@ -15,6 +15,9 @@ export const fileNameGenerator = (file: File,employee: any, tag: string, frontOr
         case 'passport':
             name = 'Reisepass_'+frontOrBack
             break;
+        case 'health-certificate':
+            name = 'Gesundheitszertifikat'
+            break;
         default:
             name = 'CV_'+frontOrBack
             break;
