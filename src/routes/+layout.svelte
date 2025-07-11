@@ -59,7 +59,7 @@
             <a href="{base}/"
                 ><img
                     class="h-10"
-                    src="https://apps.demo.celest.rest/auth/logo.jpeg"
+                    src="/recrew-web-banner.webp"
                     alt="logo"
                 /></a
             >
@@ -99,13 +99,13 @@
         <FooterLinkGroup
             ulClass="grid grid-cols-3 text-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0 "
         >
-            <FooterLink href="https://retech-software.de/impressum/"
+            <FooterLink href="https://www.recrew.info/kopie-von-legal"
                 >Impressum</FooterLink
             >
-            <FooterLink href="https://retech-software.de/datenschutz/"
+            <FooterLink href="https://www.recrew.info/kopie-von-dsgvo"
                 >Privacy Policy</FooterLink
             >
-            <FooterLink href="https://retech-software.de/">Contact</FooterLink>
+            <FooterLink href="https://www.recrew.info/kontakt">Contact</FooterLink>
         </FooterLinkGroup>
     </Footer>
     <ReusableModal />

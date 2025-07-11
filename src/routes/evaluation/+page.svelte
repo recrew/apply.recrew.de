@@ -27,7 +27,7 @@
         loading = true;
         error = false;
         try {
-            const uuid = $page.params.uuid;
+            const uuid = $page.url.searchParams.get('evaluation');
             evaluation = await get(`/rating/${uuid}`);
         } catch (err) {
             console.error(err);
