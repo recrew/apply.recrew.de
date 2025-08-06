@@ -106,7 +106,7 @@
         if(employee.images.length < 1){
             employee.images = [{documentNumber: '', imageTag: 'id-card', file: null},{documentNumber: '', imageTag: 'id-card', file: null}]
         }
-        nationalities = (await get('/hr/reference/Staatsangehoerigkeiten')).map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name))
+        nationalities = (await get('/hr/reference/Staatsangehoerigkeiten')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name))
         countries = (await get('/hr/reference/Staaten')).map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name))
     })
 
