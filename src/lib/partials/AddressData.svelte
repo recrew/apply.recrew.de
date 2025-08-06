@@ -13,7 +13,7 @@
     onMount(async () => {
         if(typeof employee.address === 'undefined') employee.address = {}
 
-        countries = (await get('/hr/reference/Staaten')).map((n) => ({...n, name: n.key})).sort((a,b) => a.name.localeCompare(b.name));
+        countries = (await get('/hr/reference/Staaten')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name));
     })
 </script>
 <div title="Adresse">

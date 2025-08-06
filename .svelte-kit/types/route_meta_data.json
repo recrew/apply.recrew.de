@@ -9,10 +9,10 @@
 	"/docs": [
 		"src/routes/+layout.ts"
 	],
-	"/schedule": [
+	"/evaluation": [
 		"src/routes/+layout.ts"
 	],
-	"/test": [
+	"/schedule": [
 		"src/routes/+layout.ts"
 	],
 	"/thank-you": [

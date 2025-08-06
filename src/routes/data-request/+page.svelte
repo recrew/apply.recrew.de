@@ -26,7 +26,7 @@
     const update = async () => {
         loading = true;
         let updateObject = {
-            healthInsurance: employee.healthInsurance || {},
+            healthInsurance: employee.healthInsurance || {isPublic: true},
             ...employee
         };
         if(employee.avatarFile && typeof employee.avatarFile === 'string'){
@@ -70,6 +70,7 @@
             if(employee.dateOfBirth.value){
                 employee.dateOfBirth.value = employee.dateOfBirth.value.split(' ')[0]
             }
+            employee.healthInsurance = employee.healthInsurance || {}
         }).catch((e) => {
             error = true;
         })

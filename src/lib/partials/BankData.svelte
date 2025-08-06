@@ -8,6 +8,7 @@
     export let employee: any;
     import {blocked} from "$lib/stores/blocked";
     import markEmptyFields from "$lib/utils/markEmptyFields";
+    import updateCall from "$lib/utils/updateCall";
 
 
     let bankDetails = null;
@@ -31,16 +32,20 @@
         getBankDetails()
     })
 
-    $:{
-        if($currentStep === 4) {
-            markEmptyFields();
+
+    const proceed = async () => {
+        if(!dataComplete){
+            return markEmptyFields()
         }
+        updateCall(employee)
+        currentStep.update((n) => n + 1)
+
     }
 </script>
 
 <Box disabled={$blocked} title="Bankdaten" open={$currentStep === 4} on:open={ev => reactToBoxInteraction(ev, 4)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     {#if employee.bankAccount}
-    <div class="grid grid-cols-2 gap-3 mt-2">
+    <div class="grid md:grid-cols-2 gap-3 mt-2">
         <div>
             <Label class="mb-2" for="accountName">Kontoinhaber *</Label>
             <Input id="accountName" bind:value={employee.bankAccount.accountName} required/>
@@ -59,5 +64,5 @@
         </div>
     </div>
     {/if}
-    <Button on:click={() => currentStep.update((n) => n + 1)} class="mt-5 w-full">Weiter</Button>
+    <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>
