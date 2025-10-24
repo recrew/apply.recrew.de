@@ -4,6 +4,7 @@
     import {onMount} from "svelte";
     import {get} from "$lib/api";
     import Typeahead from "$lib/components/Typeahead.svelte";
+    import SVNummerInput from "$lib/components/SVNummerInput.svelte";
     import {BellRingOutline, CheckCircleOutline, MountainSunSolid, QuestionCircleOutline} from "flowbite-svelte-icons";
     import {currentStep} from "$lib/stores/currentStep";
     import {reactToBoxInteraction} from "$lib/utils/openStep";
@@ -24,7 +25,9 @@
         other: 'nicht bekannt'
     }
 
-    $: dataComplete = employee.cv && employee.taxId && employee.cv.taxationClass && employee.cv.religiousAffiliation
+    let svNummerValid = false
+
+    $: dataComplete = employee.cv && employee.taxId && employee.cv.taxationClass && employee.cv.religiousAffiliation && employee.cv.socialSecurityNumber && svNummerValid
 
 
 
@@ -47,14 +50,11 @@
 
 <Box disabled={$blocked} title="Lohnsteuer" open={$currentStep === 3} on:open={ev => reactToBoxInteraction(ev, 3)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <div class="grid gap-3 mt-2">
-        <div>
-            <Label class="mb-2" for="sv">
-                SV-Nummer <span class="text-xs">(Sozialversicherungsnummer)</span>
-                <QuestionCircleOutline size="xs" class="inline cursor-pointer"/>
-                <Tooltip>Wenn nicht vorhanden, bitte leer lassen</Tooltip>
-            </Label>
-            <Input id="sv" pattern="{'[0-9]{8}[A-Z][0-9]{3}'}" bind:value={employee.cv.socialSecurityNumber}/>
-        </div>
+        <SVNummerInput
+            bind:value={employee.cv.socialSecurityNumber}
+            bind:isValid={svNummerValid}
+            {employee}
+        />
         <div>
             <Label class="mb-2" for="taxId">Steuer ID *</Label>
             <Input placeholder="12345678901" id="taxId" bind:value={employee.taxId} required/>
