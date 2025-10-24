@@ -16,7 +16,7 @@
     // Reactive validation - run whenever value or employee data changes
     $: {
         const birthDate = employee?.dateOfBirth?.value || null
-        const surname = employee?.lastName || null
+        const surname = employee?.maidenName || null
         const gender = employee?.gender || null
 
         const result = validate(value, required, birthDate, surname, gender)

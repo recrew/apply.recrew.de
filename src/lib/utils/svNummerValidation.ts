@@ -1,48 +1,9 @@
-/**
- * Validates a German SV-Nummer (Rentenversicherungsnummer) with comprehensive plausibility checks
- *
- * Structure of German SV-Nummer (12 characters):
- * - Positions 1-2: Bereichsnummer (area code for Rentenversicherungsträger)
- * - Positions 3-8: Geburtsdatum (birth date in format TTMMJJ)
- * - Position 9: Anfangsbuchstabe des Geburtsnamens (initial of birth surname)
- * - Positions 10-11: Seriennummer (serial number indicating gender: 00-49 = male, 50-99 = female)
- * - Position 12: Prüfziffer (check digit - algorithm not publicly available)
- *
- * @param svNummer - The SV-Nummer to validate (format: BBTTMMJJXSSP, e.g., "65160684M007")
- * @param required - Whether the field is required (default: true)
- * @param birthDate - Optional birth date for cross-validation (format: YYYY-MM-DD or Date object)
- *                    Validates that the date in SV-Nummer matches the provided birth date
- * @param surname - Optional surname (Geburtsname) for cross-validation
- *                  Validates that the first letter matches position 9 in SV-Nummer
- * @param gender - Optional gender for cross-validation ('male'/'männlich'/'m' or 'female'/'weiblich'/'w'/'f')
- *                 Validates that serial number (positions 10-11) matches gender:
- *                 - 00-49 = male (männlich)
- *                 - 50-99 = female (weiblich)
- *
- * @returns Object with validation result:
- *          - isValid: boolean indicating if SV-Nummer is valid
- *          - error: string with detailed error message (empty if valid)
- *
- * @example
- * // Basic validation
- * validateSVNummer('65160684M007', true)
- *
- * @example
- * // Full cross-validation
- * validateSVNummer('65160684M007', true, '1984-06-16', 'Müller', 'male')
- * // Returns: { isValid: true, error: '' }
- *
- * @example
- * // Validation with mismatch
- * validateSVNummer('65160684M007', true, '1984-06-17', 'Müller', 'male')
- * // Returns: { isValid: false, error: 'Das Geburtsdatum in der SV-Nummer (16.06.1984) stimmt nicht...' }
- */
 export function validateSVNummer(
 	svNummer: string,
 	required: boolean = true,
 	birthDate?: string | Date | null,
 	surname?: string | null,
-	gender?: 'male' | 'female' | string | null
+	gender?: 'male' | 'female' |  'diverse' | string | null
 ): { isValid: boolean; error: string } {
 	if (!svNummer) {
 		const error = required ? 'SV-Nummer ist erforderlich' : '';
@@ -128,26 +89,23 @@ export function validateSVNummer(
 
 		// Normalize gender input
 		const normalizedGender = gender.toLowerCase();
-		const isMaleGender = normalizedGender === 'male' || normalizedGender === 'männlich' || normalizedGender === 'm';
-		const isFemaleGender = normalizedGender === 'female' || normalizedGender === 'weiblich' || normalizedGender === 'w' || normalizedGender === 'f';
+		const isMaleGender = normalizedGender === 'male';
+		const isFemaleGender = normalizedGender === 'female' || normalizedGender === 'diverse';
 
 		if (isMaleGender && !isMale) {
 			return {
 				isValid: false,
-				error: `Die Seriennummer (${serialNumber.toString().padStart(2, '0')}) in der SV-Nummer deutet auf weiblich hin, aber das angegebene Geschlecht ist männlich`
+				error: `Die Seriennummer (${serialNumber.toString().padStart(2, '0')}) in der SV-Nummer deutet auf weiblich/divers hin, aber das angegebene Geschlecht ist männlich`
 			};
 		}
 
 		if (isFemaleGender && !isFemale) {
 			return {
 				isValid: false,
-				error: `Die Seriennummer (${serialNumber.toString().padStart(2, '0')}) in der SV-Nummer deutet auf männlich hin, aber das angegebene Geschlecht ist weiblich`
+				error: `Die Seriennummer (${serialNumber.toString().padStart(2, '0')}) in der SV-Nummer deutet auf männlich hin, aber das angegebene Geschlecht ist weiblich/divers`
 			};
 		}
 	}
-
-	// Note: The check digit (last digit) cannot be validated as the algorithm is not public
-	// For actual verification, contact Deutsche Rentenversicherung or Krankenkasse
 
 	return { isValid: true, error: '' };
 }
