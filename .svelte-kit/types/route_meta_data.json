@@ -15,6 +15,9 @@
 	"/schedule": [
 		"src/routes/+layout.ts"
 	],
+	"/test": [
+		"src/routes/+layout.ts"
+	],
 	"/thank-you": [
 		"src/routes/+layout.ts"
 	]

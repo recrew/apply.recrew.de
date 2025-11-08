@@ -63,11 +63,14 @@
     const idReader = (detail: any, index?: number) => {
         employee.images[index ?? 0].name = fileNameGenerator(detail.file, employee, detail.type, index ? 'Rückseite' : 'Vorderseite')
         employee.images[index ?? 0].file = detail.file
-        employee.images[index ?? 0].documentNumber = detail.text
+        employee.images[index ?? 0].documentNumber = (employee.images.filter( n => (n.imageTag === 'id-card' || n.imageTag === 'passport')).length < 1 && detail.text.length < 1) ? 'nicht lesbar' : detail.text
         employee.images[index ?? 0].imageTag = detail.type
-        console.log(employee.images[index ?? 0])
+        employee.images = [...employee.images]
+        idIndex = employee.images.findIndex((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)
 
     }
+
+    let idIndex = employee.images.findIndex((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)
 
     let dataComplete = false;
     $: {
@@ -205,12 +208,14 @@
                 </Listgroup>
             </div>
         </Alert>
-    {:else if employee.cv.nationality}
+    {/if}
+    {#if employee.cv.nationality}
         <div class="grid md:grid-cols-2 gap-3 mt-2">
+
             <div>
-                <Tesseract value={employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)} options={idOptions} on:ocr={ev => idReader(ev.detail)}/>
+                <Tesseract value={employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)} options={idOptions} on:ocr={ev => idReader(ev.detail, idIndex > -1 ? idIndex : 0)}/>
             </div>
-            {#if employee.images[0]?.file || employee.images[0]?.location}
+            {#if idIndex > -1 && (employee.images[idIndex]?.file || employee.images[idIndex]?.location)}
             <div>
                 <Tesseract
                         value={employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && !n.documentNumber)}
@@ -220,10 +225,10 @@
             </div>
 
             {/if}
-            {#if employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport'))}
+            {#if employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport')) && idIndex > -1}
             <div>
-                <Label for="id" class="mb-2">{employee.images[0].imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer *</Label>
-                <Input placeholder="{employee.images[0].imageTag === 'id-card' ? 'XY1234A12' : 'ABC456789'}" bind:value={employee.images[0].documentNumber} type="text" id="id" required />
+                <Label for="id" class="mb-2">{employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)?.imageTag === 'id-card' ? 'Personalausweis' : 'Reisepass'}nummer *</Label>
+                <Input placeholder="{employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)?.imageTag === 'id-card' ? 'XY1234A12' : 'ABC456789'}" bind:value={employee.images[idIndex].documentNumber} type="text" id="id" required />
                 <Helper class="mt-2" color="green">
                     Bitte maschinell gescanntes Ergebnis überprüfen!
                 </Helper>
