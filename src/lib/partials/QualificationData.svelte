@@ -3,25 +3,22 @@ import Box from "$lib/components/Box.svelte";
 import {Button, Helper, Input, Label, Modal, Select, Toggle, Alert} from "flowbite-svelte";
 import {onMount} from "svelte";
 import {get} from "$lib/api";
-import Tesseract from "$lib/components/Tesseract.svelte";
+import DocumentUpload from "$lib/components/DocumentUpload.svelte";
 import {reactToBoxInteraction} from "$lib/utils/openStep";
 import {currentStep} from "$lib/stores/currentStep";
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-svelte-icons";
-    import {fileNameGenerator} from "$lib/utils/fileNameGenerator.js";
+import {BellRingOutline, CheckCircleOutline, InfoCircleSolid, ArrowUpOutline} from "flowbite-svelte-icons";
     import {blocked} from "$lib/stores/blocked";
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import uploadImages from "$lib/utils/uploadImages";
     import updateCall from "$lib/utils/updateCall";
-    import dayjs from "dayjs";
     export let employee: any;
 
 
     let graduations : any[] = [];
-    let licenseIndex = 0;
     let healthCertificateIndex = -1;
-    let healthCertificateError = false;
     let loading = false;
+    let licenseBlocked = false;
+    let studentBlocked = false;
 
     let degrees = [
         'Ohne beruflichen Ausbildungsabschluss', 'Abschluss einer anerkannten Berufsausbildung',
@@ -46,93 +43,18 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
     let pantSizesWoman = [32, 34, 36, 38, 40, 42, 44, 46, 48].map((n) => ({name: n, value: "" + n}));
     let pantSizesMan = [46, 48, 50, 52, 54, 56].map((n) => ({name: n, value: "" + n}));
 
-    const bindLicense1 = (ev: CustomEvent) => {
-        employee.images[licenseIndex].name = fileNameGenerator(ev.detail.file, employee, 'license', 'Vorderseite')
-        employee.images[licenseIndex].file = ev.detail.file
-        employee.images[licenseIndex].documentNumber = ev.detail.text
-        console.log(employee.images[licenseIndex])
-    }
-    const bindLicense2 = (ev: CustomEvent) => {
-        const preExisting = employee.images.filter((n) => n.imageTag === 'license').length > 1;
-        const name = fileNameGenerator(ev.detail.file, employee, 'license', 'Rückseite')
-        if(!preExisting) {
-            employee.images = [...employee.images, {documentNumber: null, imageTag: 'license', file: null, name}]
-        }
-        const index = employee.images.findIndex((n) => n.imageTag === 'license' && n.documentNumber === null);
-        employee.images[index].name = name
-        employee.images[index].file = ev.detail.file
-    }
-    const bindStudentVerification = (ev: CustomEvent) => {
-        const preExisting = employee.images.findIndex((n) => n.imageTag === 'student-verification');
-        const name = fileNameGenerator(ev.detail.file, employee, 'student-verification')
-        if(preExisting < 0) {
-            employee.images = [...employee.images, {documentNumber: null, imageTag: 'student-verification', file: ev.detail.file, name}]
-        } else {
-            employee.images[preExisting].name = name
-            employee.images[preExisting].file = ev.detail.file
-        }
-    }
+    // Upload bindings handled by DocumentUpload
 
-    const bindHealthCert = (ev: CustomEvent) => {
-        healthCertificateError = false;
+    $: healthCertificateIndex = employee.images.findIndex(i => i.imageTag === 'health-certificate');
+    $: hasHealthCertUploaded = employee.images.some(i => i.imageTag === 'health-certificate' && (i.file || i.location));
+    $: uploadedHealthCertIdx = employee.images.findIndex(i => i.imageTag === 'health-certificate' && (i.file || i.location));
+    $: healthCertIssueComplete = uploadedHealthCertIdx === -1 || !!employee.images[uploadedHealthCertIdx]?.issueDate;
 
-        const tag = 'health-certificate';
-        let idx = employee.images.findIndex(img => img.imageTag === tag);
-
-        if (idx < 0) {
-            employee.images = [
-            ...employee.images,
-            { imageTag: tag, file: null, issueDate: '' }
-            ];
-            idx = employee.images.length - 1;
-        }
-
-        employee.images[idx].name = fileNameGenerator(ev.detail.file, employee, tag);
-        employee.images[idx].file = ev.detail.file;
-
-        employee.images[idx].issueDate = ev.detail.text;
-    };
-
-    $: {
-        healthCertificateIndex = employee.images.findIndex(i => i.imageTag === 'health-certificate');
-        console.log(employee.images, healthCertificateIndex)
-        if (healthCertificateIndex === -1) {
-            employee.images = [
-                ...employee.images,
-                { imageTag: 'health-certificate', file: null, issueDate: '' }
-            ];
-            healthCertificateIndex = employee.images.length - 1;
-        }
-    }
-
-    $: {
-        if (healthCertificateIndex >= 0 && employee.images[healthCertificateIndex]?.issueDate) {
-            dayjs.extend(customParseFormat);
-            
-            const dateString = employee.images[healthCertificateIndex].issueDate;
-            const issueDate = dayjs(dateString, 'DD.MM.YYYY', true);
-            const threeMonthsAgo = dayjs().subtract(3, 'month');
-
-            if (dateString.length === 10 && issueDate.isValid() && issueDate.isBefore(threeMonthsAgo)) {
-                healthCertificateError = true;
-            } else {
-                healthCertificateError = false;
-            }
-        }
-    }
+    // Health certificate validity check is handled inside DocumentUpload
 
 
-    $: {
-        if(employee.cv.motorVehicleLicense) {
-            licenseIndex = employee.images.findIndex((n) => n.imageTag === 'license');
-            if(licenseIndex < 0) {
-                employee.images = [...employee.images, {documentNumber: '', imageTag: 'license', file: null}]
-                licenseIndex = employee.images.length - 1
-            }
-        }
-
-    }
-    $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor;
+    $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor && (!employee.cv.motorVehicleLicense || !licenseBlocked) && (!(employee.status === 'Student') || !studentBlocked) && healthCertIssueComplete;
+    $: $blocked = !dataComplete;
     const proceed = async () => {
         if(!markEmptyFields()){
             return;
@@ -157,6 +79,7 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
             employee.healthCertificates = [];
         }
         graduations = (await get('/hr/reference/Schulabschluss')).map((n) => ({...n, name: n.value}));
+        graduations.push({name: 'Ohne Schulabschluss', value: 'Ohne Schulabschluss'});
         stati = (await get('/hr/references/stati')).map((n) => ({name: n, value: n}));
     })
 
@@ -180,7 +103,14 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
             <Select id="status" bind:value={employee.status} items={stati} required/>
         </div>
         {#if employee.status === 'Student'}
-            <Tesseract value={employee.images.find((n) => n.imageTag === 'student-verification')} options={[{name: 'Immatrikulationsbescheinigung', value: 'student-verification'}]} noRead={true} on:ocr={bindStudentVerification} />
+            <DocumentUpload kind="student-verification" bind:employee bind:blocked={studentBlocked} />
+            {#if $blocked && studentBlocked}
+                <Alert class="mt-2" border color="red">
+                    <div class="flex gap-3">
+                        <ArrowUpOutline /> Bitte Immatrikulationsbescheinigung hochladen
+                    </div>
+                </Alert>
+            {/if}
         {/if}
         <div>
             <Label class="mb-2" for="experience">Erfahrung *</Label>
@@ -196,15 +126,14 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
             </div>
         </div>
         {#if employee.cv.motorVehicleLicense}
-            <Tesseract value={employee.images.find((n) => n.imageTag === 'license' && n.documentNumber)} options={[{name: 'Führerschein Vorderseite', value: 'license'}]} on:ocr={bindLicense1} />
-            <div>
-                <Label class="mb-2" for="license">Führerscheinnummer *</Label>
-                <Input id="license" bind:value={employee.images[licenseIndex].documentNumber} required/>
-                <Helper class="mt-2" color="green">
-                    Bitte maschinell gescanntes Ergebnis überprüfen!
-                </Helper>
-            </div>
-            <Tesseract value={employee.images.find((n) => n.imageTag === 'license' && !n.documentNumber)} options={[{name: 'Führerschein Rückseite', value: 'license'}]} noRead={true} on:ocr={bindLicense2} />
+            <DocumentUpload kind="license" bind:employee bind:blocked={licenseBlocked} />
+            {#if $blocked && licenseBlocked}
+                <Alert class="mt-2" border color="red">
+                    <div class="flex gap-3">
+                        <ArrowUpOutline /> Bitte Führerschein hochladen
+                    </div>
+                </Alert>
+            {/if}
         {/if}
         <div>
             <Label class="mb-2" for="pants">Hosengröße *</Label>
@@ -230,42 +159,12 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
 
     <!-- Gesundheitszeugnis Upload -->
     <div class="mt-6">
-        <Tesseract
-            value={employee.images.find((n) => (n.imageTag === 'health-certificate' && n.issueDate))}
-            options={[{ name: 'Gesundheitszeugnis', value: 'health-certificate' }]}
-            on:ocr={bindHealthCert} >
-        </Tesseract>
+        <DocumentUpload
+            kind="health-certificate"
+            bind:employee
+        />
 
-        {#if healthCertificateIndex >= 0 && employee.images[healthCertificateIndex]?.file}
-            <div class="mt-3">
-                <Label for="certificateDate" class="mb-2">Ausstellungsdatum</Label>
-                <Input 
-                    id="certificateDate"
-                    bind:value={employee.images[healthCertificateIndex].issueDate}
-                    placeholder="DD.MM.YYYY"
-                />
-                <Helper class="mt-2" color="green">
-                    Bitte maschinell gescanntes Ergebnis überprüfen!
-                </Helper>
-            </div>
-        {/if}
-        
-        {#if healthCertificateError}
-            <Alert color="red" class="mt-3">
-                <InfoCircleSolid slot="icon" class="w-5 h-5" />
-                <p class="text-sm">
-                    Das Ausstellungsdatum des Gesundheitszeugnisses darf maximal 3 Monate zurück liegen.<br>
-                    Falls du ein neues benötigst, 
-                    <a
-                        href="https://www.google.com/search?q=gesundheitszeugnis+online"
-                        class="text-primary-900 hover:text-primary-800 underline"
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        klicke hier!
-                    </a>
-                </p>
-            </Alert>
-        {:else if healthCertificateIndex >= 0 && !employee.images[healthCertificateIndex]?.file}
+        {#if !hasHealthCertUploaded}
             <Alert border color="yellow" class="mt-3">
                 <InfoCircleSolid slot="icon" class="w-5 h-5" />
                 <p class="text-sm">
