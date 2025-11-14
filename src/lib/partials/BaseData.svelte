@@ -1,12 +1,10 @@
 <script lang="ts">
     import {
         Alert, Avatar, Button,
-        Fileupload,
         Heading,
         Input,
         Label,
-        Listgroup,
-        ListgroupItem, Modal,
+        Modal,
         P,
         Select
     } from "flowbite-svelte";
@@ -35,7 +33,6 @@
 
     let nationalities: any[] = [];
     let countries: any[] = [];
-    let files: File[];
     let avatarFiles: FileList;
     let loading = false;
 
@@ -179,15 +176,8 @@
             <Heading tag="h4">Staatsangehörigkeit außerhalb EWR</Heading>
             <P class="dark:text-white">Die Bearbeitung geht schneller, wenn du erforderliche Dokumente (Aufenthaltserlaubnis, Arbeitserlaubnis, etc) schon bereit stellst. Aber keine Sorge, du kannst diese Nachweise auch später nachreichen.</P>
             <div class="mt-2">
-                <Label class="pb-2" for="multiple_files">Datei(en) hochladen</Label>
-                <Fileupload accept="image/*,application/pdf" id="multiple_files" multiple bind:files />
-                <Listgroup items={files} let:item class="mt-2">
-                    {#if item}
-                        {item.name}
-                    {:else}
-                        <ListgroupItem>Keine Dateien</ListgroupItem>
-                    {/if}
-                </Listgroup>
+                <Label class="pb-2" for="non_eea_upload">Datei hochladen</Label>
+                <DocumentUpload bind:employee kind="non-eea" />
             </div>
         </Alert>
     {/if}
