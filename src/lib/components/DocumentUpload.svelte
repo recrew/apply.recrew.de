@@ -6,6 +6,7 @@
     import dayjs from "dayjs";
     import customParseFormat from "dayjs/plugin/customParseFormat";
     import type LenkradDate from "$lib/_types/LenkradDate";
+    import {InfoCircleSolid} from "flowbite-svelte-icons";
 
     dayjs.extend(customParseFormat);
 
@@ -262,6 +263,8 @@
     }
 
     function handleClear(docType: string, side: Side = "front") {
+        updateDocumentNumber("");
+        updateIssueDate("");
         removeDocument(docType, side);
     }
 
@@ -420,6 +423,24 @@
         <p class="text-sm">
             Das Ausstellungsdatum des Gesundheitszeugnisses darf maximal 3 Monate zurück
             liegen.
+        </p>
+    </Alert>
+{/if}
+
+<!-- Health Certificate note -->
+{#if kind === "health-certificate" && !hasFileOrLocation(front)}
+    <Alert border color="yellow" class="mt-3">
+        <InfoCircleSolid slot="icon" class="w-5 h-5" />
+        <p class="text-sm">
+            Du kannst das Gesundheitszeugnis nachreichen, musst es jedoch <strong>spätestens</strong> zum Get-to-Know-Treffen vorlegen.<br>
+            Das Gesundheitszeugnis lässt sich schnell und unkompliziert online beantragen.<br>
+            <a
+                    href="https://www.google.com/search?q=gesundheitszeugnis+online"
+                    class="text-primary-800 hover:text-primary-900 underline"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                Eine passende Stelle findest du hier!
+            </a>
         </p>
     </Alert>
 {/if}

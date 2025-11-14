@@ -1,6 +1,6 @@
 <script lang="ts">
 import Box from "$lib/components/Box.svelte";
-import {Button, Helper, Input, Label, Modal, Select, Toggle, Alert} from "flowbite-svelte";
+import {Button, Input, Label, Modal, Select, Toggle, Alert} from "flowbite-svelte";
 import {onMount} from "svelte";
 import {get} from "$lib/api";
 import DocumentUpload from "$lib/components/DocumentUpload.svelte";
@@ -15,7 +15,6 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
 
 
     let graduations : any[] = [];
-    let healthCertificateIndex = -1;
     let loading = false;
     let licenseBlocked = false;
     let studentBlocked = false;
@@ -44,16 +43,9 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
     let pantSizesMan = [46, 48, 50, 52, 54, 56].map((n) => ({name: n, value: "" + n}));
 
     // Upload bindings handled by DocumentUpload
-
-    $: healthCertificateIndex = employee.images.findIndex(i => i.imageTag === 'health-certificate');
     $: hasHealthCertUploaded = employee.images.some(i => i.imageTag === 'health-certificate' && (i.file || i.location));
-    $: uploadedHealthCertIdx = employee.images.findIndex(i => i.imageTag === 'health-certificate' && (i.file || i.location));
-    $: healthCertIssueComplete = uploadedHealthCertIdx === -1 || !!employee.images[uploadedHealthCertIdx]?.issueDate;
 
-    // Health certificate validity check is handled inside DocumentUpload
-
-
-    $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor && healthCertIssueComplete;
+    $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor;
     $: $blocked = !dataComplete;
     const proceed = async () => {
         if(!markEmptyFields()){
@@ -150,24 +142,6 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
             kind="health-certificate"
             bind:employee
         />
-
-        {#if !hasHealthCertUploaded}
-            <Alert border color="yellow" class="mt-3">
-                <InfoCircleSolid slot="icon" class="w-5 h-5" />
-                <p class="text-sm">
-                    Du kannst das Gesundheitszeugnis nachreichen, musst es jedoch <strong>spätestens</strong> zum Get-to-Know-Treffen vorlegen.<br>
-                    Das Gesundheitszeugnis lässt sich schnell und unkompliziert online beantragen.<br>
-                    <a
-                        href="https://www.google.com/search?q=gesundheitszeugnis+online"
-                        class="text-primary-800 hover:text-primary-900 underline"
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        Eine passende Stelle findest du hier!
-                    </a>
-                </p>
-            </Alert>
-        {/if}
-        
     </div>
 
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
