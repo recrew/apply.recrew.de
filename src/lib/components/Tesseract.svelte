@@ -19,7 +19,7 @@
         value: 'license'
     }]
 
-    export let value: string;
+    export let value: any;
 
     export let noRead = false;
 
@@ -165,13 +165,22 @@
 
     }
     onMount(() => {
-        if(options.length > 0){
-            type = options[0].value
+        // Prefer the existing document's tag if present
+        const preselected = value && (value.imageTag || value.type);
+        if (preselected && options?.some(o => o.value === preselected)) {
+            type = preselected;
+        } else if (options.length > 0) {
+            type = options[0].value;
         }
-        if(value && value.location) {
-            preview = value.location
+        if (value && value.location) {
+            preview = value.location;
         }
     })
+
+    // Keep type in sync when value changes from backend (e.g., refresh)
+    $: if (value && value.imageTag && options?.some(o => o.value === value.imageTag)) {
+        type = value.imageTag;
+    }
 
 </script>
 <article>
@@ -213,11 +222,13 @@
             <div class="flex-1">
                 {#if files}
                     <p class="truncate max-w-[240px]">{files[0].name}</p>
-                {/if}
+                {:else if value}
+                    <p class="truncate max-w-[240px]">Hochgeladen</p>
+                    {/if}
             </div>
-            <Button pill={true} class="right-0 !p-2"  on:click={() => showPreviewLightbox()}><ImageOutline class="w-4"/></Button>
+            <Button pill={true} class="right-0 !p-2"  on:click={() => showPreviewLightbox()}><ImageOutline class="w-5"/></Button>
             <Tooltip>Vorschau</Tooltip>
-            <Button pill={true} class="!p-2" color="red" on:click={() => {files = null; preview = null}}><CloseCircleSolid class="w-4"/></Button>
+            <Button pill={true} class="!p-2" color="red" on:click={() => {files = null; preview = null; dispatch('clear')}}><CloseCircleSolid class="w-5"/></Button>
             <Tooltip>Löschen</Tooltip>
         </div>
 
