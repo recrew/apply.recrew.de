@@ -102,8 +102,8 @@
     //$:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
 
     onMount(async () => {
-        if(employee.images.length < 1){
-            employee.images = [{documentNumber: '', imageTag: 'id-card', file: null},{documentNumber: '', imageTag: 'id-card', file: null}]
+        if(!employee.images){
+            employee.images = []
         }
         nationalities = (await get('/hr/reference/Staatsangehoerigkeiten')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name))
         countries = (await get('/hr/reference/Staaten')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name))
@@ -195,7 +195,7 @@
     {/if}
     {#if employee.cv.nationality}
         <DocumentUpload bind:employee kind="id" bind:blocked={idBlocked}/>
-        {#if $blocked && idBlocked}
+        {#if idBlocked}
             <Alert class="mt-3" border color="red">
                 <div class="flex gap-3">
                     <ArrowUpOutline /> Bitte Dokument hochladen

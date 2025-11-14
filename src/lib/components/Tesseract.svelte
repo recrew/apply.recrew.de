@@ -219,7 +219,7 @@
             </div>
             <Button pill={true} class="right-0 !p-2"  on:click={() => showPreviewLightbox()}><ImageOutline class="w-5"/></Button>
             <Tooltip>Vorschau</Tooltip>
-            <Button pill={true} class="!p-2" color="red" on:click={() => {files = null; preview = null}}><CloseCircleSolid class="w-5"/></Button>
+            <Button pill={true} class="!p-2" color="red" on:click={() => {files = null; preview = null; dispatch('clear')}}><CloseCircleSolid class="w-5"/></Button>
             <Tooltip>Löschen</Tooltip>
         </div>
 

@@ -79,7 +79,6 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid, ArrowUpOutline} fr
             employee.healthCertificates = [];
         }
         graduations = (await get('/hr/reference/Schulabschluss')).map((n) => ({...n, name: n.value}));
-        graduations.push({name: 'Ohne Schulabschluss', value: 'Ohne Schulabschluss'});
         stati = (await get('/hr/references/stati')).map((n) => ({name: n, value: n}));
     })
 
@@ -120,10 +119,8 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid, ArrowUpOutline} fr
             <Label class="mb-2" for="shirt">Hemdgröße *</Label>
             <Select id="shirt" bind:value={employee.cv.shirtSize} items={shirtSizes} required/>
         </div>
-        <div>
-            <div class="mt-8">
-                <Toggle bind:checked={employee.cv.motorVehicleLicense} >Führerschein</Toggle>
-            </div>
+        <div class="mt-8">
+            <Toggle bind:checked={employee.cv.motorVehicleLicense} >Führerschein</Toggle>
         </div>
         {#if employee.cv.motorVehicleLicense}
             <DocumentUpload kind="license" bind:employee bind:blocked={licenseBlocked} />
