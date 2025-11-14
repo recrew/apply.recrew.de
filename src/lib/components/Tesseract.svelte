@@ -19,7 +19,7 @@
         value: 'license'
     }]
 
-    export let value: string;
+    export let value: any;
 
     export let noRead = false;
 
@@ -165,13 +165,22 @@
 
     }
     onMount(() => {
-        if(options.length > 0){
-            type = options[0].value
+        // Prefer the existing document's tag if present
+        const preselected = value && (value.imageTag || value.type);
+        if (preselected && options?.some(o => o.value === preselected)) {
+            type = preselected;
+        } else if (options.length > 0) {
+            type = options[0].value;
         }
-        if(value && value.location) {
-            preview = value.location
+        if (value && value.location) {
+            preview = value.location;
         }
     })
+
+    // Keep type in sync when value changes from backend (e.g., refresh)
+    $: if (value && value.imageTag && options?.some(o => o.value === value.imageTag)) {
+        type = value.imageTag;
+    }
 
 </script>
 <article>

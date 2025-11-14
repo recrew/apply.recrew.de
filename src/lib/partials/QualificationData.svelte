@@ -6,7 +6,7 @@ import {get} from "$lib/api";
 import DocumentUpload from "$lib/components/DocumentUpload.svelte";
 import {reactToBoxInteraction} from "$lib/utils/openStep";
 import {currentStep} from "$lib/stores/currentStep";
-import {BellRingOutline, CheckCircleOutline, InfoCircleSolid, ArrowUpOutline} from "flowbite-svelte-icons";
+import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-svelte-icons";
     import {blocked} from "$lib/stores/blocked";
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import uploadImages from "$lib/utils/uploadImages";
@@ -53,7 +53,7 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid, ArrowUpOutline} fr
     // Health certificate validity check is handled inside DocumentUpload
 
 
-    $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor && (!employee.cv.motorVehicleLicense || !licenseBlocked) && (!(employee.status === 'Student') || !studentBlocked) && healthCertIssueComplete;
+    $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor && healthCertIssueComplete;
     $: $blocked = !dataComplete;
     const proceed = async () => {
         if(!markEmptyFields()){
@@ -102,14 +102,9 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid, ArrowUpOutline} fr
             <Select id="status" bind:value={employee.status} items={stati} required/>
         </div>
         {#if employee.status === 'Student'}
-            <DocumentUpload kind="student-verification" bind:employee bind:blocked={studentBlocked} />
-            {#if $blocked && studentBlocked}
-                <Alert class="mt-2" border color="red">
-                    <div class="flex gap-3">
-                        <ArrowUpOutline /> Bitte Immatrikulationsbescheinigung hochladen
-                    </div>
-                </Alert>
-            {/if}
+            <div class="md:col-span-1">
+                <DocumentUpload kind="student-verification" bind:employee bind:blocked={studentBlocked} />
+            </div>
         {/if}
         <div>
             <Label class="mb-2" for="experience">Erfahrung *</Label>
@@ -126,13 +121,6 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid, ArrowUpOutline} fr
             <div class="md:col-span-2">
                 <DocumentUpload kind="license" bind:employee bind:blocked={licenseBlocked} />
             </div>
-            {#if $blocked && licenseBlocked}
-                <Alert class="mt-2" border color="red">
-                    <div class="flex gap-3">
-                        <ArrowUpOutline /> Bitte Führerschein hochladen
-                    </div>
-                </Alert>
-            {/if}
         {/if}
         <div>
             <Label class="mb-2" for="pants">Hosengröße *</Label>
