@@ -194,7 +194,9 @@
         </Alert>
     {/if}
     {#if employee.cv.nationality}
-        <DocumentUpload bind:employee kind="id" bind:blocked={idBlocked}/>
+        <div class="md:col-span-2">
+            <DocumentUpload bind:employee kind="id" bind:blocked={idBlocked}/>
+        </div>
         {#if idBlocked}
             <Alert class="mt-3" border color="red">
                 <div class="flex gap-3">

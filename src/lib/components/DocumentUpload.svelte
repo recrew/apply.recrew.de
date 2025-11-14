@@ -20,6 +20,11 @@
     function toString(value: any): string {
         if (value === null || value === undefined) return '';
         if (typeof value === 'string') return value;
+        // Backend may return date objects like { value: '2024-11-07 00:00:00', ... }
+        if (typeof value === 'object' && typeof value.value === 'string') {
+            const d = dayjs(value.value);
+            return d.isValid() ? d.format('DD.MM.YYYY') : value.value;
+        }
         if (value instanceof Date) return dayjs(value).format('DD.MM.YYYY');
         return String(value);
     }
@@ -193,12 +198,37 @@
     // activeTag sollte den tatsächlichen Tag vom front-Dokument verwenden
     $: activeTag = front?.imageTag || configs[kind]?.options[0]?.value;
 
+    // Date warning for health certificate (older than 3 months) and validation when uploaded
+    $: dateError = (() => {
+        if (kind !== 'health-certificate') return false;
+        const hasFront = !!front?.file || !!front?.location;
+        if (!hasFront) return false; // optional: no upload -> no error
+
+        const dateString = toString(front?.issueDate);
+        if (!dateString) return false; // missing date: handled in blocked, not for this warning
+
+        const date = dayjs(dateString, 'DD.MM.YYYY', true);
+        if (!date.isValid()) return false; // invalid format: handled in blocked
+
+        return date.isBefore(dayjs().subtract(3, 'month'));
+    })();
+
     // Validation - mit toString für sichere String-Operationen
     $: blocked = (() => {
         const config = configs[kind];
         if (!config) return false;
 
         const hasFront = !!front?.file || !!front?.location;
+
+        // Gesundheitszeugnis ist optional: nur blocken, wenn hochgeladen und Datum ungültig/fehlt
+        if (kind === 'health-certificate') {
+            if (!hasFront) return false;
+            const dateStr = toString(front?.issueDate).trim();
+            const hasDate = !!dateStr;
+            const invalidFormat = hasDate ? !dayjs(dateStr, 'DD.MM.YYYY', true).isValid() : false;
+            return !hasDate || invalidFormat || !!dateError;
+        }
+
         const hasBack = config.needsBack ? (!!back?.file || !!back?.location) : true;
         const hasNumber = config.needsNumber ? !!toString(front?.documentNumber).trim() : true;
         const hasDate = config.needsDate ? !!toString(front?.issueDate).trim() : true;
@@ -223,16 +253,6 @@
         }
     }
 
-    // Health certificate date validation - mit toString
-    $: dateError = (() => {
-        if (kind !== 'health-certificate' || !front?.issueDate) return false;
-        const dateString = toString(front.issueDate);
-        if (!dateString) return false;
-
-        const date = dayjs(dateString, 'DD.MM.YYYY', true);
-        return date.isValid() && date.isBefore(dayjs().subtract(3, 'month'));
-    })();
-
     // Helper für Back-Label
     function getBackLabel(): string {
         if (!activeTag) return 'Dokument Rückseite';
@@ -244,7 +264,6 @@
         return configs[kind]?.label() + ' Rückseite';
     }
 </script>
-
 <div class="grid md:grid-cols-2 gap-3 mt-2">
     <!-- Front side upload -->
     <div>

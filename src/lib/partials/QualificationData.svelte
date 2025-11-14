@@ -123,7 +123,9 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid, ArrowUpOutline} fr
             <Toggle bind:checked={employee.cv.motorVehicleLicense} >Führerschein</Toggle>
         </div>
         {#if employee.cv.motorVehicleLicense}
-            <DocumentUpload kind="license" bind:employee bind:blocked={licenseBlocked} />
+            <div class="md:col-span-2">
+                <DocumentUpload kind="license" bind:employee bind:blocked={licenseBlocked} />
+            </div>
             {#if $blocked && licenseBlocked}
                 <Alert class="mt-2" border color="red">
                     <div class="flex gap-3">
