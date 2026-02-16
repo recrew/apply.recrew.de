@@ -266,6 +266,7 @@
                     {image}
                     bind:crop
                     bind:zoom
+                    zoomSpeed={.5}
                     on:cropcomplete={saveCroppedFile}
                     {aspect}
                     showGrid={true}

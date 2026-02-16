@@ -40,7 +40,7 @@
     import updateCall from "$lib/utils/updateCall";
     import OCRWrapper from "$lib/components/OCRWrapper.svelte";
     import { isEu } from "$lib/utils/isEu";
-    import { readPassport } from "$lib/utils/readPassport";
+    import {readIdCard, readPassport} from "$lib/utils/readPassport";
 
     export let employee: any;
 
@@ -61,37 +61,51 @@
     let cropperModal = false;
 
     const orcBinding = (detail: any, which: "front" | "back") => {
-        if (which === "front" && idOption === "passport") {
-            const reader = readPassport(detail.text);
+        let image;
 
+        if (which === "front") {
+            let reader;
+            if(idOption === "passport"){
+                reader = readPassport(detail.text);
+            } else if(idOption === 'id-card') {
+                reader = readIdCard(detail.text);
+            }
+
+            // remove existing passport
             employee.images = employee.images.filter(
-                (n) => n.imageTag !== "passport",
+                (n) => n.imageTag !== idOption,
             );
-            employee.images = [
-                ...employee.images,
-                {
-                    documentNumber: reader.passportNumber,
-                    imageTag: "passport",
-                    file: detail.file,
-                    name: fileNameGenerator(
-                        detail.file,
-                        employee,
-                        "passport",
-                        "Vorderseite",
-                    ),
-                },
-            ];
-            employee.firstName = reader.firstName;
-            employee.lastName = reader.lastName;
+            image = {
+                documentNumber: reader?.passportNumber || '',
+                imageTag: idOption,
+                file: detail.file,
+                name: fileNameGenerator(
+                    detail.file,
+                    employee,
+                    "passport",
+                    "Vorderseite",
+                ),
+            }
+            formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/image', image).then(res => {
+                employee.images = [
+                    ...employee.images,
+                    res,
+                ];
+            })
+
+            employee.firstName = reader?.firstName || '';
+            employee.lastName = reader?.lastName || '';
             employee.dateOfBirth.value = dayjs(
                 reader.dateOfBirth,
                 "DD.MM.YYYY",
             ).format("YYYY-MM-DD");
-            employee.cv.placeOfBirth = reader.placeOfBirth;
-            employee.maidenName = reader.maidenName;
-            employee.gender = reader.sex.trim() === "M" ? "male" : "female";
+            employee.cv.placeOfBirth = reader?.placeOfBirth || '';
+            employee.maidenName = reader?.maidenName || '';
+            employee.gender = reader?.sex.trim() === "M" ? "male" : "female";
             console.log({ reader, employee });
         }
+
+
     };
 
     const idReader = (detail: any, index?: number) => {
@@ -179,19 +193,21 @@
 
     //$:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
 
+    $: idImages = employee.images.filter(n => n.imageTag === idOption);
+
     onMount(async () => {
-        if (employee.images.length < 1) {
-            employee.images = [
-                { documentNumber: "", imageTag: "id-card", file: null },
-                { documentNumber: "", imageTag: "id-card", file: null },
-            ];
-        }
+
         nationalities = (await get("/hr/reference/Staatsangehoerigkeiten"))
             .map((n) => ({ ...n, name: n.value }))
             .sort((a, b) => a.name.localeCompare(b.name));
         countries = (await get("/hr/reference/Staaten"))
             .map((n) => ({ ...n, name: n.value }))
             .sort((a, b) => a.name.localeCompare(b.name));
+        if(employee.images.find(n => n.imageTag === "id-card" && n.location)) {
+            idOption = 'id-card'
+        } else if(employee.images.find(n => n.imageTag === "passport" && n.location)) {
+            idOption = 'passport'
+        }
     });
 </script>
 
@@ -257,19 +273,7 @@
                         orcBinding(ev.detail, "front");
                     }}
                 />
-                <!-- <Tesseract
-                    value={employee.images.find(
-                        (n) =>
-                            (n.imageTag === "id-card" ||
-                                n.imageTag === "passport") &&
-                            n.documentNumber,
-                    )}
-                    options={idOptions}
-                    on:ocr={(ev) => {
-                        console.log(ev.detail);
-                        idReader(ev.detail, idIndex > -1 ? idIndex : 0);
-                    }}
-                /> -->
+
             {/if}
         </div>
     </div>
@@ -279,6 +283,14 @@
         type="file"
         id="avatarFile"
     />
+    {#if idOption === 'id-card'}
+        <div class="grid grid-cols-2 gap-3">
+            {#each idImages as image}
+                <img alt="Id rendered" class="p-3" src={image.location}/>
+            {/each}
+
+        </div>
+    {/if}
 
     <div class="grid md:grid-cols-2 gap-3 mt-8">
         <div>
