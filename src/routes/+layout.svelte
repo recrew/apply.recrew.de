@@ -14,7 +14,6 @@
     } from "flowbite-svelte";
     import { page } from "$app/stores";
     import { base } from "$app/paths";
-    import { GithubSolid } from "flowbite-svelte-icons";
     import ReusableModal from "$lib/components/ReusableModal.svelte";
     import { onMount } from "svelte";
     import { token } from "$lib/stores/auth";
@@ -105,7 +104,9 @@
             <FooterLink href="https://www.recrew.info/kopie-von-dsgvo"
                 >Privacy Policy</FooterLink
             >
-            <FooterLink href="https://www.recrew.info/kontakt">Contact</FooterLink>
+            <FooterLink href="https://www.recrew.info/kontakt"
+                >Contact</FooterLink
+            >
         </FooterLinkGroup>
     </Footer>
     <ReusableModal />
