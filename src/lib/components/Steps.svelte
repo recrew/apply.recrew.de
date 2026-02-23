@@ -22,7 +22,6 @@
     >
         <li class="relative md:flex md:flex-1">
             {#if steps[0].state === -1}
-                <!-- Completed Step -->
                 <a href={steps[0].route} class="group flex w-full items-center">
                     <span
                         class="flex items-center px-6 py-4 text-sm font-medium"

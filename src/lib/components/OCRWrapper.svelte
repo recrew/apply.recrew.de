@@ -10,7 +10,7 @@
     let files: File[];
     let loading = false;
     let dispatch = createEventDispatcher();
-    const getAspect = () => {
+    const getAspect = (): number => {
         if (type === "passport") {
             return 1.53;
         }
@@ -20,7 +20,7 @@
         // DIN A4
         return 0.707;
     };
-    const readOcr = async () => {
+    const readOcr = async (): Promise<void> => {
         loading = true;
         const reader = new FileReader();
         reader.onload = async () => {

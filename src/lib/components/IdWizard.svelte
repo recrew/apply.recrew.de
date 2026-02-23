@@ -1,11 +1,16 @@
 <script lang="ts">
-    import { Dropzone } from "flowbite-svelte";
     import {
         ProfileCardOutline,
         RectangleListOutline,
     } from "flowbite-svelte-icons";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
     import { createEventDispatcher } from "svelte";
+    import OCRWrapper from "./OCRWrapper.svelte";
+    import { setApplicationStore } from "$lib/stores/application";
+    import { readIdBackCard, readIdFrontCard } from "$lib/utils/readPassport";
+
+    let cropperModalFront: boolean = false;
+    let cropperModalBack: boolean = false;
 
     const dispatch = createEventDispatcher();
     let frontIdPreview: string | null = null;
@@ -17,6 +22,23 @@
     } = {
         frontIdPhoto: null,
         backIdPhoto: null,
+    };
+
+    const ocrBinding = async (detail: any, which: "front" | "back") => {
+        let image, reader;
+        if (which === "front") {
+            //TODO: Assign to applcation store
+            reader = readIdFrontCard(detail.text);
+            await handleFrontFile(detail.file);
+        } else {
+            reader = readIdBackCard(detail.text);
+            console.log(reader.address);
+            await handleBackFile(detail.file);
+        }
+
+        //TODO: Left off here...
+        //TODO: send image to backend
+        //TODO: Process Front and Back ID
     };
 
     function setPreviewFromBlobOrFile(
@@ -32,25 +54,6 @@
         reader.onerror = () => set(null);
         reader.onload = (e: any) => set(e?.target?.result ?? null);
         reader.readAsDataURL(fileOrBlob);
-    }
-
-    function getFirstDroppedFile(event: DragEvent): File | null {
-        const dt = event.dataTransfer;
-        if (!dt) return null;
-
-        // Prefer DataTransferItemList when available
-        if (dt.items && dt.items.length) {
-            for (const item of Array.from(dt.items)) {
-                if (item.kind === "file") {
-                    const f = item.getAsFile();
-                    if (f) return f;
-                }
-            }
-            return null;
-        }
-
-        if (dt.files && dt.files.length) return dt.files[0];
-        return null;
     }
 
     async function handleFrontFile(file: File | null): Promise<void> {
@@ -102,36 +105,10 @@
         }
     }
 
-    const dropFrontHandle = async (event: DragEvent) => {
-        event.preventDefault();
-        const file = getFirstDroppedFile(event);
-        await handleFrontFile(file);
-    };
-
-    const dropBackHandle = async (event: DragEvent) => {
-        event.preventDefault();
-        const file = getFirstDroppedFile(event);
-        await handleBackFile(file);
-    };
-
-    const handleFrontChange = async (event: Event) => {
-        const input = event.currentTarget as HTMLInputElement | null;
-        const file = input?.files?.[0] ?? null;
-        await handleFrontFile(file);
-    };
-
-    const handleBackChange = async (event: Event) => {
-        const input = event.currentTarget as HTMLInputElement | null;
-        const file = input?.files?.[0] ?? null;
-        await handleBackFile(file);
-    };
-
     $: {
         if (frontIdPreview && backIdPreview) {
             dispatch("formCompleted", true);
             console.log("success");
-        } else {
-            console.log("failed");
         }
     }
 </script>
@@ -144,20 +121,25 @@
             Front of your ID
         </h5>
 
-        <Dropzone
-            on:drop={dropFrontHandle}
-            on:change={handleFrontChange}
-            on:dragover={(e) => e.preventDefault()}
-            on:dragleave={(e) => e.preventDefault()}
+        <OCRWrapper
+            type="id-card"
+            title="Personalausweis"
+            bind:cropperModal={cropperModalFront}
+            value="id-card-front"
+            on:ocr={(ev) => {
+                ocrBinding(ev.detail, "front");
+            }}
         >
             {#if !candidate.frontIdPhoto}
                 <div
-                    class="flex flex-col items-center justify-center pt-5 pb-6"
+                    class="flex flex-col justify-center items-center w-full h-64 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                    on:click={() => (cropperModalFront = true)}
+                    on:keydown={() => (cropperModalFront = true)}
+                    aria-hidden="true"
                 >
                     <ProfileCardOutline class="mb-3 w-10 h-10 text-gray-400" />
                     <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span class="font-semibold">Klicken Sie hier</span> oder
-                        ziehen Sie eine Datei hierher.
+                        <span class="font-semibold">Klicken Sie hier</span>
                     </p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         JPG, JPEG, PNG, PDF
@@ -170,7 +152,7 @@
                     alt="front-id"
                 />
             {/if}
-        </Dropzone>
+        </OCRWrapper>
     </div>
 
     <div class="w-1/2 pr-4">
@@ -180,22 +162,27 @@
             Back of your ID
         </h5>
 
-        <Dropzone
-            on:drop={dropBackHandle}
-            on:change={handleBackChange}
-            on:dragover={(e) => e.preventDefault()}
-            on:dragleave={(e) => e.preventDefault()}
+        <OCRWrapper
+            type="id-card"
+            title="Personalausweis"
+            bind:cropperModal={cropperModalBack}
+            value="id-card-back"
+            on:ocr={(ev) => {
+                ocrBinding(ev.detail, "back");
+            }}
         >
             {#if !candidate.backIdPhoto}
                 <div
-                    class="flex flex-col items-center justify-center pt-5 pb-6"
+                    class="flex flex-col justify-center items-center w-full h-64 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                    on:click={() => (cropperModalBack = true)}
+                    on:keydown={() => (cropperModalBack = true)}
+                    aria-hidden="true"
                 >
                     <RectangleListOutline
                         class="mb-3 w-10 h-10 text-gray-400"
                     />
                     <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span class="font-semibold">Klicken Sie hier</span> oder
-                        ziehen Sie eine Datei hierher.
+                        <span class="font-semibold">Klicken Sie hier</span>
                     </p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         JPG, JPEG, PNG, PDF
@@ -208,6 +195,6 @@
                     alt="back-id"
                 />
             {/if}
-        </Dropzone>
+        </OCRWrapper>
     </div>
 </div>
