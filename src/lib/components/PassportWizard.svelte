@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { BookOpenOutline, ProfileCardOutline } from "flowbite-svelte-icons";
+    import { BookOpenOutline } from "flowbite-svelte-icons";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
     import { createEventDispatcher } from "svelte";
     import OCRWrapper from "./OCRWrapper.svelte";
@@ -23,22 +23,23 @@
     const ocrBinding = async (detail: any) => {
         let reader: Partial<ApplicationFormData> = readPassport(detail.text);
         await handleFile(detail.file);
+        console.log(reader, "reader");
 
-        patchApplicationStore({
-            firstname: reader.firstname,
-            lastname: reader.lastname,
-            maidenName: reader.maidenName ?? "",
-            address: {
-                name: reader.address?.name ?? "",
-                street: reader.address?.street ?? "",
-                number: reader.address?.number ?? null,
-                place: reader.address?.place ?? "",
-                state: reader.address?.state ?? "",
-                zip: reader.address?.zip ?? "",
-                country: reader.address?.country ?? "",
-                addressAddendum: reader.address?.addressAddendum ?? null,
-            },
-        });
+        // patchApplicationStore({
+        //     firstname: reader.firstname,
+        //     lastname: reader.lastname,
+        //     maidenName: reader.maidenName ?? "",
+        //     address: {
+        //         name: reader.address?.name ?? "",
+        //         street: reader.address?.street ?? "",
+        //         number: reader.address?.number ?? null,
+        //         place: reader.address?.place ?? "",
+        //         state: reader.address?.state ?? "",
+        //         zip: reader.address?.zip ?? "",
+        //         country: reader.address?.country ?? "",
+        //         addressAddendum: reader.address?.addressAddendum ?? null,
+        //     },
+        // });
     };
 
     function setPreviewFromBlobOrFile(
@@ -88,45 +89,43 @@
     }
 </script>
 
-<div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-12 flex flex-row">
-    <div class="w-1/2 pr-4">
-        <h5
-            class="mb-4 text-lg font-extrabold tracking-tight leading-none text-gray-700 dark:text-white"
-        >
-            Passport
-        </h5>
+<div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-12 flex flex-col">
+    <h5
+        class="mb-4 text-lg font-extrabold tracking-tight leading-none text-gray-700 dark:text-white"
+    >
+        Passport
+    </h5>
 
-        <OCRWrapper
-            type="id-card"
-            title="Reisepass"
-            bind:cropperModal
-            value="id-card-front"
-            on:ocr={(ev) => {
-                ocrBinding(ev.detail);
-            }}
-        >
-            {#if !candidate.passportPhoto}
-                <div
-                    class="flex flex-col justify-center items-center w-full h-64 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                    on:click={() => (cropperModal = true)}
-                    on:keydown={() => (cropperModal = true)}
-                    aria-hidden="true"
-                >
-                    <BookOpenOutline class="mb-3 w-10 h-10 text-gray-400" />
-                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span class="font-semibold">Klicken Sie hier</span>
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                        JPG, JPEG, PNG, PDF
-                    </p>
-                </div>
-            {:else}
-                <img
-                    class="max-h-full max-w-full"
-                    src={passportPreview ?? ""}
-                    alt="front-id"
-                />
-            {/if}
-        </OCRWrapper>
-    </div>
+    <OCRWrapper
+        type="passport"
+        title="Reisepass"
+        bind:cropperModal
+        value="passport"
+        on:ocr={(ev) => {
+            ocrBinding(ev.detail);
+        }}
+    >
+        {#if !candidate.passportPhoto}
+            <div
+                class="flex flex-col justify-center items-center w-full h-96 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                on:click={() => (cropperModal = true)}
+                on:keydown={() => (cropperModal = true)}
+                aria-hidden="true"
+            >
+                <BookOpenOutline class="mb-3 w-10 h-10 text-gray-400" />
+                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span class="font-semibold">Klicken Sie hier</span>
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    JPG, JPEG, PNG, PDF
+                </p>
+            </div>
+        {:else}
+            <img
+                class="max-h-full max-w-full"
+                src={passportPreview ?? ""}
+                alt="passport"
+            />
+        {/if}
+    </OCRWrapper>
 </div>

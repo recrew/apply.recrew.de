@@ -10,8 +10,14 @@ export type ApplicationFormData = {
     letter_motivation?: string | null;
     mobile?: string | null;
     photo?: File | null;
+    idFrontPhoto?: File | null;
+    idBackPhoto?: File | null;
+    passportPhoto?: File | null;
     referer?: string | null;
     region?: string | null;
+    idNumber?: string | null;
+    passportNumber?: string | null;
+    dateOfBirth?: string | null;
     address: {
         name?: string | null;
         street: string;
@@ -31,10 +37,16 @@ export const initialApplicationData: ApplicationFormData = {
     facebook: "",
     instagram: "",
     letter_motivation: "",
+    idFrontPhoto: null,
+    idBackPhoto: null,
+    passportPhoto: null,
     mobile: "",
     photo: null,
     referer: "",
     region: "",
+    idNumber: "",
+    passportNumber: "",
+    dateOfBirth: "",
     address: {
         name: "",
         street: "",
