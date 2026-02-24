@@ -23,7 +23,7 @@
     <IdWizard on:formCompleted={() => formComplete.set(true)} />
   {:else if data.step === 1}
     <p class="text-lg text-white">Please enter your passport</p>
-    <PassportWizard />
+    <PassportWizard on:formCompleted={() => formComplete.set(true)} />
   {:else if data.step === 2}
     <ReviewApplication />
   {/if}

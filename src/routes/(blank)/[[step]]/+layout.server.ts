@@ -1,6 +1,5 @@
-import type { LayoutServerLoad, PageLoad } from "./$types";
+import type { LayoutServerLoad } from "./$types";
 
-// export const csr = true;
 export const load: LayoutServerLoad = ({ params }) => {
   let step, next;
   switch (params.step) {

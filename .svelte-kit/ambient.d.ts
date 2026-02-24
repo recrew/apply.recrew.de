@@ -91,6 +91,7 @@ declare module '$env/static/private' {
 	export const XDG_CURRENT_DESKTOP: string;
 	export const npm_config_init_license: string;
 	export const npm_package_version: string;
+	export const TMUXIFIER_MIN_TMUX_VERSION: string;
 	export const WAYLAND_DISPLAY: string;
 	export const QT_QUICK_CONTROLS_STYLE: string;
 	export const VIRTUAL_ENV_DISABLE_PROMPT: string;
@@ -151,6 +152,7 @@ declare module '$env/static/private' {
 	export const GDK_BACKEND: string;
 	export const PATH: string;
 	export const GDK_SCALE: string;
+	export const TMUXIFIER_LAYOUT_PATH: string;
 	export const GDMSESSION: string;
 	export const npm_package_devDependencies__sveltejs_kit: string;
 	export const npm_package_author_name: string;
@@ -269,6 +271,7 @@ declare module '$env/dynamic/private' {
 		XDG_CURRENT_DESKTOP: string;
 		npm_config_init_license: string;
 		npm_package_version: string;
+		TMUXIFIER_MIN_TMUX_VERSION: string;
 		WAYLAND_DISPLAY: string;
 		QT_QUICK_CONTROLS_STYLE: string;
 		VIRTUAL_ENV_DISABLE_PROMPT: string;
@@ -329,6 +332,7 @@ declare module '$env/dynamic/private' {
 		GDK_BACKEND: string;
 		PATH: string;
 		GDK_SCALE: string;
+		TMUXIFIER_LAYOUT_PATH: string;
 		GDMSESSION: string;
 		npm_package_devDependencies__sveltejs_kit: string;
 		npm_package_author_name: string;

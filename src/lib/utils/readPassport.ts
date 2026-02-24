@@ -10,7 +10,7 @@ let maidenName = "";
 let lastLine = "";
 let address = {
     street: "",
-    number: "",
+    number: 0,
     place: "",
     zip: "",
     country: "",
@@ -91,7 +91,8 @@ export const readIdBackCard = (parsedText: string) => {
             address.zip = line.split("\t")[1].split(" ")[0];
             address.place = line.split("\t")[1].split(" ")[1];
         } else if (lastLine.includes("Größe/Height/Taille")) {
-            address.number = line.match(/\d/)?.[0] ?? "";
+            const digitMatch = line.match(/\d/);
+            address.number = digitMatch ? parseInt(digitMatch?.[0]) : 0;
             address.street = line.replace(
                 /\s+\d+[a-zA-Z]?(?:[-/]\d+)?[\s\t\r\n]*$/,
                 "",

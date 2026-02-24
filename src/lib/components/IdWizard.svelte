@@ -6,7 +6,10 @@
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
     import { createEventDispatcher } from "svelte";
     import OCRWrapper from "./OCRWrapper.svelte";
-    import { setApplicationStore } from "$lib/stores/application";
+    import {
+        patchApplicationStore,
+        type ApplicationFormData,
+    } from "$lib/stores/application";
     import { readIdBackCard, readIdFrontCard } from "$lib/utils/readPassport";
 
     let cropperModalFront: boolean = false;
@@ -25,20 +28,30 @@
     };
 
     const ocrBinding = async (detail: any, which: "front" | "back") => {
-        let image, reader;
+        let reader: Partial<ApplicationFormData>;
         if (which === "front") {
-            //TODO: Assign to applcation store
             reader = readIdFrontCard(detail.text);
             await handleFrontFile(detail.file);
         } else {
             reader = readIdBackCard(detail.text);
-            console.log(reader.address);
             await handleBackFile(detail.file);
         }
 
-        //TODO: Left off here...
-        //TODO: send image to backend
-        //TODO: Process Front and Back ID
+        patchApplicationStore({
+            firstname: reader.firstname,
+            lastname: reader.lastname,
+            maidenName: reader.maidenName ?? "",
+            address: {
+                name: reader.address?.name ?? "",
+                street: reader.address?.street ?? "",
+                number: reader.address?.number ?? null,
+                place: reader.address?.place ?? "",
+                state: reader.address?.state ?? "",
+                zip: reader.address?.zip ?? "",
+                country: reader.address?.country ?? "",
+                addressAddendum: reader.address?.addressAddendum ?? null,
+            },
+        });
     };
 
     function setPreviewFromBlobOrFile(
@@ -108,7 +121,6 @@
     $: {
         if (frontIdPreview && backIdPreview) {
             dispatch("formCompleted", true);
-            console.log("success");
         }
     }
 </script>

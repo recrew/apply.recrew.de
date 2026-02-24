@@ -31,12 +31,11 @@
                 );
                 token.set(jwt.token);
                 const decoded = decodeJwt(jwt.token);
-                console.log(decoded);
                 sessionStorage.token = jwt.token;
                 user.set(decoded);
                 sessionStorage.user = JSON.stringify(decoded);
             } catch (e) {
-                console.log("Token invalid or expired");
+                console.error("Token invalid or expired");
                 token.set(null);
             } finally {
                 $page.url.searchParams.delete("token");
