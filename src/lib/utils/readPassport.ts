@@ -36,10 +36,7 @@ export const readPassport = (parsedText: string) => {
             sex = mOrF;
             dateOfBirth = dob;
             placeOfBirth = pob;
-        } else if (
-            lastLine.includes(`${type}<${code}<<`) &&
-            passportNumber === ""
-        ) {
+        } else if (lastLine.includes(`${type}<${code}`) && passportNumber === "") {
             passportNumber = capitalize(line.slice(0, 11));
         }
         lastLine = line;
