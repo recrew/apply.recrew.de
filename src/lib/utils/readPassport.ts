@@ -8,6 +8,8 @@ let placeOfBirth = "";
 let sex = "";
 let maidenName = "";
 let lastLine = "";
+let type = "";
+let code = "";
 let address = {
     street: "",
     number: 0,
@@ -20,18 +22,25 @@ export const readPassport = (parsedText: string) => {
     const lines = parsedText.split("\n");
     lastLine = "";
     lines.forEach((line) => {
-        if (lastLine.includes("Passport No")) {
-            passportNumber = line.match(/[A-Z0-9]{9}/)?.[0] ?? "";
+        if (lastLine.includes("Passport No.")) {
+            let target = line.trim().replace(/\t/g, "").replace(/\s+/g, "");
+            type = target.slice(0, 1);
+            code = target.slice(1, 2);
+            passportNumber = target.slice(2, 11).toUpperCase();
         } else if (lastLine.includes("Date de naissance")) {
-            dateOfBirth = line.match(/\d{2}\.\d{2}\.\d{4}/)?.[0] ?? "";
-        } else if (lastLine.includes("Sex")) {
-            sex =
-                line
-                    .match(/^\s*[MF]\s/)?.[0]
-                    .replace(/\t/g, "")
-                    .trim() ?? "";
-        } else if (lastLine.includes("Nationality")) {
-            placeOfBirth = capitalize(line.trim());
+            let [dob, mOrF, pob] = line
+                .trim()
+                .replace(/\t/g, ",")
+                .replace(/\s+/g, "")
+                .split(",");
+            sex = mOrF;
+            dateOfBirth = dob;
+            placeOfBirth = pob;
+        } else if (
+            lastLine.includes(`${type}<${code}<<`) &&
+            passportNumber === ""
+        ) {
+            passportNumber = capitalize(line.slice(0, 11));
         }
         lastLine = line;
     });
