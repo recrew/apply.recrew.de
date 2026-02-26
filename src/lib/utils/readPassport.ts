@@ -3,6 +3,7 @@ import { capitalize } from "./caseConverter";
 let lastName = "";
 let firstName = "";
 let passportNumber = "";
+let idNumber = "";
 let dateOfBirth = "";
 let placeOfBirth = "";
 let sex = "";
@@ -80,23 +81,28 @@ export const readIdFrontCard = (parsedText: string) => {
     const lines = parsedText.split("\n");
     lastLine = "";
     lines.forEach((line) => {
-        console.log(line, "line");
+        console.log(lastLine, "lastLine");
 
-        if (
-            line.includes("DEUTSCHLAND") ||
-            lastLine.toUpperCase().includes("NUMMER")
-        ) {
+        if (line.includes("DEUTSCHLAND") || lastLine.includes("Dokument")) {
             let number: string[] = line.split("\t");
-            passportNumber = number.length > 2 ? number[2] : number[0];
-        } else if (lastLine.includes("IDENTITY CARD / CARTE D'IDENTITE")) {
+            idNumber = number.length > 2 ? number[2] : number[0];
+        } else if (
+            lastLine.includes("IDENTITY CARD / CARTE D'IDENTITE") ||
+            lastLine.includes("Vorname")
+        ) {
             lastName = capitalize(line.trim());
             maidenName = lastName;
         } else if (lastLine.includes("Vornamen")) {
             firstName = capitalize(line.trim());
-        } else if (lastLine.includes("Date de naissance")) {
+        } else if (
+            lastLine.includes("Date de naissance") ||
+            lastLine.includes("Date of birth")
+        ) {
             dateOfBirth = line.match(/\d{2}\.\d{2}\.\d{4}/)?.[0] ?? "";
         } else if (lastLine.includes("Geburtsort")) {
             placeOfBirth = capitalize(line.trim());
+        } else if (line.includes("Nationality") && !firstName) {
+            firstName = capitalize(lastLine.trim());
         } else if (lastLine.includes("[a]")) {
             maidenName = capitalize(line.trim().match(/[A-Z-\s]{3,}/)?.[0] ?? "");
         }
@@ -105,7 +111,7 @@ export const readIdFrontCard = (parsedText: string) => {
     return {
         lastName,
         firstName,
-        passportNumber,
+        idNumber,
         dateOfBirth,
         placeOfBirth,
         maidenName,

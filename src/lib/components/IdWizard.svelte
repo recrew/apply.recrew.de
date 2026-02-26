@@ -42,6 +42,7 @@
             firstname: reader.firstname,
             lastname: reader.lastname,
             maidenName: reader.maidenName ?? "",
+            idNumber: reader.idNumber ?? "",
             address: {
                 name: reader.address?.name ?? "",
                 street: reader.address?.street ?? "",
