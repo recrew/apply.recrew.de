@@ -81,8 +81,6 @@ export const readIdFrontCard = (parsedText: string) => {
     const lines = parsedText.split("\n");
     lastLine = "";
     lines.forEach((line) => {
-        console.log(lastLine, "lastLine");
-
         if (line.includes("DEUTSCHLAND") || lastLine.includes("Dokument")) {
             let number: string[] = line.split("\t");
             idNumber = number.length > 2 ? number[2] : number[0];
@@ -132,11 +130,14 @@ export const readIdBackCard = (parsedText: string) => {
                 /\s+\d+[a-zA-Z]?(?:[-/]\d+)?[\s\t\r\n]*$/,
                 "",
             );
+        } else if (lastLine.includes("Place of birth")) {
+            placeOfBirth = capitalize(line.trim());
         }
         lastLine = line;
     });
     return {
         address,
         country: "Deutschland",
+        placeOfBirth,
     };
 };
