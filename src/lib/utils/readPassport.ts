@@ -32,9 +32,16 @@ export const readPassport = (parsedText: string) => {
                 .replace(/\t/g, ",")
                 .replace(/\s+/g, "")
                 .split(",");
+
             lines.forEach((item) => {
-                if (item.includes(".")) {
-                    dateOfBirth = item;
+                if (item.includes(".") || item.length === 8) {
+                    dateOfBirth = item.includes(".")
+                        ? item
+                        : item.slice(0, 2) +
+                        "." +
+                        item.slice(2, 4) +
+                        "." +
+                        item.slice(4, 8);
                 }
                 //matches gender
                 if (item.match(/[MF]/)) {
@@ -43,16 +50,21 @@ export const readPassport = (parsedText: string) => {
 
                 //matches place of birth
                 if (item.match(/[A-Z]/) && item.length > 1 && sex) {
-                    placeOfBirth = item;
+                    placeOfBirth = item.includes(" ") ? item.split(" ")[0] : item;
                 }
             });
-        } else if (lastLine.toUpperCase().includes("SEX") && !sex) {
+        } else if (
+            (lastLine.toUpperCase().includes("SEX") && !sex) ||
+            lastLine.toUpperCase().includes("SCHLATTAINA ")
+        ) {
             sex = line.trim().replace(/\t/g, ",").split(",")[0];
         } else if (
             (lastLine.toUpperCase().includes("NATIONALITY") && !placeOfBirth) ||
             (lastLine.toUpperCase().includes("NATIONALITÉ") && !placeOfBirth)
         ) {
-            placeOfBirth = line.trim().replace(/\t/g, ",").split(",")[0];
+            placeOfBirth = line.toUpperCase().includes("SCHWEIZ")
+                ? "SCHWEIZ"
+                : line.trim().replace(/\t/g, ",").split(",")[0];
         }
         lastLine = line;
     });
