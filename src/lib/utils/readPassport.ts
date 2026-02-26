@@ -8,8 +8,6 @@ let placeOfBirth = "";
 let sex = "";
 let maidenName = "";
 let lastLine = "";
-let type = "";
-let code = "";
 let address = {
     street: "",
     number: 0,
@@ -21,23 +19,40 @@ let address = {
 export const readPassport = (parsedText: string) => {
     const lines = parsedText.split("\n");
     lastLine = "";
+
     lines.forEach((line) => {
-        if (lastLine.includes("Passport No.")) {
-            let target = line.trim().replace(/\t/g, "").replace(/\s+/g, "");
-            type = target.slice(0, 1);
-            code = target.slice(1, 2);
-            passportNumber = target.slice(2, 11).toUpperCase();
-        } else if (lastLine.includes("Date de naissance")) {
-            let [dob, mOrF, pob] = line
+        if (lastLine.match(/[A-Z]<[A-Z]/)) {
+            passportNumber = line.split("<")[0].slice(0, 9);
+        } else if (
+            lastLine.toUpperCase().includes("DATE DE NAISSANCE") ||
+            lastLine.toUpperCase().includes("DATE OF BIRTH")
+        ) {
+            let lines: string[] = line
                 .trim()
                 .replace(/\t/g, ",")
                 .replace(/\s+/g, "")
                 .split(",");
-            sex = mOrF;
-            dateOfBirth = dob;
-            placeOfBirth = pob;
-        } else if (lastLine.includes(`${type}<${code}`) && passportNumber === "") {
-            passportNumber = capitalize(line.slice(0, 11));
+            lines.forEach((item) => {
+                if (item.includes(".")) {
+                    dateOfBirth = item;
+                }
+                //matches gender
+                if (item.match(/[MF]/)) {
+                    sex = item.length === 1 ? item : "";
+                }
+
+                //matches place of birth
+                if (item.match(/[A-Z]/) && item.length > 1 && sex) {
+                    placeOfBirth = item;
+                }
+            });
+        } else if (lastLine.toUpperCase().includes("SEX") && !sex) {
+            sex = line.trim().replace(/\t/g, ",").split(",")[0];
+        } else if (
+            (lastLine.toUpperCase().includes("NATIONALITY") && !placeOfBirth) ||
+            (lastLine.toUpperCase().includes("NATIONALITÉ") && !placeOfBirth)
+        ) {
+            placeOfBirth = line.trim().replace(/\t/g, ",").split(",")[0];
         }
         lastLine = line;
     });
