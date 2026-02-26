@@ -21,25 +21,20 @@
     };
 
     const ocrBinding = async (detail: any) => {
-        let reader: Partial<ApplicationFormData> = readPassport(detail.text);
+        let {
+            passportNumber,
+            dateOfBirth,
+            placeOfBirth,
+            sex,
+        }: Partial<ApplicationFormData> = readPassport(detail.text);
         await handleFile(detail.file);
-        console.log(reader, "reader");
 
-        // patchApplicationStore({
-        //     firstname: reader.firstname,
-        //     lastname: reader.lastname,
-        //     maidenName: reader.maidenName ?? "",
-        //     address: {
-        //         name: reader.address?.name ?? "",
-        //         street: reader.address?.street ?? "",
-        //         number: reader.address?.number ?? null,
-        //         place: reader.address?.place ?? "",
-        //         state: reader.address?.state ?? "",
-        //         zip: reader.address?.zip ?? "",
-        //         country: reader.address?.country ?? "",
-        //         addressAddendum: reader.address?.addressAddendum ?? null,
-        //     },
-        // });
+        patchApplicationStore({
+            passportNumber,
+            dateOfBirth,
+            placeOfBirth,
+            sex,
+        });
     };
 
     function setPreviewFromBlobOrFile(

@@ -18,6 +18,8 @@ export type ApplicationFormData = {
     idNumber?: string | null;
     passportNumber?: string | null;
     dateOfBirth?: string | null;
+    placeOfBirth?: string | null;
+    sex?: string | null;
     address: {
         name?: string | null;
         street: string;
