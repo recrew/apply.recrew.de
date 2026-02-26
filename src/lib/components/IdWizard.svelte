@@ -36,6 +36,7 @@
             reader = readIdBackCard(detail.text);
             await handleBackFile(detail.file);
         }
+        console.log(reader, "reader");
 
         patchApplicationStore({
             firstname: reader.firstname,

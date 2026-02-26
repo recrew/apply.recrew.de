@@ -80,8 +80,14 @@ export const readIdFrontCard = (parsedText: string) => {
     const lines = parsedText.split("\n");
     lastLine = "";
     lines.forEach((line) => {
-        if (lastLine.includes("BUNDESREPUBLIK")) {
-            passportNumber = lastLine.split("\t")[2];
+        console.log(line, "line");
+
+        if (
+            line.includes("DEUTSCHLAND") ||
+            lastLine.toUpperCase().includes("NUMMER")
+        ) {
+            let number: string[] = line.split("\t");
+            passportNumber = number.length > 2 ? number[2] : number[0];
         } else if (lastLine.includes("IDENTITY CARD / CARTE D'IDENTITE")) {
             lastName = capitalize(line.trim());
             maidenName = lastName;
