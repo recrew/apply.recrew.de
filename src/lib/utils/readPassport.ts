@@ -82,8 +82,6 @@ export const readIdFrontCard = (parsedText: string) => {
     const lines = parsedText.split("\n");
     lastLine = "";
     lines.forEach((line) => {
-        console.log(lastLine, "lastLine");
-
         if (line.includes("DEUTSCHLAND") || lastLine.includes("Dokument")) {
             let number: string[] = line.split("\t");
             idNumber = number.length > 2 ? number[2] : number[0];
