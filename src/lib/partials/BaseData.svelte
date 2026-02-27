@@ -40,7 +40,7 @@
     import updateCall from "$lib/utils/updateCall";
     import OCRWrapper from "$lib/components/OCRWrapper.svelte";
     import { isEu } from "$lib/utils/isEu";
-    import {readIdCard, readPassport} from "$lib/utils/readPassport";
+    import { readIdFrontCard, readPassport } from "$lib/utils/readPassport";
 
     export let employee: any;
 
@@ -65,10 +65,10 @@
 
         if (which === "front") {
             let reader;
-            if(idOption === "passport"){
+            if (idOption === "passport") {
                 reader = readPassport(detail.text);
-            } else if(idOption === 'id-card') {
-                reader = readIdCard(detail.text);
+            } else if (idOption === "id-card") {
+                reader = readIdFrontCard(detail.text);
             }
 
             // remove existing passport
@@ -76,7 +76,7 @@
                 (n) => n.imageTag !== idOption,
             );
             image = {
-                documentNumber: reader?.passportNumber || '',
+                documentNumber: reader?.passportNumber || "",
                 imageTag: idOption,
                 file: detail.file,
                 name: fileNameGenerator(
@@ -85,27 +85,27 @@
                     "passport",
                     "Vorderseite",
                 ),
-            }
-            formDataPost('/hr/application/' + $page.url.searchParams.get('sheet') + '/image', image).then(res => {
-                employee.images = [
-                    ...employee.images,
-                    res,
-                ];
-            })
+            };
+            formDataPost(
+                "/hr/application/" +
+                    $page.url.searchParams.get("sheet") +
+                    "/image",
+                image,
+            ).then((res) => {
+                employee.images = [...employee.images, res];
+            });
 
-            employee.firstName = reader?.firstName || '';
-            employee.lastName = reader?.lastName || '';
+            employee.firstName = reader?.firstName || "";
+            employee.lastName = reader?.lastName || "";
             employee.dateOfBirth.value = dayjs(
                 reader.dateOfBirth,
                 "DD.MM.YYYY",
             ).format("YYYY-MM-DD");
-            employee.cv.placeOfBirth = reader?.placeOfBirth || '';
-            employee.maidenName = reader?.maidenName || '';
+            employee.cv.placeOfBirth = reader?.placeOfBirth || "";
+            employee.maidenName = reader?.maidenName || "";
             employee.gender = reader?.sex.trim() === "M" ? "male" : "female";
             console.log({ reader, employee });
         }
-
-
     };
 
     const idReader = (detail: any, index?: number) => {
@@ -193,20 +193,23 @@
 
     //$:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
 
-    $: idImages = employee.images.filter(n => n.imageTag === idOption);
+    $: idImages = employee.images.filter((n) => n.imageTag === idOption);
 
     onMount(async () => {
-
         nationalities = (await get("/hr/reference/Staatsangehoerigkeiten"))
             .map((n) => ({ ...n, name: n.value }))
             .sort((a, b) => a.name.localeCompare(b.name));
         countries = (await get("/hr/reference/Staaten"))
             .map((n) => ({ ...n, name: n.value }))
             .sort((a, b) => a.name.localeCompare(b.name));
-        if(employee.images.find(n => n.imageTag === "id-card" && n.location)) {
-            idOption = 'id-card'
-        } else if(employee.images.find(n => n.imageTag === "passport" && n.location)) {
-            idOption = 'passport'
+        if (
+            employee.images.find((n) => n.imageTag === "id-card" && n.location)
+        ) {
+            idOption = "id-card";
+        } else if (
+            employee.images.find((n) => n.imageTag === "passport" && n.location)
+        ) {
+            idOption = "passport";
         }
     });
 </script>
@@ -273,7 +276,6 @@
                         orcBinding(ev.detail, "front");
                     }}
                 />
-
             {/if}
         </div>
     </div>
@@ -283,12 +285,11 @@
         type="file"
         id="avatarFile"
     />
-    {#if idOption === 'id-card'}
+    {#if idOption === "id-card"}
         <div class="grid grid-cols-2 gap-3">
             {#each idImages as image}
-                <img alt="Id rendered" class="p-3" src={image.location}/>
+                <img alt="Id rendered" class="p-3" src={image.location} />
             {/each}
-
         </div>
     {/if}
 

@@ -72,7 +72,15 @@ export function setApplicationStore(data: ApplicationFormData) {
     application.set(data);
 }
 
-/** Optional: partial update helper (usually very handy) */
 export function patchApplicationStore(patch: Partial<ApplicationFormData>) {
-    application.update((curr) => ({ ...curr, ...patch }));
+    application.update((curr) => {
+        const updated = { ...curr, ...patch };
+
+        // Deep merge address if it's being patched
+        if (patch.address) {
+            updated.address = { ...curr.address, ...patch.address };
+        }
+
+        return updated;
+    });
 }
