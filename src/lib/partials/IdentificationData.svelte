@@ -2,6 +2,7 @@
     import {
         Alert,
         Button,
+        Heading,
         Input,
         Label,
         Modal,
@@ -32,6 +33,7 @@
     import PassportWizard from "$lib/components/PassportWizard.svelte";
     import { formComplete } from "$lib/stores/formComplete";
     import Typeahead from "$lib/components/Typeahead.svelte";
+    import AddressData from "./AddressData.svelte";
 
     export let employee: any;
 
@@ -43,6 +45,7 @@
     let loading = false;
 
     let idOption: string;
+    let documentNumber: string;
 
     const orcBinding = (detail: any, which: "front" | "back") => {
         let image;
@@ -212,14 +215,7 @@
 >
     <div>
         <Label for="idOption" class="mb-2">Ausweisart *</Label>
-        <Select
-            bind:value={idOption}
-            id="idOption"
-            required
-            on:change={() => {
-                // cropperModal = true;
-            }}
-        >
+        <Select bind:value={idOption} id="idOption" required>
             <option value="id-card">Personalausweis</option>
             <option value="passport">Reisepass</option>
         </Select>
@@ -231,8 +227,20 @@
         <PassportWizard on:formCompleted={() => formComplete.set(true)} />
     {/if}
 
-    {#if $formComplete && idOption === "id-card"}
-        <div class="flex flex-col space-y-3">
+    {#if $formComplete}
+        <div class="flex flex-col space-y-3 mt-16">
+            <Heading class="text-neutral-600" tag="h5"
+                >Basic Information</Heading
+            >
+            <div class="flex-1 space-y-3">
+                <Label class="mb-2" for="firstName">Dokumentenummer</Label>
+                <Input
+                    type="text"
+                    id="documentNumber"
+                    bind:value={documentNumber}
+                    required
+                />
+            </div>
             <div class="md:flex space-y-3 md:space-y-0 gap-3 justify-between">
                 <div class="flex-1 space-y-3">
                     <Label class="mb-2" for="firstName">Vorname</Label>
@@ -327,9 +335,10 @@
                     />
                 </div>
             </div>
+            <!-- TODO: Address here: -->
+            <Heading class="text-neutral-600 pt-9" tag="h5">Adresse</Heading>
+            <AddressData bind:employee />
         </div>
-    {:else if $formComplete && idOption === "passport"}
-        test 2
     {/if}
 
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
