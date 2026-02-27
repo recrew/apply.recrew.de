@@ -1,5 +1,6 @@
 {
 	"/": [
+		"src/routes/+layout.ts",
 		"src/routes/+layout.ts"
 	],
 	"/data-request": [
@@ -15,12 +16,6 @@
 		"src/routes/+layout.ts"
 	],
 	"/thank-you": [
-		"src/routes/+layout.ts"
-	],
-	"/(blank)/[[step]]": [
-		"src/routes/(blank)/[[step]]/+layout.server.ts",
-		"src/routes/+layout.ts",
-		"src/routes/(blank)/[[step]]/+layout.server.ts",
 		"src/routes/+layout.ts"
 	]
 }
