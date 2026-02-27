@@ -20,6 +20,7 @@
     import { base } from "$app/paths";
     import { onMount } from "svelte";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
+    import { application } from "$lib/stores/application";
 
     let preview: any = null;
     let form: HTMLFormElement;
@@ -125,6 +126,7 @@
         valid = true;
     };
     onMount(() => {
+        console.log($application, "$application");
         if ($page.url.searchParams.get("ref")) {
             candidate.referer = $page.url.searchParams.get("ref");
         }

@@ -1,8 +1,8 @@
 import { writable, type Writable } from "svelte/store";
 
 export type ApplicationFormData = {
-    firstname: string;
-    lastname: string;
+    firstName: string;
+    lastName: string;
     maidenName?: string | null;
     email?: string | null;
     facebook?: string | null;
@@ -33,8 +33,8 @@ export type ApplicationFormData = {
 };
 
 export const initialApplicationData: ApplicationFormData = {
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     email: "",
     facebook: "",
     instagram: "",

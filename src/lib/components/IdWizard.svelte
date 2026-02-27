@@ -36,11 +36,9 @@
             reader = readIdBackCard(detail.text);
             await handleBackFile(detail.file);
         }
-        console.log(reader, "reader");
-
         patchApplicationStore({
-            firstname: reader.firstname,
-            lastname: reader.lastname,
+            firstName: reader.firstName,
+            lastName: reader.lastName,
             maidenName: reader.maidenName ?? "",
             idNumber: reader.idNumber ?? "",
             address: {
