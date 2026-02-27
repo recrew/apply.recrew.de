@@ -1,9 +1,20 @@
 <script lang="ts">
-    import { Button, Label, Modal, Select } from "flowbite-svelte";
+    import {
+        Alert,
+        Button,
+        Input,
+        Label,
+        Modal,
+        Select,
+    } from "flowbite-svelte";
     import { formDataPost, get } from "$lib/api";
     import { onMount } from "svelte";
     import Box from "$lib/components/Box.svelte";
-    import { BellRingOutline, CheckCircleOutline } from "flowbite-svelte-icons";
+    import {
+        BellRingOutline,
+        CheckCircleOutline,
+        GlobeSolid,
+    } from "flowbite-svelte-icons";
     import { reactToBoxInteraction } from "$lib/utils/openStep";
     import { currentStep } from "$lib/stores/currentStep";
     import { fileNameGenerator } from "$lib/utils/fileNameGenerator";
@@ -17,6 +28,10 @@
     import updateCall from "$lib/utils/updateCall";
     import { readIdFrontCard, readPassport } from "$lib/utils/readPassport";
     import OCRWrapper from "$lib/components/OCRWrapper.svelte";
+    import IdWizard from "$lib/components/IdWizard.svelte";
+    import PassportWizard from "$lib/components/PassportWizard.svelte";
+    import { formComplete } from "$lib/stores/formComplete";
+    import Typeahead from "$lib/components/Typeahead.svelte";
 
     export let employee: any;
 
@@ -24,22 +39,16 @@
 
     let nationalities: any[] = [];
     let countries: any[] = [];
-    let avatarFiles: FileList;
+    let avatarFiles: FileList | any;
     let loading = false;
 
     let idOption: string;
-    let idOptions = [
-        { name: "Personalausweis Vorderseite", value: "id-card" },
-        { name: "Reisepass Vorderseite", value: "passport" },
-    ];
-
-    let cropperModal = false;
 
     const orcBinding = (detail: any, which: "front" | "back") => {
         let image;
 
         if (which === "front") {
-            let reader;
+            let reader: any;
             if (idOption === "passport") {
                 reader = readPassport(detail.text);
             } else if (idOption === "id-card") {
@@ -48,7 +57,7 @@
 
             // remove existing passport
             employee.images = employee.images.filter(
-                (n) => n.imageTag !== idOption,
+                (n: any) => n.imageTag !== idOption,
             );
             image = {
                 documentNumber: reader?.passportNumber || "",
@@ -79,7 +88,6 @@
             employee.cv.placeOfBirth = reader?.placeOfBirth || "";
             employee.maidenName = reader?.maidenName || "";
             employee.gender = reader?.sex.trim() === "M" ? "male" : "female";
-            console.log({ reader, employee });
         }
     };
 
@@ -93,21 +101,22 @@
         employee.images[index ?? 0].file = detail.file;
         employee.images[index ?? 0].documentNumber =
             employee.images.filter(
-                (n) => n.imageTag === "id-card" || n.imageTag === "passport",
+                (n: any) =>
+                    n.imageTag === "id-card" || n.imageTag === "passport",
             ).length < 1 && detail.text.length < 1
                 ? "nicht lesbar"
                 : detail.text;
         employee.images[index ?? 0].imageTag = detail.type;
         employee.images = [...employee.images];
         idIndex = employee.images.findIndex(
-            (n) =>
+            (n: any) =>
                 (n.imageTag === "id-card" || n.imageTag === "passport") &&
                 n.documentNumber,
         );
     };
 
     let idIndex = employee.images.findIndex(
-        (n) =>
+        (n: any) =>
             (n.imageTag === "id-card" || n.imageTag === "passport") &&
             n.documentNumber,
     );
@@ -208,23 +217,120 @@
             id="idOption"
             required
             on:change={() => {
-                cropperModal = true;
+                // cropperModal = true;
             }}
         >
             <option value="id-card">Personalausweis</option>
             <option value="passport">Reisepass</option>
         </Select>
     </div>
-    <OCRWrapper
-        type={idOption}
-        title={idOption === "id-card" ? "Personalausweis" : "Reisepass"}
-        bind:cropperModal
-        value={employee.images.find(
-            (n) => n.imageTag === idOption && n.documentNumber,
-        )}
-        on:ocr={(ev) => {
-            orcBinding(ev.detail, "front");
-        }}
-    />
+
+    {#if idOption === "id-card"}
+        <IdWizard on:formCompleted={() => formComplete.set(true)} />
+    {:else if idOption === "passport"}
+        <PassportWizard on:formCompleted={() => formComplete.set(true)} />
+    {/if}
+
+    {#if $formComplete && idOption === "id-card"}
+        <div class="flex flex-col space-y-3">
+            <div class="md:flex space-y-3 md:space-y-0 gap-3 justify-between">
+                <div class="flex-1 space-y-3">
+                    <Label class="mb-2" for="firstName">Vorname</Label>
+                    <Input
+                        type="text"
+                        id="firstName"
+                        bind:value={employee.firstName}
+                        required
+                    />
+                </div>
+                <div class="flex-1 space-y-3">
+                    <Label class="mb-2" for="lastName">Nachname</Label>
+                    <Input
+                        type="text"
+                        id="lastName"
+                        bind:value={employee.lastName}
+                        required
+                    />
+                </div>
+            </div>
+            <div class="md:flex space-y-3 md:space-y-0 gap-3 justify-between">
+                <div class="flex-1 space-y-3">
+                    <Label for="nationality" class="mb-2"
+                        >Staatsanghörigkeit *</Label
+                    >
+                    <Typeahead
+                        bind:value={employee.cv.nationality}
+                        id="nationality"
+                        data={nationalities}
+                        icon={GlobeSolid}
+                        required
+                    />
+                </div>
+                <div class="flex-1 space-y-3">
+                    <Label for="gender" class="mb-2">Geschlecht *</Label>
+                    <Select bind:value={employee.gender} id="gender" required>
+                        <option value="female">Frau</option>
+                        <option value="male">Herr</option>
+                        <option value="diverse">Divers</option>
+                    </Select>
+                </div>
+            </div>
+
+            <div class="md:flex space-y-3 md:space-y-0 gap-3 justify-between">
+                <div class="flex-1 space-y-3">
+                    <Label for="placeOfBirth" class="mb-2">Geburtsort *</Label>
+                    <Input
+                        type="text"
+                        bind:value={employee.cv.placeOfBirth}
+                        id="placeOfBirth"
+                        required
+                    />
+                </div>
+                <div class="flex-1 space-y-3">
+                    <Label for="countryOfBirth" class="mb-2"
+                        >Geburtsland *</Label
+                    >
+                    <Typeahead
+                        required
+                        bind:value={employee.cv.countryOfBirth}
+                        id="countryOfBirth"
+                        data={countries}
+                        icon={GlobeSolid}
+                    />
+                </div>
+            </div>
+
+            <div class="md:flex space-y-3 md:space-y-0 gap-3 justify-between">
+                <div class="flex-1 space-y-3">
+                    <Label for="dob" class="mb-2">Geburtsdatum *</Label>
+                    <Input
+                        type="date"
+                        bind:value={employee.dateOfBirth.value}
+                        id="dob"
+                        required
+                    />
+                    {#if employee.dateOfBirth?.value && dayjs().diff(dayjs(employee.dateOfBirth.value), "years") < 18}
+                        <Alert class="mt-2" color="yellow"
+                            >Hinweis: Unter 18!</Alert
+                        >
+                    {/if}
+                </div>
+                <div class="flex-1 space-y-3">
+                    <Label for="maidenName" class="mb-2">Geburtsname *</Label>
+                    <Input
+                        pattern="[A-Z][A-Za-z\-]+"
+                        bind:value={employee.maidenName}
+                        placeholder="Geburtsname"
+                        type="text"
+                        id="maidenName"
+                        required
+                    />
+                </div>
+            </div>
+        </div>
+    {:else if $formComplete && idOption === "passport"}
+        test 2
+    {/if}
+
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>
