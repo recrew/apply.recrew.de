@@ -220,7 +220,7 @@
 <Box
     disabled={!dataComplete}
     title="Persönliche Daten"
-    open={$currentStep === 1}
+    open={$currentStep === 2}
     on:open={(ev) => reactToBoxInteraction(ev, 1)}
     icon={dataComplete ? CheckCircleOutline : BellRingOutline}
 >
