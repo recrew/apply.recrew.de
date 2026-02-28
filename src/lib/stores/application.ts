@@ -20,6 +20,7 @@ export type ApplicationFormData = {
     dateOfBirth?: string | null;
     placeOfBirth?: string | null;
     sex?: string | null;
+    file?: File | null;
     address: {
         name?: string | null;
         street: string;

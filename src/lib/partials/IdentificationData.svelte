@@ -46,6 +46,7 @@
 
     let idOption: string;
     let documentNumber: string;
+    let currentFile: File;
 
     const sendIdImage = async (
         payload: any,
@@ -58,13 +59,13 @@
             (n: any) => n.imageTag !== idOption,
         );
         image = {
-            documentNumber: payload.documentNumber,
+            documentNumber: payload.documentNumber ?? null,
             employeeUuid: employee.uuid,
             imageTag: idOption,
-            file: payload.file,
+            file: currentFile,
             name: fileNameGenerator(payload.file, employee, type, side),
         };
-        formDataPost(
+        await formDataPost(
             "/hr/application/" + $page.url.searchParams.get("sheet") + "/image",
             image,
         ).then((res) => {
@@ -103,6 +104,8 @@
                 zip: payload.detail.address.postalCode || employee.address?.zip,
             };
         }
+        currentFile = payload.detail.file;
+        sendIdImage(payload.detail, idOption, front);
     };
 
     const orcBinding = (detail: any, which: "front" | "back") => {

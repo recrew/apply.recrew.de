@@ -31,10 +31,12 @@
         let reader: Partial<ApplicationFormData>;
         if (which === "front") {
             reader = readIdFrontCard(detail.text);
+            reader.file = detail.file;
             dispatch("ocrFrontRead", reader);
             await handleFrontFile(detail.file);
         } else {
             reader = readIdBackCard(detail.text);
+            reader.file = detail.file;
             dispatch("ocrBackRead", reader);
             await handleBackFile(detail.file);
         }
