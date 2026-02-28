@@ -57,18 +57,22 @@
             (n: any) => n.imageTag !== idOption,
         );
         image = {
-            documentNumber: documentNumber ?? null,
             employeeUuid: employee.uuid,
             imageTag: idOption,
             file: currentFile,
             name: fileNameGenerator(payload.file, employee, type, side),
         };
+        loading = true;
         await formDataPost(
             "/hr/application/" + $page.url.searchParams.get("sheet") + "/image",
             image,
-        ).then((res) => {
-            employee.images = [...employee.images, res];
-        });
+        )
+            .then((res) => {
+                employee.images = [...employee.images, res];
+            })
+            .finally(() => {
+                loading = false;
+            });
     };
 
     const handleOCRInfo = (
@@ -131,12 +135,6 @@
             employee.avatarFile = avatarFiles[0];
         }
     }
-    const generateBlob = () => {
-        if (typeof employee.avatarFile === "string") {
-            return employee.avatarFile;
-        }
-        return URL.createObjectURL(employee.avatarFile);
-    };
 
     const saveImages = async () => {
         loading = true;
@@ -155,13 +153,11 @@
     const proceed = async () => {
         if (!dataComplete) {
             markEmptyFields();
+            currentStep.update((n) => n + 1);
         } else {
-            await saveImages();
             await updateCall(employee);
         }
     };
-
-    $: idImages = employee.images.filter((n: any) => n.imageTag === idOption);
 
     onMount(async () => {
         nationalities = (await get("/hr/reference/Staatsangehoerigkeiten"))
