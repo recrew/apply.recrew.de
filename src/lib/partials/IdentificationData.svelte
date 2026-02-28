@@ -27,8 +27,6 @@
     import customParseFormat from "dayjs/plugin/customParseFormat";
 
     import updateCall from "$lib/utils/updateCall";
-    import { readIdFrontCard, readPassport } from "$lib/utils/readPassport";
-    import OCRWrapper from "$lib/components/OCRWrapper.svelte";
     import IdWizard from "$lib/components/IdWizard.svelte";
     import PassportWizard from "$lib/components/PassportWizard.svelte";
     import { formComplete } from "$lib/stores/formComplete";
@@ -59,7 +57,7 @@
             (n: any) => n.imageTag !== idOption,
         );
         image = {
-            documentNumber: payload.documentNumber ?? null,
+            documentNumber: documentNumber ?? null,
             employeeUuid: employee.uuid,
             imageTag: idOption,
             file: currentFile,
@@ -79,6 +77,7 @@
     ): void => {
         if (front) {
             employee.images[0].documentNumber = payload.detail.idNumber;
+            documentNumber = payload.detail.idNumber;
             employee.firstName = payload.detail.firstName || employee.firstName;
             employee.lastName = payload.detail.lastName || employee.lastName;
             employee.dateOfBirth.value =
@@ -107,76 +106,6 @@
         currentFile = payload.detail.file;
         sendIdImage(payload.detail, idOption, front);
     };
-
-    const orcBinding = (detail: any, which: "front" | "back") => {
-        let image;
-
-        if (which === "front") {
-            // remove existing passport
-            employee.images = employee.images.filter(
-                (n: any) => n.imageTag !== idOption,
-            );
-            image = {
-                documentNumber: reader?.passportNumber || "",
-                imageTag: idOption,
-                file: detail.file,
-                name: fileNameGenerator(
-                    detail.file,
-                    employee,
-                    "passport",
-                    "Vorderseite",
-                ),
-            };
-            formDataPost(
-                "/hr/application/" +
-                    $page.url.searchParams.get("sheet") +
-                    "/image",
-                image,
-            ).then((res) => {
-                employee.images = [...employee.images, res];
-            });
-
-            employee.firstName = reader?.firstName || "";
-            employee.lastName = reader?.lastName || "";
-            employee.dateOfBirth.value = dayjs(
-                reader.dateOfBirth,
-                "DD.MM.YYYY",
-            ).format("YYYY-MM-DD");
-            employee.cv.placeOfBirth = reader?.placeOfBirth || "";
-            employee.maidenName = reader?.maidenName || "";
-            employee.gender = reader?.sex.trim() === "M" ? "male" : "female";
-        }
-    };
-
-    const idReader = (detail: any, index?: number) => {
-        employee.images[index ?? 0].name = fileNameGenerator(
-            detail.file,
-            employee,
-            detail.type,
-            index ? "Rückseite" : "Vorderseite",
-        );
-        employee.images[index ?? 0].file = detail.file;
-        employee.images[index ?? 0].documentNumber =
-            employee.images.filter(
-                (n: any) =>
-                    n.imageTag === "id-card" || n.imageTag === "passport",
-            ).length < 1 && detail.text.length < 1
-                ? "nicht lesbar"
-                : detail.text;
-        employee.images[index ?? 0].imageTag = detail.type;
-        employee.images = [...employee.images];
-        idIndex = employee.images.findIndex(
-            (n: any) =>
-                (n.imageTag === "id-card" || n.imageTag === "passport") &&
-                n.documentNumber,
-        );
-    };
-
-    let idIndex = employee.images.findIndex(
-        (n: any) =>
-            (n.imageTag === "id-card" || n.imageTag === "passport") &&
-            n.documentNumber,
-    );
 
     let dataComplete = false;
     $: {
