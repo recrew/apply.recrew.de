@@ -31,27 +31,13 @@
         let reader: Partial<ApplicationFormData>;
         if (which === "front") {
             reader = readIdFrontCard(detail.text);
+            dispatch("ocrFrontRead", reader);
             await handleFrontFile(detail.file);
         } else {
             reader = readIdBackCard(detail.text);
+            dispatch("ocrBackRead", reader);
             await handleBackFile(detail.file);
         }
-        patchApplicationStore({
-            firstName: reader.firstName,
-            lastName: reader.lastName,
-            maidenName: reader.maidenName ?? "",
-            idNumber: reader.idNumber ?? "",
-            address: {
-                name: reader.address?.name ?? "",
-                street: reader.address?.street ?? "",
-                number: reader.address?.number ?? null,
-                place: reader.address?.place ?? "",
-                state: reader.address?.state ?? "",
-                zip: reader.address?.zip ?? "",
-                country: reader.address?.country ?? "",
-                addressAddendum: reader.address?.addressAddendum ?? null,
-            },
-        });
     };
 
     function setPreviewFromBlobOrFile(
@@ -159,6 +145,9 @@
                 </div>
             {:else}
                 <img
+                    on:click={() => (cropperModalBack = true)}
+                    on:keydown={() => (cropperModalBack = true)}
+                    aria-hidden="true"
                     class="max-h-full max-w-full"
                     src={frontIdPreview ?? ""}
                     alt="front-id"
@@ -202,8 +191,11 @@
                 </div>
             {:else}
                 <img
-                    class="max-h-full max-w-full"
+                    on:click={() => (cropperModalBack = true)}
+                    on:keydown={() => (cropperModalBack = true)}
+                    aria-hidden="true"
                     src={backIdPreview ?? ""}
+                    class="max-h-full max-w-full"
                     alt="back-id"
                 />
             {/if}

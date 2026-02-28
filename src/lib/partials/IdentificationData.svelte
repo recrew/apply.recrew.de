@@ -47,17 +47,68 @@
     let idOption: string;
     let documentNumber: string;
 
+    const sendIdImage = async (
+        payload: any,
+        type: string = "id-card",
+        front: boolean = true,
+    ): Promise<void> => {
+        let image;
+        let side = front ? "Vorderseite" : "Rückseite";
+        employee.images = employee.images.filter(
+            (n: any) => n.imageTag !== idOption,
+        );
+        image = {
+            documentNumber: payload.documentNumber,
+            employeeUuid: employee.uuid,
+            imageTag: idOption,
+            file: payload.file,
+            name: fileNameGenerator(payload.file, employee, type, side),
+        };
+        formDataPost(
+            "/hr/application/" + $page.url.searchParams.get("sheet") + "/image",
+            image,
+        ).then((res) => {
+            employee.images = [...employee.images, res];
+        });
+    };
+
+    const handleOCRInfo = (
+        payload: CustomEvent,
+        front: boolean = true,
+    ): void => {
+        if (front) {
+            employee.images[0].documentNumber = payload.detail.idNumber;
+            employee.firstName = payload.detail.firstName || employee.firstName;
+            employee.lastName = payload.detail.lastName || employee.lastName;
+            employee.dateOfBirth.value =
+                dayjs(payload.detail.dateOfBirth, "DD.MM.YYYY").format(
+                    "YYYY-MM-DD",
+                ) || employee.dateOfBirth.value;
+            employee.cv.nationality =
+                payload.detail.placeOfBirth || employee.cv.nationality;
+            employee.maidenName =
+                payload.detail.maidenName || employee.maidenName;
+            employee.gender = payload.detail.sex === "M" ? "male" : "female";
+            employee.cv.countryOfBirth =
+                payload.detail.countryOfBirth || employee.cv.countryOfBirth;
+        } else {
+            employee.address = {
+                country:
+                    payload.detail.address.country || employee.address?.country,
+                place: payload.detail.address.place || employee.address?.place,
+                street:
+                    payload.detail.address.street || employee.address?.street,
+                number:
+                    payload.detail.address.number || employee.address?.number,
+                zip: payload.detail.address.postalCode || employee.address?.zip,
+            };
+        }
+    };
+
     const orcBinding = (detail: any, which: "front" | "back") => {
         let image;
 
         if (which === "front") {
-            let reader: any;
-            if (idOption === "passport") {
-                reader = readPassport(detail.text);
-            } else if (idOption === "id-card") {
-                reader = readIdFrontCard(detail.text);
-            }
-
             // remove existing passport
             employee.images = employee.images.filter(
                 (n: any) => n.imageTag !== idOption,
@@ -222,7 +273,11 @@
     </div>
 
     {#if idOption === "id-card"}
-        <IdWizard on:formCompleted={() => formComplete.set(true)} />
+        <IdWizard
+            on:formCompleted={() => formComplete.set(true)}
+            on:ocrFrontRead={handleOCRInfo}
+            on:ocrBackRead={(e) => handleOCRInfo(e, false)}
+        />
     {:else if idOption === "passport"}
         <PassportWizard on:formCompleted={() => formComplete.set(true)} />
     {/if}
@@ -233,7 +288,7 @@
                 >Basic Information</Heading
             >
             <div class="flex-1 space-y-3">
-                <Label class="mb-2" for="firstName">Dokumentenummer</Label>
+                <Label class="mb-2" for="documentNumber">Dokumentenummer</Label>
                 <Input
                     type="text"
                     id="documentNumber"
@@ -335,7 +390,6 @@
                     />
                 </div>
             </div>
-            <!-- TODO: Address here: -->
             <Heading class="text-neutral-600 pt-9" tag="h5">Adresse</Heading>
             <AddressData bind:employee />
         </div>
