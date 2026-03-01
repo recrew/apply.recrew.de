@@ -6,10 +6,7 @@
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
     import { createEventDispatcher } from "svelte";
     import OCRWrapper from "./OCRWrapper.svelte";
-    import {
-        patchApplicationStore,
-        type ApplicationFormData,
-    } from "$lib/stores/application";
+    import { type ApplicationFormData } from "$lib/stores/application";
     import { readIdBackCard, readIdFrontCard } from "$lib/utils/readPassport";
 
     let cropperModalFront: boolean = false;

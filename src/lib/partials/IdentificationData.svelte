@@ -109,9 +109,12 @@
         sendIdImage(payload.detail, idOption, front);
     };
 
-    //For sue on Reisepass/Passports
+    //For use on Reisepass/Passports
     const handleOCRInfo = (payload: CustomEvent): void => {
-        console.log(payload.detail, "payload.detail");
+        const { firstName, lastName } = payload.detail.passportBio;
+
+        employee.firstName = firstName || employee.firstName;
+        employee.lastName = lastName || employee.lastName;
 
         employee.images[0].documentNumber = payload.detail.idNumber;
         documentNumber = payload.detail.idNumber;

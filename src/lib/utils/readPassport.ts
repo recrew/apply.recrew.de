@@ -19,6 +19,8 @@ let address = {
     addressAddendum: "",
 };
 export const readPassport = (parsedText: string) => {
+    const passportBio = readIdFrontCard(parsedText);
+
     const lines = parsedText.split("\n");
     lastLine = "";
 
@@ -71,6 +73,7 @@ export const readPassport = (parsedText: string) => {
         lastLine = line;
     });
     return {
+        passportBio,
         idNumber,
         dateOfBirth,
         placeOfBirth,

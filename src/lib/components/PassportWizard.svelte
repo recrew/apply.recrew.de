@@ -3,10 +3,7 @@
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
     import { createEventDispatcher } from "svelte";
     import OCRWrapper from "./OCRWrapper.svelte";
-    import {
-        patchApplicationStore,
-        type ApplicationFormData,
-    } from "$lib/stores/application";
+    import { type ApplicationFormData } from "$lib/stores/application";
     import { readPassport } from "$lib/utils/readPassport";
 
     let cropperModal: boolean = false;
@@ -22,6 +19,7 @@
 
     const ocrBinding = async (detail: any) => {
         let {
+            passportBio,
             idNumber,
             dateOfBirth,
             placeOfBirth,
@@ -29,6 +27,7 @@
         }: Partial<ApplicationFormData> = readPassport(detail.text);
 
         dispatch("ocrRead", {
+            passportBio,
             idNumber,
             dateOfBirth,
             placeOfBirth,
@@ -36,13 +35,6 @@
             file: detail.file,
         });
         await handleFile(detail.file);
-
-        patchApplicationStore({
-            idNumber,
-            dateOfBirth,
-            placeOfBirth,
-            sex,
-        });
     };
 
     function setPreviewFromBlobOrFile(

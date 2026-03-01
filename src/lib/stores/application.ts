@@ -1,6 +1,10 @@
 import { writable, type Writable } from "svelte/store";
 
 export type ApplicationFormData = {
+    passportBio?: {
+        firstName?: string | null;
+        lastName?: string | null;
+    };
     firstName: string;
     lastName: string;
     maidenName?: string | null;
