@@ -79,6 +79,7 @@
         payload: CustomEvent,
         front: boolean = true,
     ): void => {
+        console.log(payload.detail);
         if (front) {
             employee.images[0].documentNumber = payload.detail.idNumber;
             documentNumber = payload.detail.idNumber;
@@ -88,23 +89,22 @@
                 dayjs(payload.detail.dateOfBirth, "DD.MM.YYYY").format(
                     "YYYY-MM-DD",
                 ) || employee.dateOfBirth.value;
-            employee.cv.nationality =
-                payload.detail.placeOfBirth || employee.cv.nationality;
+            employee.cv.placeOfBirth =
+                payload.detail.placeOfBirth || employee.cv.countryOfBirth;
             employee.maidenName =
                 payload.detail.maidenName || employee.maidenName;
-            employee.gender = payload.detail.sex === "M" ? "male" : "female";
-            employee.cv.countryOfBirth =
-                payload.detail.countryOfBirth || employee.cv.countryOfBirth;
+            employee.gender = payload.detail.sex === "F" ? "female" : "male";
         } else {
+            employee.cv.countryOfBirth =
+                payload.detail.country || employee.cv.countryOfBirth;
             employee.address = {
-                country:
-                    payload.detail.address.country || employee.address?.country,
+                country: payload.detail.country || employee.address?.country,
                 place: payload.detail.address.place || employee.address?.place,
                 street:
                     payload.detail.address.street || employee.address?.street,
                 number:
                     payload.detail.address.number || employee.address?.number,
-                zip: payload.detail.address.postalCode || employee.address?.zip,
+                zip: payload.detail.address.zip || employee.address?.zip,
             };
         }
         currentFile = payload.detail.file;
@@ -127,7 +127,7 @@
             employee.cv.countryOfBirth &&
             employee.cv.nationality &&
             idDocsComplete &&
-            employee.address.country;
+            employee.address?.country;
 
         $blocked = !dataComplete;
 

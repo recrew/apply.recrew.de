@@ -153,7 +153,7 @@
             employee.cv.countryOfBirth &&
             employee.cv.nationality &&
             idDocsComplete &&
-            employee.address.country;
+            employee.address?.country;
 
         $blocked = !dataComplete;
 
