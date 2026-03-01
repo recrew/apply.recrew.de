@@ -22,7 +22,6 @@
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import { blocked } from "$lib/stores/blocked";
     import { page } from "$app/stores";
-    import uploadImages from "$lib/utils/uploadImages";
     import dayjs from "dayjs";
     import customParseFormat from "dayjs/plugin/customParseFormat";
 
@@ -75,11 +74,10 @@
             });
     };
 
-    const handleOCRInfo = (
+    const handleOCRInfoId = (
         payload: CustomEvent,
         front: boolean = true,
     ): void => {
-        console.log(payload.detail);
         if (front) {
             employee.images[0].documentNumber = payload.detail.idNumber;
             documentNumber = payload.detail.idNumber;
@@ -111,6 +109,24 @@
         sendIdImage(payload.detail, idOption, front);
     };
 
+    //For sue on Reisepass/Passports
+    const handleOCRInfo = (payload: CustomEvent): void => {
+        console.log(payload.detail, "payload.detail");
+
+        employee.images[0].documentNumber = payload.detail.idNumber;
+        documentNumber = payload.detail.idNumber;
+        employee.dateOfBirth.value =
+            dayjs(payload.detail.dateOfBirth, "DD.MM.YYYY").format(
+                "YYYY-MM-DD",
+            ) || employee.dateOfBirth.value;
+        employee.cv.placeOfBirth =
+            payload.detail.placeOfBirth || employee.cv.countryOfBirth;
+        employee.gender = payload.detail.sex === "F" ? "female" : "male";
+
+        currentFile = payload.detail.file;
+        sendIdImage(payload.detail, idOption);
+    };
+
     let dataComplete = false;
     $: {
         const idFront =
@@ -136,20 +152,6 @@
         }
     }
 
-    const saveImages = async () => {
-        loading = true;
-        try {
-            await uploadImages(employee, $page.url.searchParams.get("sheet"));
-            currentStep.update((n) => n + 1);
-        } catch (e) {
-            alert(
-                "Fehler beim Hochladen der Bilder. Bitte prüfen Sie Ihren Browser, ob alle Dateien nicht zu groß sind. ",
-            );
-        } finally {
-            loading = false;
-        }
-    };
-
     const proceed = async () => {
         if (!dataComplete) {
             markEmptyFields();
@@ -166,19 +168,6 @@
         countries = (await get("/hr/reference/Staaten"))
             .map((n: any) => ({ ...n, name: n.value }))
             .sort((a: any, b: any) => a.name.localeCompare(b.name));
-        if (
-            employee.images.find(
-                (n: any) => n.imageTag === "id-card" && n.location,
-            )
-        ) {
-            idOption = "id-card";
-        } else if (
-            employee.images.find(
-                (n: any) => n.imageTag === "passport" && n.location,
-            )
-        ) {
-            idOption = "passport";
-        }
     });
 </script>
 
@@ -203,11 +192,14 @@
     {#if idOption === "id-card"}
         <IdWizard
             on:formCompleted={() => formComplete.set(true)}
-            on:ocrFrontRead={handleOCRInfo}
-            on:ocrBackRead={(e) => handleOCRInfo(e, false)}
+            on:ocrFrontRead={handleOCRInfoId}
+            on:ocrBackRead={(e) => handleOCRInfoId(e, false)}
         />
     {:else if idOption === "passport"}
-        <PassportWizard on:formCompleted={() => formComplete.set(true)} />
+        <PassportWizard
+            on:formCompleted={() => formComplete.set(true)}
+            on:ocrRead={handleOCRInfo}
+        />
     {/if}
 
     {#if $formComplete}

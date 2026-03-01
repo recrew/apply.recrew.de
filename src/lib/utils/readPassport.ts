@@ -24,7 +24,7 @@ export const readPassport = (parsedText: string) => {
 
     lines.forEach((line) => {
         if (lastLine.match(/[A-Z]<[A-Z]/)) {
-            passportNumber = line.split("<")[0].slice(0, 9);
+            idNumber = line.split("<")[0].slice(0, 9);
         } else if (
             lastLine.toUpperCase().includes("DATE DE NAISSANCE") ||
             lastLine.toUpperCase().includes("DATE OF BIRTH")
@@ -71,7 +71,7 @@ export const readPassport = (parsedText: string) => {
         lastLine = line;
     });
     return {
-        passportNumber,
+        idNumber,
         dateOfBirth,
         placeOfBirth,
         sex,

@@ -22,15 +22,23 @@
 
     const ocrBinding = async (detail: any) => {
         let {
-            passportNumber,
+            idNumber,
             dateOfBirth,
             placeOfBirth,
             sex,
         }: Partial<ApplicationFormData> = readPassport(detail.text);
+
+        dispatch("ocrRead", {
+            idNumber,
+            dateOfBirth,
+            placeOfBirth,
+            sex,
+            file: detail.file,
+        });
         await handleFile(detail.file);
 
         patchApplicationStore({
-            passportNumber,
+            idNumber,
             dateOfBirth,
             placeOfBirth,
             sex,
