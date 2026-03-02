@@ -1,12 +1,13 @@
 <script lang="ts">
-    import { Heading, Input, Label, Select } from "flowbite-svelte";
+    import { Input, Label } from "flowbite-svelte";
     import { get } from "$lib/api";
     import { onMount } from "svelte";
-    import Box from "$lib/components/Box.svelte";
     import { GlobeSolid } from "flowbite-svelte-icons";
     import Typeahead from "$lib/components/Typeahead.svelte";
 
     export let employee: any;
+    export let getInputClass: (fieldName: string) => string = () => "";
+    export let changedFields: Set<string> = new Set();
 
     let countries: any[] = [];
 
@@ -14,8 +15,8 @@
         if (typeof employee.address === "undefined") employee.address = {};
 
         countries = (await get("/hr/reference/Staaten"))
-            .map((n) => ({ ...n, name: n.value }))
-            .sort((a, b) => a.name.localeCompare(b.name));
+            .map((n: any) => ({ ...n, name: n.value }))
+            .sort((a: any, b: any) => a.name.localeCompare(b.name));
     });
 </script>
 
@@ -28,6 +29,7 @@
                     type="text"
                     bind:value={employee.address.street}
                     id="street"
+                    class={getInputClass("street")}
                     required
                 />
             </div>
@@ -38,6 +40,7 @@
                     bind:value={employee.address.number}
                     pattern="[0-9]*"
                     id="number"
+                    class={getInputClass("number")}
                     required
                 />
             </div>
@@ -47,6 +50,7 @@
                     type="text"
                     bind:value={employee.address.addressAddendum}
                     id="addressAddendum"
+                    class={getInputClass("addressAddendum")}
                 />
             </div>
             <div>
@@ -55,6 +59,7 @@
                     type="text"
                     bind:value={employee.address.zip}
                     id="plz"
+                    class={getInputClass("zip")}
                     required
                 />
             </div>
@@ -64,6 +69,7 @@
                     type="text"
                     bind:value={employee.address.place}
                     id="place"
+                    class={getInputClass("place")}
                     required
                 />
             </div>
@@ -74,10 +80,10 @@
                     id="country"
                     data={countries}
                     icon={GlobeSolid}
+                    class={getInputClass("country")}
                     required
                 />
             </div>
         </div>
     {/if}
 </div>
-

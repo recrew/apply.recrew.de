@@ -66,7 +66,7 @@
                 title: "Erfolgreich gespeichert",
             });
         } catch (e) {
-            console.log(e);
+            console.error(e);
             $modalStore.registerConfig({
                 content: "Ein Fehler ist aufgetreten.",
                 title: "Ups...",

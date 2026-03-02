@@ -134,6 +134,7 @@ declare module '$env/static/private' {
 	export const XDG_VTNR: string;
 	export const XDG_SESSION_ID: string;
 	export const npm_config_user_agent: string;
+	export const GHOSTTY_SHELL_INTEGRATION_NO_CURSOR: string;
 	export const npm_execpath: string;
 	export const npm_package_devDependencies__sveltejs_adapter_auto: string;
 	export const npm_package_devDependencies_svelte: string;
@@ -313,6 +314,7 @@ declare module '$env/dynamic/private' {
 		XDG_VTNR: string;
 		XDG_SESSION_ID: string;
 		npm_config_user_agent: string;
+		GHOSTTY_SHELL_INTEGRATION_NO_CURSOR: string;
 		npm_execpath: string;
 		npm_package_devDependencies__sveltejs_adapter_auto: string;
 		npm_package_devDependencies_svelte: string;

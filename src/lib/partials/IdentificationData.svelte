@@ -24,7 +24,6 @@
     import { page } from "$app/stores";
     import dayjs from "dayjs";
     import customParseFormat from "dayjs/plugin/customParseFormat";
-
     import updateCall from "$lib/utils/updateCall";
     import IdWizard from "$lib/components/IdWizard.svelte";
     import PassportWizard from "$lib/components/PassportWizard.svelte";
@@ -44,25 +43,149 @@
     let idOption: string;
     let documentNumber: string;
     let currentFile: File;
+
     let initialValues: any = {};
+    let changedFields: Set<string> = new Set();
+
+    const buildChangedFields = (): Set<string> => {
+        const next = new Set<string>();
+
+        const fieldsToCheck = [
+            {
+                current: documentNumber,
+                initial: initialValues.documentNumber,
+                name: "documentNumber",
+            },
+            {
+                current: employee.firstName,
+                initial: initialValues.firstName,
+                name: "firstName",
+            },
+            {
+                current: employee.lastName,
+                initial: initialValues.lastName,
+                name: "lastName",
+            },
+            {
+                current: employee.cv.nationality,
+                initial: initialValues.nationality,
+                name: "nationality",
+            },
+            {
+                current: employee.gender,
+                initial: initialValues.gender,
+                name: "gender",
+            },
+            {
+                current: employee.cv.placeOfBirth,
+                initial: initialValues.placeOfBirth,
+                name: "placeOfBirth",
+            },
+            {
+                current: employee.cv.countryOfBirth,
+                initial: initialValues.countryOfBirth,
+                name: "countryOfBirth",
+            },
+            {
+                current: employee.dateOfBirth.value,
+                initial: initialValues.dateOfBirth,
+                name: "dateOfBirth",
+            },
+            {
+                current: employee.maidenName,
+                initial: initialValues.maidenName,
+                name: "maidenName",
+            },
+            {
+                current: employee.address?.country,
+                initial: initialValues.country,
+                name: "country",
+            },
+            {
+                current: employee.address?.place,
+                initial: initialValues.place,
+                name: "place",
+            },
+            {
+                current: employee.address?.street,
+                initial: initialValues.street,
+                name: "street",
+            },
+            {
+                current: employee.address?.number,
+                initial: initialValues.number,
+                name: "number",
+            },
+            {
+                current: employee.address?.zip,
+                initial: initialValues.zip,
+                name: "zip",
+            },
+            {
+                current: employee.address?.addressAddendum,
+                initial: initialValues.addressAddendum,
+                name: "addressAddendum",
+            },
+        ];
+
+        for (const { current, initial, name } of fieldsToCheck) {
+            if (current !== initial) {
+                next.add(name);
+            }
+        }
+
+        return next;
+    };
+
+    const getInputClass = (fieldName: string) =>
+        changedFields.has(fieldName)
+            ? "ring-2 ring-blue-500 ring-offset-1 ring-offset-white"
+            : "";
+
+    $: initialReady = initialValues && Object.keys(initialValues).length > 0;
+
+    $: if (initialReady) {
+        documentNumber;
+        employee.firstName;
+        employee.lastName;
+        employee.cv.nationality;
+        employee.gender;
+        employee.cv.placeOfBirth;
+        employee.cv.countryOfBirth;
+        employee.dateOfBirth.value;
+        employee.maidenName;
+        employee.address?.country;
+        employee.address?.place;
+        employee.address?.street;
+        employee.address?.number;
+        employee.address?.zip;
+        employee.address?.addressAddendum;
+
+        changedFields = buildChangedFields();
+    } else {
+        changedFields = new Set();
+    }
 
     const sendIdImage = async (
         payload: any,
         type: string = "id-card",
         front: boolean = true,
     ): Promise<void> => {
-        let image;
         let side = front ? "Vorderseite" : "Rückseite";
+
         employee.images = employee.images.filter(
             (n: any) => n.imageTag !== idOption,
         );
-        image = {
+
+        const image = {
             employeeUuid: employee.uuid,
             imageTag: idOption,
             file: currentFile,
             name: fileNameGenerator(payload.file, employee, type, side),
         };
+
         loading = true;
+
         await formDataPost(
             "/hr/application/" + $page.url.searchParams.get("sheet") + "/image",
             image,
@@ -106,11 +229,11 @@
                 zip: payload.detail.address.zip || employee.address?.zip,
             };
         }
+
         currentFile = payload.detail.file;
         sendIdImage(payload.detail, idOption, front);
     };
 
-    //For use on Reisepass/Passports
     const handleOCRInfo = (payload: CustomEvent): void => {
         const { firstName, lastName } = payload.detail.passportBio;
 
@@ -119,12 +242,15 @@
 
         employee.images[0].documentNumber = payload.detail.idNumber;
         documentNumber = payload.detail.idNumber;
+
         employee.dateOfBirth.value =
             dayjs(payload.detail.dateOfBirth, "DD.MM.YYYY").format(
                 "YYYY-MM-DD",
             ) || employee.dateOfBirth.value;
+
         employee.cv.placeOfBirth =
             payload.detail.placeOfBirth || employee.cv.countryOfBirth;
+
         employee.gender = payload.detail.sex === "F" ? "female" : "male";
 
         currentFile = payload.detail.file;
@@ -132,11 +258,13 @@
     };
 
     let dataComplete = false;
+
     $: {
         const idFront =
             employee.images[0]?.file || employee.images[0]?.location;
         const idBack = employee.images[1]?.file || employee.images[1]?.location;
         const isIdCard = employee.images[0]?.imageTag === "id-card";
+
         const idDocsComplete = isIdCard ? idFront && idBack : idFront;
 
         dataComplete =
@@ -166,9 +294,28 @@
     };
 
     onMount(async () => {
+        initialValues = {
+            documentNumber,
+            firstName: employee.firstName,
+            lastName: employee.lastName,
+            nationality: employee.cv.nationality,
+            gender: employee.gender,
+            placeOfBirth: employee.cv.placeOfBirth,
+            countryOfBirth: employee.cv.countryOfBirth,
+            dateOfBirth: employee.dateOfBirth.value,
+            maidenName: employee.maidenName,
+            country: employee.address?.country,
+            place: employee.address?.place,
+            street: employee.address?.street,
+            number: employee.address?.number,
+            zip: employee.address?.zip,
+            addressAddendum: employee.address?.addressAddendum,
+        };
+
         nationalities = (await get("/hr/reference/Staatsangehoerigkeiten"))
             .map((n: any) => ({ ...n, name: n.value }))
             .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
         countries = (await get("/hr/reference/Staaten"))
             .map((n: any) => ({ ...n, name: n.value }))
             .sort((a: any, b: any) => a.name.localeCompare(b.name));
@@ -217,6 +364,7 @@
                     type="text"
                     id="documentNumber"
                     bind:value={documentNumber}
+                    class={getInputClass("documentNumber")}
                     required
                 />
             </div>
@@ -227,6 +375,7 @@
                         type="text"
                         id="firstName"
                         bind:value={employee.firstName}
+                        class={getInputClass("firstName")}
                         required
                     />
                 </div>
@@ -236,6 +385,7 @@
                         type="text"
                         id="lastName"
                         bind:value={employee.lastName}
+                        class={getInputClass("lastName")}
                         required
                     />
                 </div>
@@ -247,6 +397,7 @@
                     >
                     <Typeahead
                         bind:value={employee.cv.nationality}
+                        inputClass={getInputClass("nationality")}
                         id="nationality"
                         data={nationalities}
                         icon={GlobeSolid}
@@ -255,7 +406,12 @@
                 </div>
                 <div class="flex-1 space-y-3">
                     <Label for="gender" class="mb-2">Geschlecht *</Label>
-                    <Select bind:value={employee.gender} id="gender" required>
+                    <Select
+                        bind:value={employee.gender}
+                        id="gender"
+                        required
+                        class={getInputClass("gender")}
+                    >
                         <option value="female">Frau</option>
                         <option value="male">Herr</option>
                         <option value="diverse">Divers</option>
@@ -269,6 +425,7 @@
                     <Input
                         type="text"
                         bind:value={employee.cv.placeOfBirth}
+                        class={getInputClass("placeOfBirth")}
                         id="placeOfBirth"
                         required
                     />
@@ -280,6 +437,7 @@
                     <Typeahead
                         required
                         bind:value={employee.cv.countryOfBirth}
+                        inputClass={getInputClass("countryOfBirth")}
                         id="countryOfBirth"
                         data={countries}
                         icon={GlobeSolid}
@@ -293,6 +451,7 @@
                     <Input
                         type="date"
                         bind:value={employee.dateOfBirth.value}
+                        class={getInputClass("dateOfBirth")}
                         id="dob"
                         required
                     />
@@ -307,6 +466,7 @@
                     <Input
                         pattern="[A-Z][A-Za-z\-]+"
                         bind:value={employee.maidenName}
+                        class={getInputClass("maidenName")}
                         placeholder="Geburtsname"
                         type="text"
                         id="maidenName"
@@ -315,7 +475,7 @@
                 </div>
             </div>
             <Heading class="text-neutral-600 pt-9" tag="h5">Adresse</Heading>
-            <AddressData bind:employee />
+            <AddressData bind:employee {changedFields} {getInputClass} />
         </div>
     {/if}
 
