@@ -4,6 +4,7 @@
     import getCroppedImg from "$lib/utils/canvasUtils.js";
     import { createEventDispatcher, onMount } from "svelte";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
+    import { ZoomOutOutline, ZoomInOutline } from "flowbite-svelte-icons";
 
     export let aspect: number = 1.6;
     export let name = "avatar";
@@ -190,6 +191,12 @@
             files = dataTransfer.files;
         }
     }
+    function zoomIn() {
+        zoom = Math.min(zoom + 0.1, 3);
+    }
+    function zoomOut() {
+        zoom = Math.max(zoom - 0.1, 1);
+    }
 
     function submit() {
         dispatch("cropped", {
@@ -266,7 +273,7 @@
                     {image}
                     bind:crop
                     bind:zoom
-                    zoomSpeed={.5}
+                    zoomSpeed={0.5}
                     on:cropcomplete={saveCroppedFile}
                     {aspect}
                     showGrid={true}
@@ -309,6 +316,18 @@
                 if (hasCamera) startCamera();
             }}>Reset</Button
         >
+        <div class="flex gap-2">
+            <button
+                type="button"
+                on:click|preventDefault={zoomOut}
+                color="light"
+            >
+                <ZoomOutOutline size="md" color="primary" />
+            </button>
+            <button type="button" on:click|preventDefault={zoomIn} color="dark">
+                <ZoomInOutline size="md" color="white" />
+            </button>
+        </div>
         <Button type="button" on:click={submit}>Übernehmen</Button>
     </div>
 {/if}

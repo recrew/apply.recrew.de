@@ -117,6 +117,9 @@
             </div>
         {:else}
             <img
+                on:click={() => (cropperModal = true)}
+                on:keydown={() => (cropperModal = true)}
+                aria-hidden="true"
                 class="max-h-full max-w-full"
                 src={passportPreview ?? ""}
                 alt="passport"
