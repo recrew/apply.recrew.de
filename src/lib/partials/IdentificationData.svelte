@@ -44,6 +44,7 @@
     let idOption: string;
     let documentNumber: string;
     let currentFile: File;
+    let initialValues: any = {};
 
     const sendIdImage = async (
         payload: any,
