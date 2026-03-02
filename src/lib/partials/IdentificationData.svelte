@@ -266,8 +266,6 @@
         const idBack = employee.images[1]?.file || employee.images[1]?.location;
         const isIdCard = employee.images[0]?.imageTag === "id-card";
 
-        const idDocsComplete = isIdCard ? idFront && idBack : idFront;
-
         dataComplete =
             employee.firstName &&
             employee.lastName &&
@@ -276,14 +274,11 @@
             employee.cv.placeOfBirth &&
             employee.cv.countryOfBirth &&
             employee.dateOfBirth.value &&
-            employee.maidenName &&
             employee.address?.country &&
             employee.address?.place &&
             employee.address?.street &&
             employee.address?.number &&
-            employee.address?.zip &&
-            employee.address?.addressAddendum &&
-            idDocsComplete;
+            employee.address?.zip;
 
         $blocked = !dataComplete;
 
@@ -294,10 +289,11 @@
 
     const proceed = async () => {
         if (!dataComplete) {
+            console.log("not complete");
             markEmptyFields();
-            currentStep.update((n) => n + 1);
         } else {
             await updateCall(employee);
+            currentStep.update((n) => n + 1);
         }
     };
 
