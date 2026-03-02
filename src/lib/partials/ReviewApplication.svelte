@@ -11,7 +11,7 @@
         Textarea,
     } from "flowbite-svelte";
     import { goto } from "$app/navigation";
-    import { NewspaperSolid, UserCircleSolid } from "flowbite-svelte-icons";
+    import { UserCircleSolid } from "flowbite-svelte-icons";
     import Botr from "$lib/components/Botr.svelte";
 
     import { formDataPost } from "$lib/api";
@@ -20,13 +20,14 @@
     import { base } from "$app/paths";
     import { onMount } from "svelte";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
+    import { application } from "$lib/stores/application";
 
-    let preview = null;
-    let form;
+    let preview: any = null;
+    let form: HTMLFormElement;
     let valid = false;
     let canvas: HTMLCanvasElement;
 
-    let candidate = {
+    let candidate: any = {
         firstname: "",
         lastname: "",
         email: "",
@@ -90,7 +91,7 @@
         setTimeout(showPreview, 300);
     };
 
-    const handleChange = async (event) => {
+    const handleChange = async (event: Event) => {
         const files = event.target.files;
         if (files.length > 0) {
             if (files[0].type === "application/pdf") {
@@ -104,7 +105,7 @@
     };
     const showPreview = () => {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = (e: any) => {
             preview = e.target.result;
         };
         reader.readAsDataURL(candidate.photo);
@@ -125,13 +126,12 @@
         valid = true;
     };
     onMount(() => {
+        console.log($application, "$application");
         if ($page.url.searchParams.get("ref")) {
             candidate.referer = $page.url.searchParams.get("ref");
         }
     });
 </script>
-
-<div class="w-full banner"></div>
 
 <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto mb-24">
     <section>
@@ -343,13 +343,3 @@
         </div>
     </section>
 </div>
-
-<style>
-    .banner {
-        background-image: url("/barkeeper-1400x600.jpg");
-        background-size: cover;
-        background-position: bottom left;
-        background-repeat: no-repeat;
-        height: 50vh;
-    }
-</style>
