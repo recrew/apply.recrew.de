@@ -178,6 +178,7 @@
         );
 
         const image = {
+            documentNumber: payload.idNumber ?? null,
             employeeUuid: employee.uuid,
             imageTag: idOption,
             file: currentFile,
@@ -270,12 +271,19 @@
         dataComplete =
             employee.firstName &&
             employee.lastName &&
-            employee.gender &&
-            employee.dateOfBirth.value &&
-            employee.cv.countryOfBirth &&
             employee.cv.nationality &&
-            idDocsComplete &&
-            employee.address?.country;
+            employee.gender &&
+            employee.cv.placeOfBirth &&
+            employee.cv.countryOfBirth &&
+            employee.dateOfBirth.value &&
+            employee.maidenName &&
+            employee.address?.country &&
+            employee.address?.place &&
+            employee.address?.street &&
+            employee.address?.number &&
+            employee.address?.zip &&
+            employee.address?.addressAddendum &&
+            idDocsComplete;
 
         $blocked = !dataComplete;
 
