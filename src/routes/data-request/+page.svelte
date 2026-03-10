@@ -17,7 +17,7 @@
     import HealthInsuranceData from "$lib/partials/HealthInsuranceData.svelte";
     import BankData from "$lib/partials/BankData.svelte";
     import QualificationData from "$lib/partials/QualificationData.svelte";
-    import BaseData from "$lib/partials/BaseData.svelte";
+    import ProfileData from "$lib/partials/ProfileData.svelte";
     import { modalStore } from "$lib/stores/modal";
     import DatasheetSaved from "$lib/partials/DatasheetSaved.svelte";
     import { currentStep } from "$lib/stores/currentStep";
@@ -79,7 +79,7 @@
 
     let steps = [
         "Identifikations Daten",
-        "Persönliche Daten",
+        "Profil & Kontakt",
         "Qualifikationen",
         "Lohnsteuer",
         "Bankdaten",
@@ -144,7 +144,7 @@
 
             <StepIndicator currentStep={$currentStep} {steps} />
             <IdentificationData bind:employee />
-            <BaseData bind:employee />
+            <ProfileData bind:employee />
             <QualificationData bind:employee />
 
             <TaxData bind:employee />

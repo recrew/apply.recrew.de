@@ -48,7 +48,7 @@
     })
 </script>
 
-<Box disabled={$blocked} title="Lohnsteuer" open={$currentStep === 3} on:open={ev => reactToBoxInteraction(ev, 3)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={$blocked} title="Lohnsteuer" open={$currentStep === 4} on:open={ev => reactToBoxInteraction(ev, 4)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     <div class="grid gap-3 mt-2">
         <SVNummerInput
             bind:value={employee.cv.socialSecurityNumber}

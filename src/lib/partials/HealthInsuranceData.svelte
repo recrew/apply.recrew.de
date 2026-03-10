@@ -21,13 +21,13 @@
     })
 
     $:{
-        if($currentStep === 5) {
+        if($currentStep === 6) {
             markEmptyFields();
         }
     }
 </script>
 
-<Box disabled={$blocked} title="Krankenversicherung" open={$currentStep === 5} on:open={ev => reactToBoxInteraction(ev, 5)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={$blocked} title="Krankenversicherung" open={$currentStep === 6} on:open={ev => reactToBoxInteraction(ev, 6)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     {#if employee.healthInsurance}
         <div class="my-2">
             <Toggle bind:checked={employee.healthInsurance.isPublic}>Gesetzlich versichert?</Toggle>

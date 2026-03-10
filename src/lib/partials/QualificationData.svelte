@@ -278,8 +278,8 @@
 <Box
     disabled={$blocked}
     title="Qualifikationen"
-    open={$currentStep === 2}
-    on:open={(ev) => reactToBoxInteraction(ev, 2)}
+    open={$currentStep === 3}
+    on:open={(ev) => reactToBoxInteraction(ev, 3)}
     icon={dataComplete ? CheckCircleOutline : BellRingOutline}
 >
     <div class="grid md:grid-cols-2 gap-y-3 gap-x-4 mt-2">

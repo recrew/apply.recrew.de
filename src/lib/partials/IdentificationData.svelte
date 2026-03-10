@@ -7,6 +7,10 @@
         Label,
         Modal,
         Select,
+        Fileupload,
+        Listgroup,
+        ListgroupItem,
+        P
     } from "flowbite-svelte";
     import { formDataPost, get } from "$lib/api";
     import { onMount } from "svelte";
@@ -28,7 +32,7 @@
     import DocumentWizard from "$lib/components/DocumentWizard.svelte";
     import { formComplete } from "$lib/stores/formComplete";
     import Typeahead from "$lib/components/Typeahead.svelte";
-    import AddressData from "./AddressData.svelte";
+    import { isEu } from "$lib/utils/isEu";
 
     export let employee: any;
 
@@ -38,6 +42,7 @@
     let countries: any[] = [];
     let avatarFiles: FileList | any;
     let loading = false;
+    let nonEuFiles: File[] = [];
 
     let idOption: string = "id-card";
     let documentNumber: string;
@@ -94,37 +99,7 @@
                 current: employee.maidenName,
                 initial: initialValues.maidenName,
                 name: "maidenName",
-            },
-            {
-                current: employee.address?.country,
-                initial: initialValues.country,
-                name: "country",
-            },
-            {
-                current: employee.address?.place,
-                initial: initialValues.place,
-                name: "place",
-            },
-            {
-                current: employee.address?.street,
-                initial: initialValues.street,
-                name: "street",
-            },
-            {
-                current: employee.address?.number,
-                initial: initialValues.number,
-                name: "number",
-            },
-            {
-                current: employee.address?.zip,
-                initial: initialValues.zip,
-                name: "zip",
-            },
-            {
-                current: employee.address?.addressAddendum,
-                initial: initialValues.addressAddendum,
-                name: "addressAddendum",
-            },
+            }
         ];
 
         for (const { current, initial, name } of fieldsToCheck) {
@@ -153,12 +128,6 @@
         employee.cv.countryOfBirth;
         employee.dateOfBirth.value;
         employee.maidenName;
-        employee.address?.country;
-        employee.address?.place;
-        employee.address?.street;
-        employee.address?.number;
-        employee.address?.zip;
-        employee.address?.addressAddendum;
 
         changedFields = buildChangedFields();
     } else {
@@ -290,7 +259,7 @@
         docsComplete = !!(hasFront && hasBack);
     }
 
-    // 2. Calculate data completeness
+    // 2. Calculate data completeness (removed address fields)
     $: dataComplete =
         !!(employee.firstName &&
         employee.lastName &&
@@ -298,31 +267,20 @@
         employee.gender &&
         employee.cv.placeOfBirth &&
         employee.cv.countryOfBirth &&
-        employee.dateOfBirth.value &&
-        employee.address?.country &&
-        employee.address?.place &&
-        employee.address?.street &&
-        employee.address?.number &&
-        employee.address?.zip);
+        employee.dateOfBirth.value);
 
     // 3. Update stores based on calculated completeness
     $: $blocked = !dataComplete || !docsComplete;
     $: formComplete.set(docsComplete);
 
-    // 4. Handle avatar files separately
-    $: if (avatarFiles && avatarFiles.length > 0) {
-        employee.avatarFile = avatarFiles[0];
-    }
-
-    // 5. Sync documentNumber back to the images array for persistence
+    // 4. Sync documentNumber back to the images array for persistence
     $: if (documentNumber && employee.images) {
         const idImages = employee.images.filter(img => img.imageTag === idOption);
         if (idImages.length > 0) {
-            // Sort to find the latest image of the current type (id-card or passport)
             const latest = [...idImages].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
             if (latest && latest.documentNumber !== documentNumber) {
                 latest.documentNumber = documentNumber;
-                employee.images = [...employee.images]; // Trigger reactivity
+                employee.images = [...employee.images]; 
             }
         }
     }
@@ -332,6 +290,31 @@
             console.log("not complete or missing images");
             markEmptyFields();
         } else {
+            // Upload Non-EU files if any
+            if (nonEuFiles && nonEuFiles.length > 0) {
+                loading = true;
+                for (const file of nonEuFiles) {
+                    if (file) {
+                        try {
+                            const image = {
+                                employeeUuid: employee.uuid,
+                                imageTag: "work-permit",
+                                file: file,
+                                name: fileNameGenerator(file, employee, "work-permit", ""),
+                            };
+                            const res = await formDataPost(
+                                "/hr/application/" + $page.url.searchParams.get("sheet") + "/image",
+                                image
+                            );
+                            employee.images = [...employee.images, res];
+                        } catch (e) {
+                            console.error("Error uploading non-eu file", e);
+                        }
+                    }
+                }
+                nonEuFiles = []; // clear after upload
+                loading = false;
+            }
             await updateCall(employee);
             currentStep.update((n) => n + 1);
         }
@@ -359,12 +342,6 @@
             countryOfBirth: employee.cv.countryOfBirth,
             dateOfBirth: employee.dateOfBirth.value,
             maidenName: employee.maidenName,
-            country: employee.address?.country,
-            place: employee.address?.place,
-            street: employee.address?.street,
-            number: employee.address?.number,
-            zip: employee.address?.zip,
-            addressAddendum: employee.address?.addressAddendum,
         };
 
         nationalities = (await get("/hr/reference/Staatsangehoerigkeiten"))
@@ -382,7 +359,7 @@
 </Modal>
 <Box
     disabled={!dataComplete}
-    title="Identifikation Daten"
+    title="Identifikation & Verifikation"
     open={$currentStep === 1}
     on:open={(ev) => reactToBoxInteraction(ev, 1)}
     icon={dataComplete ? CheckCircleOutline : BellRingOutline}
@@ -399,7 +376,7 @@
     {#if $formComplete}
         <div class="flex flex-col space-y-3 mt-16">
             <Heading class="text-neutral-600" tag="h5"
-                >Basic Information</Heading
+                >Basis Informationen</Heading
             >
             <div class="flex-1 space-y-3">
                 <Label class="mb-2" for="documentNumber">Dokumentenummer</Label>
@@ -436,7 +413,7 @@
             <div class="md:flex space-y-3 md:space-y-0 gap-3 justify-between">
                 <div class="flex-1 space-y-3">
                     <Label for="nationality" class="mb-2"
-                        >Staatsanghörigkeit *</Label
+                        >Staatsangehörigkeit *</Label
                     >
                     <Typeahead
                         bind:value={employee.cv.nationality}
@@ -461,6 +438,53 @@
                     </Select>
                 </div>
             </div>
+
+            {#if employee.cv.nationality && !isEu(employee.cv.nationality)}
+                <Alert class="mt-3" border color="red">
+                    <Heading tag="h4">Staatsangehörigkeit außerhalb EWR</Heading>
+                    <P class="dark:text-white"
+                        >Die Bearbeitung geht schneller, wenn du erforderliche Dokumente
+                        (Aufenthaltserlaubnis, Arbeitserlaubnis, etc) schon bereit
+                        stellst. Aber keine Sorge, du kannst diese Nachweise auch später
+                        nachreichen.</P
+                    >
+                    
+                    {#if (employee.images ?? []).filter(img => img.imageTag === "work-permit").length > 0}
+                        <div class="mt-4 mb-2">
+                            <Label class="pb-1 text-xs text-gray-500 uppercase">Bereits hochgeladene Dokumente:</Label>
+                            <Listgroup class="bg-white/50 border-dashed">
+                                {#each (employee.images ?? []).filter(img => img.imageTag === "work-permit") as img}
+                                    <ListgroupItem class="flex justify-between items-center text-sm py-1">
+                                        <span class="truncate">{img.name || "Arbeitserlaubnis"}</span>
+                                        {#if img.location}
+                                            <a href={img.location} target="_blank" class="text-blue-600 hover:underline text-xs">Ansehen</a>
+                                        {/if}
+                                    </ListgroupItem>
+                                {/each}
+                            </Listgroup>
+                        </div>
+                    {/if}
+
+                    <div class="mt-4">
+                        <Label class="pb-2" for="multiple_files"
+                            >Weitere Datei(en) hochladen</Label
+                        >
+                        <Fileupload
+                            accept="image/*,application/pdf"
+                            id="multiple_files"
+                            multiple
+                            bind:files={nonEuFiles}
+                        />
+                        <Listgroup items={nonEuFiles} let:item class="mt-2">
+                            {#if item}
+                                {item.name}
+                            {:else}
+                                <ListgroupItem>Keine neuen Dateien ausgewählt</ListgroupItem>
+                            {/if}
+                        </Listgroup>
+                    </div>
+                </Alert>
+            {/if}
 
             <div class="md:flex space-y-3 md:space-y-0 gap-3 justify-between">
                 <div class="flex-1 space-y-3">
@@ -517,10 +541,9 @@
                     />
                 </div>
             </div>
-            <Heading class="text-neutral-600 pt-9" tag="h5">Adresse</Heading>
-            <AddressData bind:employee {changedFields} {getInputClass} />
         </div>
     {/if}
 
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>
+
