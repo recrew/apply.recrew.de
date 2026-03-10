@@ -1,6 +1,5 @@
 <script lang="ts">
     import { createEventDispatcher, onDestroy } from "svelte";
-    import { fade } from "svelte/transition";
     import { Alert, Button, Label, Select } from "flowbite-svelte";
     import {
         ProfileCardOutline,
@@ -108,6 +107,8 @@
         syncStateFromImages();
     }
 
+    $: showBack = (state === "needs-back" || (state === "complete" && selectedType === "id-card")) && selectedType !== "other";
+
     $: hasDocs = !!(
         frontPreview ||
         backPreview ||
@@ -193,7 +194,7 @@
 <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-12">
         <div class="mb-6">
             {#if hasDocs || selectedType === "other"}
-                <div transition:fade class="mb-4">
+                <div class="mb-4">
                     <Label for="docTypeSelect" class="mb-2">Ausweisart *</Label>
                     <Select
                         id="docTypeSelect"
@@ -208,29 +209,29 @@
             {/if}
 
             {#if state === "unknown-type"}
-                <div transition:fade class="mt-3">
+                <div class="mt-3">
                     <Alert color="yellow">
                         <ExclamationCircleOutline slot="icon" class="w-5 h-5" />
                         Dokumenttyp nicht erkannt — bitte oben manuell wählen (z.B. bei ausländischen ID-Karten)
                     </Alert>
                 </div>
             {:else if state === "needs-back"}
-                <div transition:fade class="flex items-center gap-2 mt-3 text-blue-600 dark:text-blue-400">
+                <div class="flex items-center gap-2 mt-3 text-blue-600 dark:text-blue-400">
                     <CheckCircleSolid class="w-5 h-5" />
                     <span class="text-sm font-medium">Dokument erkannt — bitte Rückseite hochladen</span>
                 </div>
             {:else if state === "complete" && selectedType === "passport"}
-                <div transition:fade class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
+                <div class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
                     <CheckCircleSolid class="w-5 h-5" />
                     <span class="text-sm font-medium">Reisepass erkannt ✓</span>
                 </div>
             {:else if state === "complete" && selectedType === "id-card"}
-                <div transition:fade class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
+                <div class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
                     <CheckCircleSolid class="w-5 h-5" />
                     <span class="text-sm font-medium">Dokument vollständig erkannt ✓</span>
                 </div>
             {:else if state === "complete" && selectedType === "other"}
-                 <div transition:fade class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
+                 <div class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
                     <CheckCircleSolid class="w-5 h-5" />
                     <span class="text-sm font-medium">Dokument hochgeladen ✓</span>
                 </div>
@@ -239,7 +240,7 @@
 
         <div class="flex flex-row gap-4 items-stretch">
             <!-- Vorderseite / Reisepass / Sonstiges -->
-            <div class={state === "needs-back" || state === "complete" ? "w-1/2" : "w-full"}>
+            <div class={showBack ? "w-1/2" : "w-full"}>
                 <h5 class="mb-4 text-lg font-extrabold tracking-tight leading-none text-gray-700 dark:text-white">
                     {state === "complete" && selectedType === "passport"
                         ? "Reisepass"
@@ -257,7 +258,7 @@
                     value="doc-front"
                     on:ocr={(ev) => handleFrontOCR(ev.detail)}
                 >
-                    <div class={state === "needs-back" || (state === "complete" && selectedType === "id-card") ? "aspect-[1.6] w-full relative" : "w-full relative"}>
+                    <div class={showBack ? "aspect-[1.6] w-full relative" : "w-full relative"}>
                         {#if !frontPreview}
                             <div
                                 class="flex flex-col justify-center items-center w-full h-64 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
@@ -286,51 +287,49 @@
             </div>
 
             <!-- Rückseite (nur bei Personalausweis) -->
-            {#if (state === "needs-back" || (state === "complete" && selectedType === "id-card")) && selectedType !== "other"}
-                <div class="w-1/2 flex flex-col" transition:fade>
-                    <h5 class="mb-4 text-lg font-extrabold tracking-tight leading-none text-gray-700 dark:text-white">
-                        Rückseite
-                    </h5>
+            <div class={`flex flex-col overflow-hidden ${showBack ? "w-1/2" : "w-0 pointer-events-none"}`}>
+                <h5 class="mb-4 text-lg font-extrabold tracking-tight leading-none text-gray-700 dark:text-white">
+                    Rückseite
+                </h5>
 
-                    <OCRWrapper
-                        type="id-card"
-                        title="Dokument Rückseite"
-                        bind:cropperModal={cropperModalBack}
-                        value="id-card"
-                        on:ocr={(ev) => handleBackOCR(ev.detail)}
-                    >
-                        <div class="aspect-[1.6] w-full relative">
-                            {#if !backPreview}
-                                <div
-                                    class="absolute inset-0 flex flex-col justify-center items-center bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                                    on:click={() => (cropperModalBack = true)}
-                                    on:keydown={() => (cropperModalBack = true)}
-                                    aria-hidden="true"
-                                >
-                                    <RectangleListOutline class="mb-3 w-10 h-10 text-gray-400" />
-                                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                        <span class="font-semibold">Klicken Sie hier</span>
-                                    </p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">JPG, JPEG, PNG, PDF</p>
-                                </div>
-                            {:else}
-                                <img
-                                    on:click={() => (cropperModalBack = true)}
-                                    on:keydown={() => (cropperModalBack = true)}
-                                    aria-hidden="true"
-                                    class="absolute inset-0 w-full h-full object-contain rounded"
-                                    src={backPreview}
-                                    alt="Rückseite"
-                                />
-                            {/if}
-                        </div>
-                    </OCRWrapper>
-                </div>
-            {/if}
+                <OCRWrapper
+                    type="id-card"
+                    title="Dokument Rückseite"
+                    bind:cropperModal={cropperModalBack}
+                    value="id-card"
+                    on:ocr={(ev) => handleBackOCR(ev.detail)}
+                >
+                    <div class="aspect-[1.6] w-full relative">
+                        {#if !backPreview}
+                            <div
+                                class="absolute inset-0 flex flex-col justify-center items-center bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                                on:click={() => (cropperModalBack = true)}
+                                on:keydown={() => (cropperModalBack = true)}
+                                aria-hidden="true"
+                            >
+                                <RectangleListOutline class="mb-3 w-10 h-10 text-gray-400" />
+                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <span class="font-semibold">Klicken Sie hier</span>
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">JPG, JPEG, PNG, PDF</p>
+                            </div>
+                        {:else}
+                            <img
+                                on:click={() => (cropperModalBack = true)}
+                                on:keydown={() => (cropperModalBack = true)}
+                                aria-hidden="true"
+                                class="absolute inset-0 w-full h-full object-contain rounded"
+                                src={backPreview}
+                                alt="Rückseite"
+                            />
+                        {/if}
+                    </div>
+                </OCRWrapper>
+            </div>
         </div>
 
         {#if !hasDocs && state === 'idle'}
-            <div class="mt-8 flex justify-center" transition:fade>
+            <div class="mt-8 flex justify-center">
                 <Button 
                     outline 
                     color="light" 
