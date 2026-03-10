@@ -20,13 +20,22 @@
         // DIN A4
         return 0.707;
     };
+    let ocrError: string | null = null;
+
+    const readFileAsDataURL = (file: File): Promise<string> =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+        });
+
     const readOcr = async (): Promise<void> => {
         loading = true;
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const result = await post("/ocr/parse", {
-                base64Image: reader.result,
-            });
+        ocrError = null;
+        try {
+            const dataUrl = await readFileAsDataURL(files[0]);
+            const result = await post("/ocr/parse", { base64Image: dataUrl });
             const parsed = result.ParsedResults[0];
             dispatch("ocr", {
                 text: parsed.ParsedText,
@@ -34,10 +43,11 @@
                 file: files[0],
             });
             cropperModal = false;
+        } catch (error) {
+            ocrError = "OCR-Erkennung fehlgeschlagen. Bitte versuche es erneut.";
+        } finally {
             loading = false;
-        };
-
-        reader.readAsDataURL(files[0]);
+        }
     };
 </script>
 
@@ -48,6 +58,9 @@
         <Heading class="text-xl font-semibold text-gray-900 dark:text-white">{title}</Heading>
     </svelte:fragment>
     <div class="my-5">
+        {#if ocrError}
+            <p class="mb-4 text-sm text-red-600">{ocrError}</p>
+        {/if}
         {#if loading}
             <Spinner />
         {:else}

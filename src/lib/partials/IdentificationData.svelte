@@ -27,6 +27,7 @@
     import { blocked } from "$lib/stores/blocked";
     import { page } from "$app/stores";
     import dayjs from "dayjs";
+    import { latestImageByTag } from "$lib/utils/imageUtils";
     import customParseFormat from "dayjs/plugin/customParseFormat";
     import updateCall from "$lib/utils/updateCall";
     import DocumentWizard from "$lib/components/DocumentWizard.svelte";
@@ -47,6 +48,7 @@
     let idOption: string = "id-card";
     let documentNumber: string;
     let currentFile: File;
+    let pendingFrontPayload: any = null;
 
     let initialValues: any = {};
     let changedFields: Set<string> = new Set();
@@ -189,13 +191,17 @@
         if (detail.idNumber) documentNumber = detail.idNumber;
         if (detail.firstName) employee.firstName = detail.firstName;
         if (detail.lastName) employee.lastName = detail.lastName;
+        if (detail.maidenName) employee.maidenName = detail.maidenName;
         const dob = parseDateOfBirth(detail.dateOfBirth);
         if (dob) employee.dateOfBirth.value = dob;
         if (detail.placeOfBirth) employee.cv.placeOfBirth = detail.placeOfBirth;
+        if (detail.nationality) employee.cv.nationality = detail.nationality;
         if (detail.sex) {
             employee.gender = sexToGender(detail.sex);
         }
     };
+
+    let streetMissingWarning = false;
 
     const handleOCRInfoId = async (
         payload: CustomEvent,
@@ -205,10 +211,13 @@
         if (payload.detail.docType) idOption = payload.detail.docType;
 
         if (front) {
-            if (payload.detail.maidenName) employee.maidenName = payload.detail.maidenName;
             applyCommonOcrFields(payload.detail);
+            pendingFrontPayload = { ...payload.detail, docType };
+            await updateCall(employee);
         } else {
+            if (payload.detail.idNumber) documentNumber = payload.detail.idNumber;
             if (payload.detail.country) employee.cv.countryOfBirth = payload.detail.country;
+            if (payload.detail.height) employee.cv.height = payload.detail.height;
             employee.address = {
                 country: payload.detail.address?.country || employee.address?.country || "Deutschland",
                 place: payload.detail.address?.place || employee.address?.place || null,
@@ -216,22 +225,32 @@
                 number: payload.detail.address?.number ?? employee.address?.number ?? null,
                 zip: payload.detail.address?.zip || employee.address?.zip || null,
             };
-        }
+            streetMissingWarning = !!payload.detail.streetMissingOcrLines;
 
-        currentFile = payload.detail.file;
-        await sendIdImage(payload.detail, docType, front);
-        await updateCall(employee);
+            // Upload front with corrected documentNumber from back MRZ
+            if (pendingFrontPayload) {
+                currentFile = pendingFrontPayload.file;
+                await sendIdImage({ ...pendingFrontPayload, idNumber: documentNumber }, docType, true);
+                pendingFrontPayload = null;
+            }
+
+            currentFile = payload.detail.file;
+            await sendIdImage({ ...payload.detail, idNumber: documentNumber }, docType, false);
+            syncDocumentNumberToImage();
+            await updateCall(employee);
+        }
     };
 
     const handleOCRInfo = async (payload: CustomEvent): Promise<void> => {
         const docType = payload.detail.docType ?? idOption;
         if (payload.detail.docType) idOption = payload.detail.docType;
 
-        const { firstName, lastName } = payload.detail.passportBio ?? {};
-        applyCommonOcrFields({ ...payload.detail, firstName, lastName });
+        const { firstName, lastName, maidenName } = payload.detail.passportBio ?? {};
+        applyCommonOcrFields({ ...payload.detail, firstName, lastName, maidenName });
 
         currentFile = payload.detail.file;
         await sendIdImage(payload.detail, docType);
+        syncDocumentNumberToImage();
         await updateCall(employee);
     };
 
@@ -275,15 +294,24 @@
     $: formComplete.set(docsComplete);
 
     // 4. Sync documentNumber back to the images array for persistence
-    $: if (documentNumber && employee.images) {
-        const idImages = employee.images.filter(img => img.imageTag === idOption);
-        if (idImages.length > 0) {
-            const latest = [...idImages].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
-            if (latest && latest.documentNumber !== documentNumber) {
-                latest.documentNumber = documentNumber;
-                employee.images = [...employee.images]; 
+    $: loadDocumentNumber(idOption);
+
+    function loadDocumentNumber(type: string) {
+        const latest = latestImageByTag(employee.images ?? [], type);
+        documentNumber = latest?.documentNumber ?? "";
+    }
+
+    function syncDocumentNumberToImage() {
+        if (!documentNumber || !employee.images) return;
+        const tag = idOption === "passport" ? "passport" : "id-card";
+        let changed = false;
+        for (const img of employee.images) {
+            if (img.imageTag === tag && img.documentNumber !== documentNumber) {
+                img.documentNumber = documentNumber;
+                changed = true;
             }
         }
+        if (changed) employee.images = [...employee.images];
     }
 
     const proceed = async () => {
@@ -373,6 +401,12 @@
         on:ocrBackRead={(e) => handleOCRInfoId(e, false)}
         on:ocrRead={handleOCRInfo}
     />
+
+    {#if streetMissingWarning}
+        <p class="mt-3 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded px-3 py-2">
+            Straße konnte nicht erkannt werden — bitte manuell eingeben.
+        </p>
+    {/if}
 
     {#if $formComplete}
         <div class="flex flex-col space-y-3 mt-16">

@@ -17,6 +17,7 @@
         readIdFrontCard,
         readIdBackCard,
     } from "$lib/utils/readPassport";
+    import { latestImageByTag } from "$lib/utils/imageUtils";
 
     type WizardState = "idle" | "detecting" | "needs-back" | "complete" | "unknown-type" | "other";
 
@@ -30,10 +31,7 @@
     let cropperModalBack = false;
     let frontPreview: string | null = null;
     let backPreview: string | null = null;
-    const latestByTag = (tag: string) =>
-        images
-            .filter(img => img.imageTag === tag)
-            .sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0] ?? null;
+    const latestByTag = (tag: string) => latestImageByTag(images, tag);
 
     const idCardHasSide = (img: { name?: string; location?: string }, side: string) => {
         const encodedSide = encodeURIComponent(side);
