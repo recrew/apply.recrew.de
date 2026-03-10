@@ -7,6 +7,7 @@
         RectangleListOutline,
         CheckCircleSolid,
         ExclamationCircleOutline,
+        QuestionCircleOutline,
     } from "flowbite-svelte-icons";
     import OCRWrapper from "./OCRWrapper.svelte";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
@@ -17,10 +18,10 @@
         readIdBackCard,
     } from "$lib/utils/readPassport";
 
-    type WizardState = "idle" | "detecting" | "needs-back" | "complete" | "unknown-type";
+    type WizardState = "idle" | "detecting" | "needs-back" | "complete" | "unknown-type" | "other";
 
     export let images: { id?: number; imageTag: string; name?: string; location?: string }[] = [];
-    export let selectedType: "id-card" | "passport" = "id-card";
+    export let selectedType: "id-card" | "passport" | "other" = "id-card";
 
     const dispatch = createEventDispatcher();
 
@@ -50,38 +51,44 @@
 
     let initialized = false;
 
-    function syncStateFromImages(forceType?: "id-card" | "passport") {
+    function syncStateFromImages(forceType?: "id-card" | "passport" | "other") {
         const typeToSync = forceType ?? selectedType;
         
         const latestFrontIdCard = latestIdCardBySide("Vorderseite");
         const latestPassport = latestByTag("passport");
+        const latestOther = latestByTag("other");
         const back = latestIdCardBySide("Rückseite");
 
         const isIdComplete = !!(latestFrontIdCard && back);
         const isPassportComplete = !!latestPassport;
+        const isOtherComplete = !!latestOther;
 
         let front = null;
 
         if (forceType) {
-            front = forceType === "passport" ? latestPassport : latestFrontIdCard;
+            if (forceType === "passport") front = latestPassport;
+            else if (forceType === "other") front = latestOther;
+            else front = latestFrontIdCard;
         } else {
             // Preference logic for initial load:
-            if (isPassportComplete && !isIdComplete) {
+            if (isPassportComplete) {
                 front = latestPassport;
-            } else if (isIdComplete && !isPassportComplete) {
+            } else if (isIdComplete) {
                 front = latestFrontIdCard;
+            } else if (isOtherComplete) {
+                front = latestOther;
             } else {
                 front = (latestFrontIdCard && latestPassport)
                     ? ((latestFrontIdCard.id ?? 0) > (latestPassport.id ?? 0) ? latestFrontIdCard : latestPassport)
-                    : (latestFrontIdCard ?? latestPassport);
+                    : (latestFrontIdCard ?? latestPassport ?? latestOther);
             }
         }
 
         if (front?.location) {
             frontPreview = front.location;
-            selectedType = front.imageTag as "id-card" | "passport";
+            selectedType = front.imageTag as "id-card" | "passport" | "other";
             
-            if (front.imageTag === "passport") {
+            if (front.imageTag === "passport" || front.imageTag === "other") {
                 state = "complete";
                 dispatch("formCompleted");
             } else if (back?.location) {
@@ -108,7 +115,7 @@
     $: hasDocs = !!(
         frontPreview ||
         backPreview ||
-        images.some((img) => img.imageTag === "passport" || img.imageTag === "id-card")
+        images.some((img) => img.imageTag === "passport" || img.imageTag === "id-card" || img.imageTag === "other")
     );
 
     function setPreview(fileOrBlob: File | Blob | null, side: "front" | "back") {
@@ -142,10 +149,18 @@
 
     const handleFrontOCR = async (detail: any) => {
         lastFrontDetail = detail;
-        const docType = detectDocumentType(detail.text);
-
+        
         const resolved = await resolvePreview(detail.file);
         setPreview(resolved, "front");
+
+        if (selectedType === "other") {
+            dispatch("ocrRead", { file: detail.file, docType: "other" });
+            state = "complete";
+            dispatch("formCompleted");
+            return;
+        }
+
+        const docType = detectDocumentType(detail.text);
 
         if (docType === "passport") {
             selectedType = "passport";
@@ -185,7 +200,7 @@
 
 <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-12">
         <div class="mb-6">
-            {#if hasDocs}
+            {#if hasDocs || selectedType === "other"}
                 <div transition:fade class="mb-4">
                     <Label for="docTypeSelect" class="mb-2">Ausweisart *</Label>
                     <Select
@@ -193,8 +208,9 @@
                         bind:value={selectedType}
                         on:change={onManualTypeChange}
                     >
-                        <option value="id-card">Personalausweis</option>
+                        <option value="id-card">Personalausweis / Aufenthaltstitel</option>
                         <option value="passport">Reisepass</option>
+                        <option value="other">Sonstiges (Fiktionsbescheinigung / Duldung)</option>
                     </Select>
                 </div>
             {/if}
@@ -203,13 +219,13 @@
                 <div transition:fade class="mt-3">
                     <Alert color="yellow">
                         <ExclamationCircleOutline slot="icon" class="w-5 h-5" />
-                        Dokumenttyp nicht erkannt — bitte oben manuell wählen
+                        Dokumenttyp nicht erkannt — bitte oben manuell wählen (z.B. bei ausländischen ID-Karten)
                     </Alert>
                 </div>
             {:else if state === "needs-back"}
                 <div transition:fade class="flex items-center gap-2 mt-3 text-blue-600 dark:text-blue-400">
                     <CheckCircleSolid class="w-5 h-5" />
-                    <span class="text-sm font-medium">Personalausweis erkannt — bitte Rückseite hochladen</span>
+                    <span class="text-sm font-medium">Dokument erkannt — bitte Rückseite hochladen</span>
                 </div>
             {:else if state === "complete" && selectedType === "passport"}
                 <div transition:fade class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
@@ -219,24 +235,31 @@
             {:else if state === "complete" && selectedType === "id-card"}
                 <div transition:fade class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
                     <CheckCircleSolid class="w-5 h-5" />
-                    <span class="text-sm font-medium">Personalausweis vollständig ✓</span>
+                    <span class="text-sm font-medium">Dokument vollständig erkannt ✓</span>
+                </div>
+            {:else if state === "complete" && selectedType === "other"}
+                 <div transition:fade class="flex items-center gap-2 mt-3 text-green-600 dark:text-green-400">
+                    <CheckCircleSolid class="w-5 h-5" />
+                    <span class="text-sm font-medium">Dokument hochgeladen ✓</span>
                 </div>
             {/if}
         </div>
 
         <div class="flex flex-row gap-4 items-stretch">
-            <!-- Vorderseite / Reisepass -->
+            <!-- Vorderseite / Reisepass / Sonstiges -->
             <div class={state === "needs-back" || state === "complete" ? "w-1/2" : "w-full"}>
                 <h5 class="mb-4 text-lg font-extrabold tracking-tight leading-none text-gray-700 dark:text-white">
                     {state === "complete" && selectedType === "passport"
                         ? "Reisepass"
+                        : selectedType === "other"
+                        ? "Dokument"
                         : state === "needs-back" || (state === "complete" && selectedType === "id-card")
-                        ? "Personalausweis — Vorderseite"
-                        : "Ausweis / Reisepass"}
+                        ? "Vorderseite"
+                        : "Ausweis / Reisepass / eAT"}
                 </h5>
 
                 <OCRWrapper
-                    type="id-card"
+                    type={selectedType === "other" ? "id-card" : selectedType}
                     title="Dokument"
                     bind:cropperModal={cropperModalFront}
                     value="doc-front"
@@ -263,7 +286,7 @@
                                 aria-hidden="true"
                                 class="w-full h-full object-contain rounded"
                                 src={frontPreview}
-                                alt="Vorderseite"
+                                alt="Dokument"
                             />
                         {/if}
                     </div>
@@ -271,15 +294,15 @@
             </div>
 
             <!-- Rückseite (nur bei Personalausweis) -->
-            {#if state === "needs-back" || (state === "complete" && selectedType === "id-card")}
+            {#if (state === "needs-back" || (state === "complete" && selectedType === "id-card")) && selectedType !== "other"}
                 <div class="w-1/2 flex flex-col" transition:fade>
                     <h5 class="mb-4 text-lg font-extrabold tracking-tight leading-none text-gray-700 dark:text-white">
-                        Personalausweis — Rückseite
+                        Rückseite
                     </h5>
 
                     <OCRWrapper
                         type="id-card"
-                        title="Personalausweis Rückseite"
+                        title="Dokument Rückseite"
                         bind:cropperModal={cropperModalBack}
                         value="id-card"
                         on:ocr={(ev) => handleBackOCR(ev.detail)}
@@ -313,4 +336,19 @@
                 </div>
             {/if}
         </div>
+
+        {#if !hasDocs && state === 'idle'}
+            <div class="mt-8 flex justify-center" transition:fade>
+                <Button 
+                    outline 
+                    color="light" 
+                    size="sm"
+                    class="flex items-center gap-2 border-dashed"
+                    on:click={() => { selectedType = 'other'; state = 'idle'; initialized = true; }}
+                >
+                    <QuestionCircleOutline class="w-4 h-4" />
+                    Ich habe keines dieser Dokumente
+                </Button>
+            </div>
+        {/if}
 </div>

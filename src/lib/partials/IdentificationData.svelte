@@ -244,6 +244,7 @@
         
         const isIdCard = idOption === "id-card";
         const isPassport = idOption === "passport";
+        const isOther = idOption === "other";
         
         const checkSide = (img: any, side: string) => {
             const encodedSide = encodeURIComponent(side);
@@ -253,7 +254,7 @@
                    img.location?.includes(`%20${encodedSide}`);
         };
 
-        const hasFront = isPassport ? idImages.length > 0 : idImages.some(img => checkSide(img, "Vorderseite"));
+        const hasFront = (isPassport || isOther) ? idImages.length > 0 : idImages.some(img => checkSide(img, "Vorderseite"));
         const hasBack = isIdCard ? idImages.some(img => checkSide(img, "Rückseite")) : true;
 
         docsComplete = !!(hasFront && hasBack);
@@ -322,7 +323,7 @@
 
     onMount(async () => {
         // Initialize documentNumber from the latest relevant images
-        const idImages = (employee.images ?? []).filter(img => img.imageTag === "id-card" || img.imageTag === "passport");
+        const idImages = (employee.images ?? []).filter(img => img.imageTag === "id-card" || img.imageTag === "passport" || img.imageTag === "other");
 
         const latestWithId = [...idImages]
             .filter(img => img.documentNumber)
