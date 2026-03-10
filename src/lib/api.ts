@@ -102,14 +102,20 @@ const formConverter = (data: any, form: FormData): FormData => {
                         ) {
                             subSubValue = parseGermanDate(subSubValue);
                         }
-                        form.append(`${key}[${subKey}][${subSubKey}]`, subSubValue);
+                        if (typeof subSubValue !== "undefined" && subSubValue !== null) {
+                            form.append(`${key}[${subKey}][${subSubKey}]`, subSubValue);
+                        }
                     });
                 } else {
-                    form.append(`${key}[${subKey}]`, subValue);
+                    if (typeof subValue !== "undefined" && subValue !== null) {
+                        form.append(`${key}[${subKey}]`, subValue);
+                    }
                 }
             });
         } else {
-            form.append(key, value);
+            if (typeof value !== "undefined" && value !== null) {
+                form.append(key, value);
+            }
         }
     });
     return form;

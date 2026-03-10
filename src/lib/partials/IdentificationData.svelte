@@ -25,8 +25,7 @@
     import dayjs from "dayjs";
     import customParseFormat from "dayjs/plugin/customParseFormat";
     import updateCall from "$lib/utils/updateCall";
-    import IdWizard from "$lib/components/IdWizard.svelte";
-    import PassportWizard from "$lib/components/PassportWizard.svelte";
+    import DocumentWizard from "$lib/components/DocumentWizard.svelte";
     import { formComplete } from "$lib/stores/formComplete";
     import Typeahead from "$lib/components/Typeahead.svelte";
     import AddressData from "./AddressData.svelte";
@@ -40,7 +39,7 @@
     let avatarFiles: FileList | any;
     let loading = false;
 
-    let idOption: string;
+    let idOption: string = "id-card";
     let documentNumber: string;
     let currentFile: File;
 
@@ -171,16 +170,21 @@
         type: string = "id-card",
         front: boolean = true,
     ): Promise<void> => {
-        let side = front ? "Vorderseite" : "Rückseite";
+        const side = front ? "Vorderseite" : "Rückseite";
+        const imageTag = type === "passport" ? "passport" : "id-card";
 
-        employee.images = employee.images.filter(
-            (n: any) => n.imageTag !== idOption,
-        );
+        employee.images = employee.images.filter((n: any) => {
+            if (n.imageTag !== imageTag) return true;
+            const encodedSide = encodeURIComponent(side);
+            const matchesName = n.name?.includes(`_${side}`);
+            const matchesLocation = n.location?.includes(`_${side}`) || n.location?.includes(`_${encodedSide}`);
+            return !(matchesName || matchesLocation);
+        });
 
         const image = {
             documentNumber: payload.idNumber ?? null,
             employeeUuid: employee.uuid,
-            imageTag: idOption,
+            imageTag,
             file: currentFile,
             name: fileNameGenerator(payload.file, employee, type, side),
         };
@@ -199,63 +203,67 @@
             });
     };
 
-    const handleOCRInfoId = (
+    const parseDateOfBirth = (raw: string): string => {
+        const parsed = dayjs(raw, "DD.MM.YYYY");
+        return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "";
+    };
+
+    const sexToGender = (sex: string): "female" | "male" | "divers" => {
+        if (!sex) return "divers";
+        const s = sex.toLowerCase();
+        if (["f", "female"].includes(s)) return "female";
+        if (["m", "male"].includes(s)) return "male";
+        return "divers";
+    };
+
+    const applyCommonOcrFields = (detail: any): void => {
+        if (detail.idNumber) documentNumber = detail.idNumber;
+        if (detail.firstName) employee.firstName = detail.firstName;
+        if (detail.lastName) employee.lastName = detail.lastName;
+        const dob = parseDateOfBirth(detail.dateOfBirth);
+        if (dob) employee.dateOfBirth.value = dob;
+        if (detail.placeOfBirth) employee.cv.placeOfBirth = detail.placeOfBirth;
+        if (detail.sex) {
+            employee.gender = sexToGender(detail.sex);
+        }
+    };
+
+    const handleOCRInfoId = async (
         payload: CustomEvent,
         front: boolean = true,
-    ): void => {
+    ): Promise<void> => {
+        const docType = payload.detail.docType ?? idOption;
+        if (payload.detail.docType) idOption = payload.detail.docType;
+
         if (front) {
-            employee.images[0].documentNumber = payload.detail.idNumber;
-            documentNumber = payload.detail.idNumber;
-            employee.firstName = payload.detail.firstName || employee.firstName;
-            employee.lastName = payload.detail.lastName || employee.lastName;
-            employee.dateOfBirth.value =
-                dayjs(payload.detail.dateOfBirth, "DD.MM.YYYY").format(
-                    "YYYY-MM-DD",
-                ) || employee.dateOfBirth.value;
-            employee.cv.placeOfBirth =
-                payload.detail.placeOfBirth || employee.cv.countryOfBirth;
-            employee.maidenName =
-                payload.detail.maidenName || employee.maidenName;
-            employee.gender = payload.detail.sex === "F" ? "female" : "male";
+            if (payload.detail.maidenName) employee.maidenName = payload.detail.maidenName;
+            applyCommonOcrFields(payload.detail);
         } else {
-            employee.cv.countryOfBirth =
-                payload.detail.country || employee.cv.countryOfBirth;
+            if (payload.detail.country) employee.cv.countryOfBirth = payload.detail.country;
             employee.address = {
-                country: payload.detail.country || employee.address?.country,
-                place: payload.detail.address.place || employee.address?.place,
-                street:
-                    payload.detail.address.street || employee.address?.street,
-                number:
-                    payload.detail.address.number || employee.address?.number,
-                zip: payload.detail.address.zip || employee.address?.zip,
+                country: payload.detail.address?.country || employee.address?.country || "Deutschland",
+                place: payload.detail.address?.place || employee.address?.place || null,
+                street: payload.detail.address?.street || employee.address?.street || null,
+                number: payload.detail.address?.number ?? employee.address?.number ?? null,
+                zip: payload.detail.address?.zip || employee.address?.zip || null,
             };
         }
 
         currentFile = payload.detail.file;
-        sendIdImage(payload.detail, idOption, front);
+        await sendIdImage(payload.detail, docType, front);
+        await updateCall(employee);
     };
 
-    const handleOCRInfo = (payload: CustomEvent): void => {
-        const { firstName, lastName } = payload.detail.passportBio;
+    const handleOCRInfo = async (payload: CustomEvent): Promise<void> => {
+        const docType = payload.detail.docType ?? idOption;
+        if (payload.detail.docType) idOption = payload.detail.docType;
 
-        employee.firstName = firstName || employee.firstName;
-        employee.lastName = lastName || employee.lastName;
-
-        employee.images[0].documentNumber = payload.detail.idNumber;
-        documentNumber = payload.detail.idNumber;
-
-        employee.dateOfBirth.value =
-            dayjs(payload.detail.dateOfBirth, "DD.MM.YYYY").format(
-                "YYYY-MM-DD",
-            ) || employee.dateOfBirth.value;
-
-        employee.cv.placeOfBirth =
-            payload.detail.placeOfBirth || employee.cv.countryOfBirth;
-
-        employee.gender = payload.detail.sex === "F" ? "female" : "male";
+        const { firstName, lastName } = payload.detail.passportBio ?? {};
+        applyCommonOcrFields({ ...payload.detail, firstName, lastName });
 
         currentFile = payload.detail.file;
-        sendIdImage(payload.detail, idOption);
+        await sendIdImage(payload.detail, docType);
+        await updateCall(employee);
     };
 
     let dataComplete = false;
@@ -298,6 +306,15 @@
     };
 
     onMount(async () => {
+        // Initialize documentNumber from the latest id-card or passport image that has it
+        const latestWithId = [...(employee.images ?? [])]
+            .filter(img => (img.imageTag === "id-card" || img.imageTag === "passport") && img.documentNumber)
+            .sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
+
+        if (latestWithId) {
+            documentNumber = latestWithId.documentNumber;
+        }
+
         initialValues = {
             documentNumber,
             firstName: employee.firstName,
@@ -336,26 +353,13 @@
     on:open={(ev) => reactToBoxInteraction(ev, 1)}
     icon={dataComplete ? CheckCircleOutline : BellRingOutline}
 >
-    <div>
-        <Label for="idOption" class="mb-2">Ausweisart *</Label>
-        <Select bind:value={idOption} id="idOption" required>
-            <option value="id-card">Personalausweis</option>
-            <option value="passport">Reisepass</option>
-        </Select>
-    </div>
-
-    {#if idOption === "id-card"}
-        <IdWizard
-            on:formCompleted={() => formComplete.set(true)}
-            on:ocrFrontRead={handleOCRInfoId}
-            on:ocrBackRead={(e) => handleOCRInfoId(e, false)}
-        />
-    {:else if idOption === "passport"}
-        <PassportWizard
-            on:formCompleted={() => formComplete.set(true)}
-            on:ocrRead={handleOCRInfo}
-        />
-    {/if}
+    <DocumentWizard
+        images={employee.images ?? []}
+        on:formCompleted={() => formComplete.set(true)}
+        on:ocrFrontRead={handleOCRInfoId}
+        on:ocrBackRead={(e) => handleOCRInfoId(e, false)}
+        on:ocrRead={handleOCRInfo}
+    />
 
     {#if $formComplete}
         <div class="flex flex-col space-y-3 mt-16">

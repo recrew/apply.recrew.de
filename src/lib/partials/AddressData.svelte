@@ -12,7 +12,16 @@
     let countries: any[] = [];
 
     onMount(async () => {
-        if (typeof employee.address === "undefined") employee.address = {};
+        if (typeof employee.address === "undefined" || employee.address === null) {
+            employee.address = {};
+        } else {
+            // Filter "0" and "undefined" values to show empty strings in UI
+            ["street", "number", "zip", "place", "addressAddendum"].forEach(field => {
+                if (employee.address[field] === "0" || employee.address[field] === 0 || employee.address[field] === "undefined") {
+                    employee.address[field] = "";
+                }
+            });
+        }
 
         countries = (await get("/hr/reference/Staaten"))
             .map((n: any) => ({ ...n, name: n.value }))

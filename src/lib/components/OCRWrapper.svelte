@@ -27,8 +27,10 @@
             const result = await post("/ocr/parse", {
                 base64Image: reader.result,
             });
+            const parsed = result.ParsedResults[0];
             dispatch("ocr", {
-                text: result.ParsedResults[0].ParsedText,
+                text: parsed.ParsedText,
+                lines: parsed.TextOverlay?.Lines ?? [],
                 file: files[0],
             });
             cropperModal = false;
