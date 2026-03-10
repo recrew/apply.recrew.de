@@ -1,6 +1,6 @@
 <script lang="ts">
     import Cropper from "svelte-easy-crop";
-    import { Button, Fileupload, Heading, Hr } from "flowbite-svelte";
+    import { Button, Heading, Hr } from "flowbite-svelte";
     import getCroppedImg from "$lib/utils/canvasUtils.js";
     import { createEventDispatcher, onMount } from "svelte";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
@@ -235,7 +235,6 @@
                 {#if hasCamera}
                     <Button
                         class="whitespace-nowrap flex-1"
-                        color="blue"
                         on:click={startCamera}>Kamera starten</Button
                     >
                 {/if}
@@ -248,18 +247,10 @@
                     accept="image/*,application/pdf"
                     {name}
                 />
-                <Button on:click={() => fileInput?.click()}
+                <Button outline color="light" on:click={() => fileInput?.click()}
                     >Datei auswählen</Button
                 >
 
-                <!-- <Fileupload
-                    bind:files
-                    accept="image/*,application/pdf"
-                    {name}
-                /> -->
-                <!-- <Button type="button" on:click={handleFileSelection}
-                    >{previewOnly ? "Vorschau" : "Zuschneiden"}
-                </Button> -->
             </div>
         {/if}
     {/if}

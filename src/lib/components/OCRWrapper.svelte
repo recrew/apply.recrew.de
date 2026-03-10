@@ -45,7 +45,7 @@
 
 <Modal bind:open={cropperModal} autoclose={false}>
     <svelte:fragment slot="header">
-        <Heading>{title}</Heading>
+        <Heading class="text-xl font-semibold text-gray-900 dark:text-white">{title}</Heading>
     </svelte:fragment>
     <div class="my-5">
         {#if loading}
