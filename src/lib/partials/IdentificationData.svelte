@@ -314,6 +314,19 @@
         employee.avatarFile = avatarFiles[0];
     }
 
+    // 5. Sync documentNumber back to the images array for persistence
+    $: if (documentNumber && employee.images) {
+        const idImages = employee.images.filter(img => img.imageTag === idOption);
+        if (idImages.length > 0) {
+            // Sort to find the latest image of the current type (id-card or passport)
+            const latest = [...idImages].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
+            if (latest && latest.documentNumber !== documentNumber) {
+                latest.documentNumber = documentNumber;
+                employee.images = [...employee.images]; // Trigger reactivity
+            }
+        }
+    }
+
     const proceed = async () => {
         if (!dataComplete || !docsComplete) {
             console.log("not complete or missing images");
