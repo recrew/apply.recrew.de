@@ -267,37 +267,56 @@
     };
 
     let dataComplete = false;
+    let docsComplete = false;
 
+    // 1. Calculate document completeness
     $: {
-        const idFront =
-            employee.images[0]?.file || employee.images[0]?.location;
-        const idBack = employee.images[1]?.file || employee.images[1]?.location;
-        const isIdCard = employee.images[0]?.imageTag === "id-card";
+        const idImages = (employee.images ?? []).filter(img => img.imageTag === idOption);
+        
+        const isIdCard = idOption === "id-card";
+        const isPassport = idOption === "passport";
+        
+        const checkSide = (img: any, side: string) => {
+            const encodedSide = encodeURIComponent(side);
+            return img.name?.includes(`_${side}`) || 
+                   img.location?.includes(`_${side}`) || 
+                   img.location?.includes(`_${encodedSide}`) ||
+                   img.location?.includes(`%20${encodedSide}`);
+        };
 
-        dataComplete =
-            employee.firstName &&
-            employee.lastName &&
-            employee.cv.nationality &&
-            employee.gender &&
-            employee.cv.placeOfBirth &&
-            employee.cv.countryOfBirth &&
-            employee.dateOfBirth.value &&
-            employee.address?.country &&
-            employee.address?.place &&
-            employee.address?.street &&
-            employee.address?.number &&
-            employee.address?.zip;
+        const hasFront = isPassport ? idImages.length > 0 : idImages.some(img => checkSide(img, "Vorderseite"));
+        const hasBack = isIdCard ? idImages.some(img => checkSide(img, "Rückseite")) : true;
 
-        $blocked = !dataComplete;
+        docsComplete = !!(hasFront && hasBack);
+    }
 
-        if (avatarFiles && avatarFiles.length > 0) {
-            employee.avatarFile = avatarFiles[0];
-        }
+    // 2. Calculate data completeness
+    $: dataComplete =
+        !!(employee.firstName &&
+        employee.lastName &&
+        employee.cv.nationality &&
+        employee.gender &&
+        employee.cv.placeOfBirth &&
+        employee.cv.countryOfBirth &&
+        employee.dateOfBirth.value &&
+        employee.address?.country &&
+        employee.address?.place &&
+        employee.address?.street &&
+        employee.address?.number &&
+        employee.address?.zip);
+
+    // 3. Update stores based on calculated completeness
+    $: $blocked = !dataComplete || !docsComplete;
+    $: formComplete.set(docsComplete);
+
+    // 4. Handle avatar files separately
+    $: if (avatarFiles && avatarFiles.length > 0) {
+        employee.avatarFile = avatarFiles[0];
     }
 
     const proceed = async () => {
-        if (!dataComplete) {
-            console.log("not complete");
+        if (!dataComplete || !docsComplete) {
+            console.log("not complete or missing images");
             markEmptyFields();
         } else {
             await updateCall(employee);
@@ -306,9 +325,11 @@
     };
 
     onMount(async () => {
-        // Initialize documentNumber from the latest id-card or passport image that has it
-        const latestWithId = [...(employee.images ?? [])]
-            .filter(img => (img.imageTag === "id-card" || img.imageTag === "passport") && img.documentNumber)
+        // Initialize documentNumber from the latest relevant images
+        const idImages = (employee.images ?? []).filter(img => img.imageTag === "id-card" || img.imageTag === "passport");
+
+        const latestWithId = [...idImages]
+            .filter(img => img.documentNumber)
             .sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
 
         if (latestWithId) {
@@ -354,6 +375,7 @@
     icon={dataComplete ? CheckCircleOutline : BellRingOutline}
 >
     <DocumentWizard
+        bind:selectedType={idOption}
         images={employee.images ?? []}
         on:formCompleted={() => formComplete.set(true)}
         on:ocrFrontRead={handleOCRInfoId}

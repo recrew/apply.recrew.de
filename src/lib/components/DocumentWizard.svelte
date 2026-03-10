@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { createEventDispatcher, onMount } from "svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { fade } from "svelte/transition";
-    import { Alert, Label, Select } from "flowbite-svelte";
+    import { Alert, Button, Label, Select, Spinner } from "flowbite-svelte";
     import {
         ProfileCardOutline,
         RectangleListOutline,
@@ -20,15 +20,16 @@
     type WizardState = "idle" | "detecting" | "needs-back" | "complete" | "unknown-type";
 
     export let images: { id?: number; imageTag: string; name?: string; location?: string }[] = [];
+    export let selectedType: "id-card" | "passport" = "id-card";
 
     const dispatch = createEventDispatcher();
 
     let state: WizardState = "idle";
-    let selectedType: "id-card" | "passport" = "id-card";
     let cropperModalFront = false;
     let cropperModalBack = false;
     let frontPreview: string | null = null;
     let backPreview: string | null = null;
+    let lastFrontDetail: any = null;
 
     const latestByTag = (tag: string) =>
         images
@@ -47,18 +48,39 @@
             .filter(img => img.imageTag === "id-card" && idCardHasSide(img, side))
             .sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0] ?? null;
 
-    onMount(() => {
+    let initialized = false;
+
+    function syncStateFromImages(forceType?: "id-card" | "passport") {
+        const typeToSync = forceType ?? selectedType;
+        
         const latestFrontIdCard = latestIdCardBySide("Vorderseite");
         const latestPassport = latestByTag("passport");
-        const front = (latestFrontIdCard && latestPassport)
-            ? ((latestFrontIdCard.id ?? 0) > (latestPassport.id ?? 0) ? latestFrontIdCard : latestPassport)
-            : (latestFrontIdCard ?? latestPassport);
         const back = latestIdCardBySide("Rückseite");
+
+        const isIdComplete = !!(latestFrontIdCard && back);
+        const isPassportComplete = !!latestPassport;
+
+        let front = null;
+
+        if (forceType) {
+            front = forceType === "passport" ? latestPassport : latestFrontIdCard;
+        } else {
+            // Preference logic for initial load:
+            if (isPassportComplete && !isIdComplete) {
+                front = latestPassport;
+            } else if (isIdComplete && !isPassportComplete) {
+                front = latestFrontIdCard;
+            } else {
+                front = (latestFrontIdCard && latestPassport)
+                    ? ((latestFrontIdCard.id ?? 0) > (latestPassport.id ?? 0) ? latestFrontIdCard : latestPassport)
+                    : (latestFrontIdCard ?? latestPassport);
+            }
+        }
 
         if (front?.location) {
             frontPreview = front.location;
             selectedType = front.imageTag as "id-card" | "passport";
-
+            
             if (front.imageTag === "passport") {
                 state = "complete";
                 dispatch("formCompleted");
@@ -69,13 +91,47 @@
             } else {
                 state = "needs-back";
             }
+        } else {
+            frontPreview = null;
+            backPreview = null;
+            state = "idle";
         }
-    });
-
-    function setPreview(fileOrBlob: File | Blob | null, setter: (v: string | null) => void) {
-        if (!fileOrBlob) { setter(null); return; }
-        setter(URL.createObjectURL(fileOrBlob));
+        
+        initialized = true;
     }
+
+    // Reactive initialization to handle async data
+    $: if (images && images.length > 0 && state === "idle" && !initialized) {
+        syncStateFromImages();
+    }
+
+    $: hasDocs = !!(
+        frontPreview ||
+        backPreview ||
+        images.some((img) => img.imageTag === "passport" || img.imageTag === "id-card")
+    );
+
+    function setPreview(fileOrBlob: File | Blob | null, side: "front" | "back") {
+        const oldUrl = side === "front" ? frontPreview : backPreview;
+        
+        if (!fileOrBlob) {
+            if (side === "front") frontPreview = null;
+            else backPreview = null;
+            if (oldUrl && oldUrl.startsWith("blob:")) URL.revokeObjectURL(oldUrl);
+            return;
+        }
+
+        const url = URL.createObjectURL(fileOrBlob);
+        if (side === "front") frontPreview = url;
+        else backPreview = url;
+        
+        if (oldUrl && oldUrl.startsWith("blob:")) URL.revokeObjectURL(oldUrl);
+    }
+
+    onDestroy(() => {
+        if (frontPreview && frontPreview.startsWith("blob:")) URL.revokeObjectURL(frontPreview);
+        if (backPreview && backPreview.startsWith("blob:")) URL.revokeObjectURL(backPreview);
+    });
 
     async function resolvePreview(file: File): Promise<File | Blob> {
         if (file.type === "application/pdf") {
@@ -85,11 +141,11 @@
     }
 
     const handleFrontOCR = async (detail: any) => {
-        state = "detecting";
+        lastFrontDetail = detail;
         const docType = detectDocumentType(detail.text);
 
         const resolved = await resolvePreview(detail.file);
-        setPreview(resolved, (v) => (frontPreview = v));
+        setPreview(resolved, "front");
 
         if (docType === "passport") {
             selectedType = "passport";
@@ -109,7 +165,7 @@
 
     const handleBackOCR = async (detail: any) => {
         const resolved = await resolvePreview(detail.file);
-        setPreview(resolved, (v) => (backPreview = v));
+        setPreview(resolved, "back");
 
         const parsed = readIdBackCard(detail.text, detail.lines ?? []);
         dispatch("ocrBackRead", { ...parsed, file: detail.file, docType: "id-card" });
@@ -118,15 +174,18 @@
     };
 
     const onManualTypeChange = () => {
-        frontPreview = null;
-        backPreview = null;
-        state = "idle";
+        // Cleanup existing blob previews before switching
+        setPreview(null, "front");
+        setPreview(null, "back");
+        
+        lastFrontDetail = null;
+        syncStateFromImages(selectedType);
     };
 </script>
 
 <div class="md:w-4/5 px-2 lg:max-w-screen-lg mx-auto my-12">
         <div class="mb-6">
-            {#if frontPreview}
+            {#if hasDocs}
                 <div transition:fade class="mb-4">
                     <Label for="docTypeSelect" class="mb-2">Ausweisart *</Label>
                     <Select
@@ -144,7 +203,7 @@
                 <div transition:fade class="mt-3">
                     <Alert color="yellow">
                         <ExclamationCircleOutline slot="icon" class="w-5 h-5" />
-                        Dokumenttyp nicht erkannt — bitte oben manuell wählen und erneut hochladen
+                        Dokumenttyp nicht erkannt — bitte oben manuell wählen
                     </Alert>
                 </div>
             {:else if state === "needs-back"}
