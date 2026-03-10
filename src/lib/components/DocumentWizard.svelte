@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { createEventDispatcher, onDestroy, onMount } from "svelte";
+    import { createEventDispatcher, onDestroy } from "svelte";
     import { fade } from "svelte/transition";
-    import { Alert, Button, Label, Select, Spinner } from "flowbite-svelte";
+    import { Alert, Button, Label, Select } from "flowbite-svelte";
     import {
         ProfileCardOutline,
         RectangleListOutline,
@@ -30,8 +30,6 @@
     let cropperModalBack = false;
     let frontPreview: string | null = null;
     let backPreview: string | null = null;
-    let lastFrontDetail: any = null;
-
     const latestByTag = (tag: string) =>
         images
             .filter(img => img.imageTag === tag)
@@ -148,8 +146,6 @@
     }
 
     const handleFrontOCR = async (detail: any) => {
-        lastFrontDetail = detail;
-        
         const resolved = await resolvePreview(detail.file);
         setPreview(resolved, "front");
 
@@ -192,8 +188,6 @@
         // Cleanup existing blob previews before switching
         setPreview(null, "front");
         setPreview(null, "back");
-        
-        lastFrontDetail = null;
         syncStateFromImages(selectedType);
     };
 </script>
