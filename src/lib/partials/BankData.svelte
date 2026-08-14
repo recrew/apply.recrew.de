@@ -27,7 +27,7 @@
 
         })
     }
-    $: dataComplete = employee.bankAccount && employee.bankAccount.iban && employee.bankAccount.accountName
+    $: dataComplete = employee.bankAccount && employee.bankAccount.iban && employee.bankAccount.bicSwift && employee.bankAccount.accountName
     onMount(() => {
         getBankDetails()
     })

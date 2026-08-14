@@ -12,7 +12,7 @@
 
     export let employee: any
     let insurances: any[] = []
-    $: dataComplete = employee.healthInsurance && employee.healthInsurance.insuranceName && employee.healthInsurance.insuranceNumber
+    $: dataComplete = employee.healthInsurance && employee.healthInsurance.insuranceName
         onMount(async() => {
         if(!employee.healthInsurance){
             employee.healthInsurance = {}
@@ -22,6 +22,7 @@
 
     $:{
         if($currentStep === 6) {
+            $blocked = !dataComplete;
             markEmptyFields();
         }
     }
