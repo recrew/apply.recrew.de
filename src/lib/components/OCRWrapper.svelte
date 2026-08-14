@@ -4,7 +4,6 @@
     import { post } from "$lib/api";
     import { createEventDispatcher } from "svelte";
     export let type: string;
-    export let value: any;
     export let cropperModal = true;
     export let title: string;
     let files: File[];

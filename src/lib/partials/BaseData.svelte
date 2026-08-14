@@ -269,9 +269,6 @@
                         ? "Personalausweis"
                         : "Reisepass"}
                     bind:cropperModal
-                    value={employee.images.find(
-                        (n) => n.imageTag === idOption && n.documentNumber,
-                    )}
                     on:ocr={(ev) => {
                         orcBinding(ev.detail, "front");
                     }}

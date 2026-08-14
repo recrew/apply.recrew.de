@@ -2,7 +2,6 @@ import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
 
 const shadowCanvas = document.createElement("canvas");
 
-// If you want: set once (not required but avoids doing it repeatedly)
 pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs";
 
@@ -16,8 +15,7 @@ export async function convertPdfToImageFromFileInput(
     if (!file) throw new Error("No file provided");
 
     // pdfjs works best with ArrayBuffer/Uint8Array
-    const arrayBuffer = await readFileAsArrayBuffer(file);
-    return convertPdfToImage(arrayBuffer, format);
+    return convertPdfToImage(await file.arrayBuffer(), format);
 }
 
 export default async function convertPdfToImage(
@@ -42,41 +40,20 @@ export default async function convertPdfToImage(
     }).promise;
 
     if (format === "blob") {
-        const blob = await canvasToBlob(shadowCanvas, "image/png");
-        return blob; // Blob
+        return canvasToBlob(shadowCanvas, "image/png");
     }
 
-    return shadowCanvas.toDataURL("image/png"); // string
-}
-
-function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () =>
-            reject(reader.error ?? new Error("Failed to read file"));
-        reader.onload = () => {
-            if (!(reader.result instanceof ArrayBuffer)) {
-                reject(new Error("Expected ArrayBuffer from FileReader"));
-                return;
-            }
-            resolve(reader.result);
-        };
-        reader.readAsArrayBuffer(file);
-    });
+    return shadowCanvas.toDataURL("image/png");
 }
 
 function canvasToBlob(canvas: any, mime: string): Promise<Blob> {
     return new Promise((resolve, reject) => {
-        canvas.toBlob(
-            (blob: Blob) => {
-                if (!blob) {
-                    reject(new Error("Canvas toBlob() returned null"));
-                    return;
-                }
-                resolve(blob);
-            },
-            mime,
-            0.92,
-        );
+        canvas.toBlob((blob: Blob | null) => {
+            if (!blob) {
+                reject(new Error("Canvas toBlob() returned null"));
+                return;
+            }
+            resolve(blob);
+        }, mime);
     });
 }

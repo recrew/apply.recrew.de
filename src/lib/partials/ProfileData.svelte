@@ -6,6 +6,7 @@
         Label,
         Select,
     } from "flowbite-svelte";
+    import { onDestroy } from "svelte";
     import Box from "$lib/components/Box.svelte";
     import AddressData from "$lib/partials/AddressData.svelte";
     import {
@@ -31,19 +32,34 @@
             employee.address?.zip &&
             employee.address?.place);
 
-        $blocked = !dataComplete;
+        if ($currentStep === 2) {
+            $blocked = !dataComplete;
+        }
 
         if (avatarFiles && avatarFiles.length > 0) {
             employee.avatarFile = avatarFiles[0];
         }
     }
 
-    const generateBlob = () => {
-        if (typeof employee.avatarFile === "string") {
-            return employee.avatarFile;
+    // Als reaktiver Wert statt Aufruf im Template: dort lief createObjectURL bei
+    // jedem Render und die vorherige Blob-URL wurde nie freigegeben.
+    let avatarPreview = "";
+    $: setAvatarPreview(employee.avatarFile);
+
+    function setAvatarPreview(avatarFile: File | string | null) {
+        const previous = avatarPreview;
+        if (!avatarFile) avatarPreview = "";
+        else if (typeof avatarFile === "string") avatarPreview = avatarFile;
+        else avatarPreview = URL.createObjectURL(avatarFile);
+
+        if (previous.startsWith("blob:") && previous !== avatarPreview) {
+            URL.revokeObjectURL(previous);
         }
-        return URL.createObjectURL(employee.avatarFile);
-    };
+    }
+
+    onDestroy(() => {
+        if (avatarPreview.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
+    });
 
     const proceed = async () => {
         if (!dataComplete) {
@@ -70,7 +86,7 @@
                 Profilbild (Optional)
             </div>
             <Avatar
-                src={employee.avatarFile ? generateBlob() : ""}
+                src={avatarPreview}
                 rounded
                 size="xl"
             >{employee.firstName?.charAt(0) || ""}{employee.lastName?.charAt(0) || ""}</Avatar>

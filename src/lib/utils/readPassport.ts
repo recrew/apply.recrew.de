@@ -159,7 +159,6 @@ export const detectDocumentType = (ocrText: string): DocumentType => {
 };
 
 export const readPassport = (parsedText: string) => {
-    console.log("[readPassport] OCR Input:", { parsedText });
 
     let idNumber = "";
     let dateOfBirth = "";
@@ -231,7 +230,7 @@ export const readPassport = (parsedText: string) => {
         lastLine = line;
     });
 
-    const result = {
+    return {
         passportBio: { firstName, lastName, idNumber, dateOfBirth, placeOfBirth, maidenName },
         idNumber,
         dateOfBirth,
@@ -239,12 +238,9 @@ export const readPassport = (parsedText: string) => {
         sex,
         nationality,
     };
-    console.log("[readPassport] Detected:", result);
-    return result;
 };
 
 export const readIdFrontCard = (parsedText: string) => {
-    console.log("[readIdFrontCard] OCR Input:", { parsedText });
 
     let lastName = "";
     let firstName = "";
@@ -332,17 +328,10 @@ export const readIdFrontCard = (parsedText: string) => {
         lastLine = line;
     });
 
-    const result = { lastName, firstName, idNumber, dateOfBirth, placeOfBirth, maidenName, sex, nationality };
-    console.log("[readIdFrontCard] Detected:", result);
-    return result;
+    return { lastName, firstName, idNumber, dateOfBirth, placeOfBirth, maidenName, sex, nationality };
 };
 
 export const readIdBackCard = (parsedText: string, ocrLines: { LineText: string }[] = []) => {
-    console.log("[readIdBackCard] OCR Input:", { 
-        parsedText, 
-        ocrLinesCount: ocrLines.length,
-        ocrLines: ocrLines.map(l => l.LineText)
-    });
 
     let placeOfBirth = "";
     let idNumber = "";
@@ -427,7 +416,5 @@ export const readIdBackCard = (parsedText: string, ocrLines: { LineText: string 
 
     const streetMissingOcrLines = !address.street && ocrLines.length > 0;
 
-    const result = { address, country: "Deutschland", placeOfBirth, idNumber, streetMissingOcrLines, height };
-    console.log("[readIdBackCard] Detected:", result);
-    return result;
+    return { address, country: "Deutschland", placeOfBirth, idNumber, streetMissingOcrLines, height };
 };

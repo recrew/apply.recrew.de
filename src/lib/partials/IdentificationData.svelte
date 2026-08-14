@@ -27,7 +27,7 @@
     import { blocked } from "$lib/stores/blocked";
     import { page } from "$app/stores";
     import dayjs from "dayjs";
-    import { latestImageByTag } from "$lib/utils/imageUtils";
+    import { latestImageByTag, imageHasSide } from "$lib/utils/imageUtils";
     import customParseFormat from "dayjs/plugin/customParseFormat";
     import updateCall from "$lib/utils/updateCall";
     import DocumentWizard from "$lib/components/DocumentWizard.svelte";
@@ -41,7 +41,6 @@
 
     let nationalities: any[] = [];
     let countries: any[] = [];
-    let avatarFiles: FileList | any;
     let loading = false;
     let nonEuFiles: File[] = [];
 
@@ -51,90 +50,35 @@
     let pendingFrontPayload: any = null;
 
     let initialValues: any = {};
-    let changedFields: Set<string> = new Set();
-
-    const buildChangedFields = (): Set<string> => {
-        const next = new Set<string>();
-
-        const fieldsToCheck = [
-            {
-                current: documentNumber,
-                initial: initialValues.documentNumber,
-                name: "documentNumber",
-            },
-            {
-                current: employee.firstName,
-                initial: initialValues.firstName,
-                name: "firstName",
-            },
-            {
-                current: employee.lastName,
-                initial: initialValues.lastName,
-                name: "lastName",
-            },
-            {
-                current: employee.cv.nationality,
-                initial: initialValues.nationality,
-                name: "nationality",
-            },
-            {
-                current: employee.gender,
-                initial: initialValues.gender,
-                name: "gender",
-            },
-            {
-                current: employee.cv.placeOfBirth,
-                initial: initialValues.placeOfBirth,
-                name: "placeOfBirth",
-            },
-            {
-                current: employee.cv.countryOfBirth,
-                initial: initialValues.countryOfBirth,
-                name: "countryOfBirth",
-            },
-            {
-                current: employee.dateOfBirth.value,
-                initial: initialValues.dateOfBirth,
-                name: "dateOfBirth",
-            },
-            {
-                current: employee.maidenName,
-                initial: initialValues.maidenName,
-                name: "maidenName",
-            }
-        ];
-
-        for (const { current, initial, name } of fieldsToCheck) {
-            if (current !== initial) {
-                next.add(name);
-            }
-        }
-
-        return next;
-    };
 
     const getInputClass = (fieldName: string) =>
         changedFields.has(fieldName)
             ? "ring-2 ring-blue-500 ring-offset-1 ring-offset-white"
             : "";
 
-    $: initialReady = initialValues && Object.keys(initialValues).length > 0;
+    // Einzige Quelle der überwachten Felder — initialValues in onMount wird
+    // aus demselben Objekt gebaut.
+    $: currentValues = <Record<string, any>>{
+        documentNumber,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        nationality: employee.cv.nationality,
+        gender: employee.gender,
+        placeOfBirth: employee.cv.placeOfBirth,
+        countryOfBirth: employee.cv.countryOfBirth,
+        dateOfBirth: employee.dateOfBirth.value,
+        maidenName: employee.maidenName,
+    };
 
-    $: if (initialReady) {
-        documentNumber;
-        employee.firstName;
-        employee.lastName;
-        employee.cv.nationality;
-        employee.gender;
-        employee.cv.placeOfBirth;
-        employee.cv.countryOfBirth;
-        employee.dateOfBirth.value;
-        employee.maidenName;
+    $: initialReady = Object.keys(initialValues).length > 0;
 
-        changedFields = buildChangedFields();
-    } else {
-        changedFields = new Set();
-    }
+    $: changedFields = new Set(
+        initialReady
+            ? Object.keys(currentValues).filter(
+                  (name) => currentValues[name] !== initialValues[name],
+              )
+            : [],
+    );
 
     const sendIdImage = async (
         payload: any,
@@ -144,13 +88,9 @@
         const side = front ? "Vorderseite" : "Rückseite";
         const imageTag = type;
 
-        employee.images = employee.images.filter((n: any) => {
-            if (n.imageTag !== imageTag) return true;
-            const encodedSide = encodeURIComponent(side);
-            const matchesName = n.name?.includes(`_${side}`);
-            const matchesLocation = n.location?.includes(`_${side}`) || n.location?.includes(`_${encodedSide}`);
-            return !(matchesName || matchesLocation);
-        });
+        employee.images = employee.images.filter(
+            (n: any) => n.imageTag !== imageTag || !imageHasSide(n, side),
+        );
 
         const image = {
             documentNumber: payload.idNumber ?? null,
@@ -264,19 +204,11 @@
         const idImages = (employee.images ?? []).filter(img => img.imageTag === idOption);
         
         const isIdCard = idOption === "id-card";
-        const isPassport = idOption === "passport";
-        const isOther = idOption === "other";
-        
-        const checkSide = (img: any, side: string) => {
-            const encodedSide = encodeURIComponent(side);
-            return img.name?.includes(`_${side}`) || 
-                   img.location?.includes(`_${side}`) || 
-                   img.location?.includes(`_${encodedSide}`) ||
-                   img.location?.includes(`%20${encodedSide}`);
-        };
 
-        const hasFront = (isPassport || isOther) ? idImages.length > 0 : idImages.some(img => checkSide(img, "Vorderseite"));
-        const hasBack = isIdCard ? idImages.some(img => checkSide(img, "Rückseite")) : true;
+        const hasFront = isIdCard
+            ? idImages.some(img => imageHasSide(img, "Vorderseite"))
+            : idImages.length > 0;
+        const hasBack = isIdCard ? idImages.some(img => imageHasSide(img, "Rückseite")) : true;
 
         docsComplete = !!(hasFront && hasBack);
     }
@@ -294,7 +226,9 @@
         employee.dateOfBirth.value);
 
     // 3. Update stores based on calculated completeness
-    $: $blocked = !dataComplete || !docsComplete;
+    $: if ($currentStep === 1) {
+        $blocked = !dataComplete || !docsComplete;
+    }
     $: formComplete.set(docsComplete);
 
     // 4. Sync documentNumber back to the images array for persistence
@@ -320,7 +254,6 @@
 
     const proceed = async () => {
         if (!dataComplete || !docsComplete) {
-            console.log("not complete or missing images");
             markEmptyFields();
         } else {
             // Upload Non-EU files if any
@@ -365,25 +298,20 @@
             documentNumber = latestWithId.documentNumber;
         }
 
-        initialValues = {
-            documentNumber,
-            firstName: employee.firstName,
-            lastName: employee.lastName,
-            nationality: employee.cv.nationality,
-            gender: employee.gender,
-            placeOfBirth: employee.cv.placeOfBirth,
-            countryOfBirth: employee.cv.countryOfBirth,
-            dateOfBirth: employee.dateOfBirth.value,
-            maidenName: employee.maidenName,
-        };
+        // documentNumber explizit: currentValues wurde vor der Zuweisung oben berechnet
+        initialValues = { ...currentValues, documentNumber };
 
-        nationalities = (await get("/hr/reference/Staatsangehoerigkeiten"))
-            .map((n: any) => ({ ...n, name: n.value }))
-            .sort((a: any, b: any) => a.name.localeCompare(b.name));
+        const byName = (list: any[]) =>
+            list
+                .map((n: any) => ({ ...n, name: n.value }))
+                .sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-        countries = (await get("/hr/reference/Staaten"))
-            .map((n: any) => ({ ...n, name: n.value }))
-            .sort((a: any, b: any) => a.name.localeCompare(b.name));
+        const [nationalityList, countryList] = await Promise.all([
+            get("/hr/reference/Staatsangehoerigkeiten"),
+            get("/hr/reference/Staaten"),
+        ]);
+        nationalities = byName(nationalityList);
+        countries = byName(countryList);
     });
 </script>
 
@@ -585,4 +513,3 @@
 
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>
 </Box>
-

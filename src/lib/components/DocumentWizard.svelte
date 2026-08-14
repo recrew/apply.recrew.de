@@ -16,9 +16,9 @@
         readIdFrontCard,
         readIdBackCard,
     } from "$lib/utils/readPassport";
-    import { latestImageByTag } from "$lib/utils/imageUtils";
+    import { latestImageByTag, latestImageByTagAndSide } from "$lib/utils/imageUtils";
 
-    type WizardState = "idle" | "detecting" | "needs-back" | "complete" | "unknown-type" | "other";
+    type WizardState = "idle" | "needs-back" | "complete" | "unknown-type";
 
     export let images: { id?: number; imageTag: string; name?: string; location?: string }[] = [];
     export let selectedType: "id-card" | "passport" | "other" = "id-card";
@@ -30,28 +30,15 @@
     let cropperModalBack = false;
     let frontPreview: string | null = null;
     let backPreview: string | null = null;
-    const latestByTag = (tag: string) => latestImageByTag(images, tag);
-
-    const idCardHasSide = (img: { name?: string; location?: string }, side: string) => {
-        const encodedSide = encodeURIComponent(side);
-        return img.name?.includes(`_${side}`) ||
-            img.location?.includes(`_${side}`) ||
-            img.location?.includes(`_${encodedSide}`);
-    };
-
     const latestIdCardBySide = (side: "Vorderseite" | "Rückseite") =>
-        images
-            .filter(img => img.imageTag === "id-card" && idCardHasSide(img, side))
-            .sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0] ?? null;
+        latestImageByTagAndSide(images, "id-card", side);
 
     let initialized = false;
 
     function syncStateFromImages(forceType?: "id-card" | "passport" | "other") {
-        const typeToSync = forceType ?? selectedType;
-        
         const latestFrontIdCard = latestIdCardBySide("Vorderseite");
-        const latestPassport = latestByTag("passport");
-        const latestOther = latestByTag("other");
+        const latestPassport = latestImageByTag(images, "passport");
+        const latestOther = latestImageByTag(images, "other");
         const back = latestIdCardBySide("Rückseite");
 
         const isIdComplete = !!(latestFrontIdCard && back);
@@ -255,7 +242,6 @@
                     type={selectedType === "other" ? "id-card" : selectedType}
                     title="Dokument"
                     bind:cropperModal={cropperModalFront}
-                    value="doc-front"
                     on:ocr={(ev) => handleFrontOCR(ev.detail)}
                 >
                     <div class={showBack ? "aspect-[1.6] w-full relative" : "w-full relative"}>
@@ -296,7 +282,6 @@
                     type="id-card"
                     title="Dokument Rückseite"
                     bind:cropperModal={cropperModalBack}
-                    value="id-card"
                     on:ocr={(ev) => handleBackOCR(ev.detail)}
                 >
                     <div class="aspect-[1.6] w-full relative">
