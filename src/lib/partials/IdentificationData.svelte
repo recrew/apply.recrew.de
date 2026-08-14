@@ -142,7 +142,7 @@
         front: boolean = true,
     ): Promise<void> => {
         const side = front ? "Vorderseite" : "Rückseite";
-        const imageTag = type === "passport" ? "passport" : "id-card";
+        const imageTag = type;
 
         employee.images = employee.images.filter((n: any) => {
             if (n.imageTag !== imageTag) return true;
@@ -179,12 +179,12 @@
         return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "";
     };
 
-    const sexToGender = (sex: string): "female" | "male" | "divers" => {
-        if (!sex) return "divers";
+    const sexToGender = (sex: string): "female" | "male" | "diverse" => {
+        if (!sex) return "diverse";
         const s = sex.toLowerCase();
         if (["f", "female"].includes(s)) return "female";
         if (["m", "male"].includes(s)) return "male";
-        return "divers";
+        return "diverse";
     };
 
     const applyCommonOcrFields = (detail: any): void => {
@@ -243,6 +243,7 @@
 
     const handleOCRInfo = async (payload: CustomEvent): Promise<void> => {
         const docType = payload.detail.docType ?? idOption;
+        const ocrDocumentNumber = payload.detail.idNumber;
         if (payload.detail.docType) idOption = payload.detail.docType;
 
         const { firstName, lastName, maidenName } = payload.detail.passportBio ?? {};
@@ -250,6 +251,7 @@
 
         currentFile = payload.detail.file;
         await sendIdImage(payload.detail, docType);
+        if (ocrDocumentNumber) documentNumber = ocrDocumentNumber;
         syncDocumentNumberToImage();
         await updateCall(employee);
     };
@@ -281,8 +283,10 @@
 
     // 2. Calculate data completeness (removed address fields)
     $: dataComplete =
-        !!(employee.firstName &&
+        !!(documentNumber &&
+        employee.firstName &&
         employee.lastName &&
+        employee.maidenName &&
         employee.cv.nationality &&
         employee.gender &&
         employee.cv.placeOfBirth &&
@@ -303,7 +307,7 @@
 
     function syncDocumentNumberToImage() {
         if (!documentNumber || !employee.images) return;
-        const tag = idOption === "passport" ? "passport" : "id-card";
+        const tag = idOption;
         let changed = false;
         for (const img of employee.images) {
             if (img.imageTag === tag && img.documentNumber !== documentNumber) {
