@@ -6,8 +6,10 @@
     export let type: string;
     export let cropperModal = true;
     export let title: string;
+    export let skipOcr = false;
     let files: File[];
     let loading = false;
+    let imageCropper: any;
     let dispatch = createEventDispatcher();
     const getAspect = (): number => {
         if (type === "passport") {
@@ -48,6 +50,19 @@
             loading = false;
         }
     };
+
+    const acceptWithoutOcr = (): void => {
+        dispatch("ocr", {
+            text: "",
+            lines: [],
+            file: files[0],
+        });
+        cropperModal = false;
+    };
+
+    $: if (!cropperModal) {
+        imageCropper?.cleanup();
+    }
 </script>
 
 <slot></slot>
@@ -64,12 +79,14 @@
             <Spinner />
         {:else}
             <ImageCropper
+                bind:this={imageCropper}
                 previewOnly={type === "health-certificate"}
                 aspect={getAspect()}
                 on:cropped={({ detail }) => {
                     files = detail.files;
 
-                    readOcr();
+                    if (skipOcr) acceptWithoutOcr();
+                    else readOcr();
                 }}
             />
         {/if}

@@ -276,7 +276,7 @@
     <p>Bitte warten...</p>
 </Modal>
 <Box
-    disabled={$blocked}
+    disabled={$blocked || $currentStep < 3}
     title="Qualifikationen"
     open={$currentStep === 3}
     on:open={(ev) => reactToBoxInteraction(ev, 3)}

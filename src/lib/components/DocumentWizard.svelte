@@ -52,17 +52,32 @@
             else if (forceType === "other") front = latestOther;
             else front = latestFrontIdCard;
         } else {
-            // Preference logic for initial load:
-            if (isPassportComplete) {
-                front = latestPassport;
-            } else if (isIdComplete) {
-                front = latestFrontIdCard;
-            } else if (isOtherComplete) {
-                front = latestOther;
-            } else {
-                front = (latestFrontIdCard && latestPassport)
-                    ? ((latestFrontIdCard.id ?? 0) > (latestPassport.id ?? 0) ? latestFrontIdCard : latestPassport)
-                    : (latestFrontIdCard ?? latestPassport ?? latestOther);
+            const completeDocuments = [
+                isPassportComplete
+                    ? { image: latestPassport, id: latestPassport?.id ?? 0 }
+                    : null,
+                isIdComplete
+                    ? {
+                          image: latestFrontIdCard,
+                          id: Math.max(
+                              latestFrontIdCard?.id ?? 0,
+                              back?.id ?? 0,
+                          ),
+                      }
+                    : null,
+                isOtherComplete
+                    ? { image: latestOther, id: latestOther?.id ?? 0 }
+                    : null,
+            ]
+                .filter(Boolean)
+                .sort((a, b) => b!.id - a!.id);
+
+            front = completeDocuments[0]?.image ?? null;
+
+            if (!front) {
+                front = [latestFrontIdCard, latestPassport, latestOther]
+                    .filter(Boolean)
+                    .sort((a, b) => (b!.id ?? 0) - (a!.id ?? 0))[0] ?? null;
             }
         }
 
@@ -239,7 +254,8 @@
                 </h5>
 
                 <OCRWrapper
-                    type={selectedType === "other" ? "id-card" : selectedType}
+                    type={selectedType}
+                    skipOcr={selectedType === "other"}
                     title="Dokument"
                     bind:cropperModal={cropperModalFront}
                     on:ocr={(ev) => handleFrontOCR(ev.detail)}

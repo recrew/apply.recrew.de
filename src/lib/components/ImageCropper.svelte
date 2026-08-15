@@ -2,7 +2,7 @@
     import Cropper from "svelte-easy-crop";
     import { Button, Heading, Hr } from "flowbite-svelte";
     import getCroppedImg from "$lib/utils/canvasUtils.js";
-    import { createEventDispatcher, onMount } from "svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
     import { ZoomOutOutline, ZoomInOutline } from "flowbite-svelte-icons";
 
@@ -67,6 +67,12 @@
         }
         cameraActive = false;
     }
+
+    export function cleanup() {
+        stopCamera();
+    }
+
+    onDestroy(cleanup);
 
     function capturePhoto() {
         const canvas = document.createElement("canvas");

@@ -72,7 +72,7 @@
 </script>
 
 <Box
-    disabled={!dataComplete}
+    disabled={!dataComplete || $currentStep < 2}
     title="Profil & Kontakt"
     open={$currentStep === 2}
     on:open={(ev) => reactToBoxInteraction(ev, 2)}

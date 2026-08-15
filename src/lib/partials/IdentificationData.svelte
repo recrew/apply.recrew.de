@@ -252,6 +252,11 @@
         if (changed) employee.images = [...employee.images];
     }
 
+    // Keep manual corrections in the persisted image records as well.
+    $: if (documentNumber && employee.images) {
+        syncDocumentNumberToImage();
+    }
+
     const proceed = async () => {
         if (!dataComplete || !docsComplete) {
             markEmptyFields();
