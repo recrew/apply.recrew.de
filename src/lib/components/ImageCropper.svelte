@@ -100,6 +100,11 @@
     async function handleFileSelection() {
         if (!files?.[0]) return;
 
+        if (files[0].size > 1048576 * 4) {
+            alert("Die Datei ist zu groß! (max. 4 MB)");
+            return;
+        }
+
         let file: File;
 
         if (files[0].type === "application/pdf") {

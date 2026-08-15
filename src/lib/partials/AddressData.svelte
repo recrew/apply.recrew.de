@@ -6,8 +6,6 @@
     import Typeahead from "$lib/components/Typeahead.svelte";
 
     export let employee: any;
-    export let getInputClass: (fieldName: string) => string = () => "";
-    export let changedFields: Set<string> = new Set();
 
     let countries: any[] = [];
 
@@ -38,7 +36,6 @@
                     type="text"
                     bind:value={employee.address.street}
                     id="street"
-                    class={getInputClass("street")}
                     required
                 />
             </div>
@@ -49,7 +46,6 @@
                     bind:value={employee.address.number}
                     pattern="[0-9]*"
                     id="number"
-                    class={getInputClass("number")}
                     required
                 />
             </div>
@@ -59,7 +55,6 @@
                     type="text"
                     bind:value={employee.address.addressAddendum}
                     id="addressAddendum"
-                    class={getInputClass("addressAddendum")}
                 />
             </div>
             <div>
@@ -68,7 +63,6 @@
                     type="text"
                     bind:value={employee.address.zip}
                     id="plz"
-                    class={getInputClass("zip")}
                     required
                 />
             </div>
@@ -78,7 +72,6 @@
                     type="text"
                     bind:value={employee.address.place}
                     id="place"
-                    class={getInputClass("place")}
                     required
                 />
             </div>
@@ -89,7 +82,6 @@
                     id="country"
                     data={countries}
                     icon={GlobeSolid}
-                    class={getInputClass("country")}
                     required
                 />
             </div>
