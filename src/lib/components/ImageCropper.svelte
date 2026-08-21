@@ -4,6 +4,7 @@
     import getCroppedImg from "$lib/utils/canvasUtils.js";
     import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { convertPdfToImageFromFileInput } from "$lib/utils/convertPdfToImage";
+    import { compressImage } from "$lib/utils/imageCompression";
     import { ZoomOutOutline, ZoomInOutline } from "flowbite-svelte-icons";
 
     export let aspect: number = 1.6;
@@ -27,6 +28,36 @@
     let stream: MediaStream;
 
     let fileInput: HTMLInputElement;
+
+    const MAX_INPUT_SIZE = 25 * 1024 * 1024;
+
+    function replaceFiles(file: File) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        files = dataTransfer.files;
+    }
+
+    function clearFiles() {
+        files = new DataTransfer().files;
+        if (fileInput) fileInput.value = "";
+    }
+
+    function canvasToBlob(
+        canvas: HTMLCanvasElement,
+        type: string,
+        quality?: number,
+    ): Promise<Blob> {
+        return new Promise((resolve, reject) => {
+            canvas.toBlob(
+                (blob) =>
+                    blob
+                        ? resolve(blob)
+                        : reject(new Error("Bild konnte nicht verarbeitet werden.")),
+                type,
+                quality,
+            );
+        });
+    }
 
     onMount(async () => {
         try {
@@ -74,36 +105,51 @@
 
     onDestroy(cleanup);
 
-    function capturePhoto() {
+    async function capturePhoto() {
         const canvas = document.createElement("canvas");
         canvas.width = videoElement.videoWidth;
         canvas.height = videoElement.videoHeight;
         const ctx = canvas.getContext("2d");
-        ctx?.drawImage(videoElement, 0, 0);
-        image = canvas.toDataURL("image/png");
 
-        // Create a File object from the captured image
-        canvas.toBlob((blob) => {
-            if (blob) {
-                const file = new File([blob], `capture-${Date.now()}.png`, {
-                    type: "image/png",
-                });
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                files = dataTransfer.files;
-                preview = previewOnly ? image : URL.createObjectURL(file);
-                stopCamera();
-            }
-        }, "image/png");
+        try {
+            if (!ctx) throw new Error("Canvas wird von diesem Browser nicht unterstützt.");
+            ctx.drawImage(videoElement, 0, 0);
+            const captured = await canvasToBlob(canvas, "image/jpeg", 0.9);
+            const compressed = await compressImage(captured);
+            const file = new File(
+                [compressed],
+                `capture-${Date.now()}.jpg`,
+                { type: "image/jpeg" },
+            );
+            replaceFiles(file);
+            croppedImage = previewOnly ? compressed : null;
+            image = canvas.toDataURL("image/jpeg", 0.9);
+            preview = previewOnly ? URL.createObjectURL(file) : image;
+            stopCamera();
+        } catch (error) {
+            console.error("Camera image processing failed", error);
+            alert("Das Foto konnte nicht verarbeitet werden. Bitte versuche es erneut.");
+        }
     }
 
     async function handleFileSelection() {
         if (!files?.[0]) return;
 
-        if (files[0].size > 1048576 * 4) {
-            alert("Die Datei ist zu groß! (max. 4 MB)");
+        if (files[0].size === 0) {
+            alert("Die ausgewählte Datei ist leer. Bitte wähle sie erneut aus.");
+            clearFiles();
             return;
         }
+
+        if (files[0].size > MAX_INPUT_SIZE) {
+            alert("Die Datei ist zu groß! (max. 25 MB vor der Kompression)");
+            clearFiles();
+            return;
+        }
+
+        image = "";
+        preview = "";
+        croppedImage = null;
 
         let file: File;
 
@@ -120,6 +166,32 @@
         } else {
             file = files[0];
         }
+
+        if (file.size === 0) {
+            alert("Die ausgewählte Datei ist leer. Bitte wähle sie erneut aus.");
+            clearFiles();
+            return;
+        }
+
+        if (previewOnly && file.type.startsWith("image/")) {
+            try {
+                const compressed = await compressImage(file);
+                if (compressed !== file) {
+                    const fileName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+                    file = new File([compressed], fileName, {
+                        type: compressed.type,
+                    });
+                }
+            } catch (error) {
+                console.error("Image compression failed", error);
+                alert("Das Bild konnte nicht komprimiert werden.");
+                clearFiles();
+                return;
+            }
+        }
+
+        replaceFiles(file);
+        croppedImage = previewOnly ? file : null;
 
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -152,39 +224,7 @@
     ) {
         let tempCroppedImage = await getCroppedImg(image, e.detail.pixels, 0);
         if (tempCroppedImage) {
-            // Iterative compression logic
-            let quality = 0.9;
-            const targetSize = 1024 * 1024; // 1024 KB
-            let finalBlob = tempCroppedImage;
-
-            if (tempCroppedImage.size > targetSize) {
-                const img = await new Promise<HTMLImageElement>((resolve) => {
-                    const i = new Image();
-                    i.onload = () => resolve(i);
-                    i.src = URL.createObjectURL(tempCroppedImage!);
-                });
-
-                const canvas = document.createElement("canvas");
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext("2d");
-
-                while (quality > 0.1) {
-                    ctx?.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx?.drawImage(img, 0, 0);
-                    finalBlob = await new Promise<Blob>((resolve) => {
-                        canvas.toBlob(
-                            (b) => resolve(b!),
-                            "image/jpeg",
-                            quality,
-                        );
-                    });
-                    if (finalBlob.size <= targetSize) break;
-                    quality -= 0.1;
-                }
-            }
-
-            croppedImage = finalBlob;
+            croppedImage = await compressImage(tempCroppedImage, true);
             preview = URL.createObjectURL(croppedImage);
             // Convert Blob into File
             const fileNameParts = files[0].name.split(".");
@@ -195,11 +235,7 @@
             const file = new File([croppedImage], fileName, {
                 type: croppedImage.type,
             });
-            // Create a new DataTransfer instance
-            const dataTransfer = new DataTransfer();
-            // Add file to DataTransfer
-            dataTransfer.items.add(file);
-            files = dataTransfer.files;
+            replaceFiles(file);
         }
     }
     function zoomIn() {
@@ -315,6 +351,8 @@
             on:click={() => {
                 image = "";
                 preview = "";
+                croppedImage = null;
+                clearFiles();
                 if (hasCamera) startCamera();
             }}>Reset</Button
         >
@@ -330,6 +368,10 @@
                 <ZoomInOutline size="md" color="white" />
             </button>
         </div>
-        <Button type="button" on:click={submit}>Übernehmen</Button>
+        <Button
+            type="button"
+            disabled={!previewOnly && !croppedImage}
+            on:click={submit}>Übernehmen</Button
+        >
     </div>
 {/if}

@@ -244,11 +244,22 @@
         loading = true;
         try {
             await uploadImages(employee, employee.uuid);
+        } catch (error) {
+            console.error("Image upload failed", error);
+            alert(
+                "Ein Dokument konnte nicht hochgeladen werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+            );
+            loading = false;
+            return;
+        }
+
+        try {
             await updateCall(employee);
             currentStep.update((n) => n + 1);
-        } catch (e) {
+        } catch (error) {
+            console.error("Employee data update failed", error);
             alert(
-                "Fehler beim Hochladen der Bilder. Bitte prüfen Sie Ihren Browser, ob alle Dateien nicht zu groß sind. ",
+                "Die Stammdaten konnten nicht gespeichert werden. Bitte prüfe deine Eingaben und versuche es erneut.",
             );
         } finally {
             loading = false;
