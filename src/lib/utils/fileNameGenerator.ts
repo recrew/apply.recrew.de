@@ -4,7 +4,7 @@ export const fileNameGenerator = (file: File,employee: any, tag: string, frontOr
     let name = '';
     switch(tag){
         case 'license':
-            name = 'Füherschein_'+frontOrBack
+            name = 'Führerschein_'+frontOrBack
             break;
         case 'student-verification':
             name = 'Immatrikulationsbescheinigung'

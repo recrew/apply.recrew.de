@@ -1,24 +1,19 @@
 <script lang="ts">
     import {
         Alert, Avatar, Button,
-        Fileupload,
         Heading,
-        Helper,
         Input,
         Label,
-        Listgroup,
-        ListgroupItem, Modal,
+        Modal,
         P,
         Select
     } from "flowbite-svelte";
-    import {formDataPost, get} from "$lib/api";
-    import {createEventDispatcher, onMount} from "svelte";
+    import {get} from "$lib/api";
+    import {onMount} from "svelte";
     import Box from "$lib/components/Box.svelte";
     import AddressData from "$lib/partials/AddressData.svelte";
-    import Tesseract from "$lib/components/Tesseract.svelte";
     import Typeahead from "$lib/components/Typeahead.svelte";
     import {
-        ArrowUpDownOutline,
         ArrowUpOutline,
         BellRingOutline,
         CheckCircleOutline,
@@ -26,26 +21,22 @@
     } from "flowbite-svelte-icons";
     import {reactToBoxInteraction} from "$lib/utils/openStep";
     import {currentStep} from "$lib/stores/currentStep";
-    import {fileNameGenerator} from "$lib/utils/fileNameGenerator";
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import {blocked} from "$lib/stores/blocked";
     import {page} from "$app/stores";
     import uploadImages from "$lib/utils/uploadImages";
     import dayjs from "dayjs";
     import updateCall from "$lib/utils/updateCall";
+    import DocumentUpload from "$lib/components/DocumentUpload.svelte";
 
     export let employee: any
 
     let nationalities: any[] = [];
     let countries: any[] = [];
-    let files: File[];
     let avatarFiles: FileList;
     let loading = false;
 
-    let idOptions = [
-        {name: "Personalausweis Vorderseite", value: "id-card"},
-        {name: "Reisepass Vorderseite", value: "passport"},
-    ]
+    let idBlocked = true;
 
     const isEu = (key) => {
         return [
@@ -60,21 +51,9 @@
         ].includes(key)
     }
 
-    const idReader = (detail: any, index?: number) => {
-        employee.images[index ?? 0].name = fileNameGenerator(detail.file, employee, detail.type, index ? 'Rückseite' : 'Vorderseite')
-        employee.images[index ?? 0].file = detail.file
-        employee.images[index ?? 0].documentNumber = (employee.images.filter( n => (n.imageTag === 'id-card' || n.imageTag === 'passport')).length < 1 && detail.text.length < 1) ? 'nicht lesbar' : detail.text
-        employee.images[index ?? 0].imageTag = detail.type
-        employee.images = [...employee.images]
-        idIndex = employee.images.findIndex((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)
-
-    }
-
-    let idIndex = employee.images.findIndex((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)
-
     let dataComplete = false;
     $: {
-        dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
+        dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && !idBlocked && employee.address.country
 
         /*if(employee) {
             markEmptyFields();
@@ -118,8 +97,8 @@
     //$:dataComplete = employee.firstName && employee.lastName && employee.gender && employee.dateOfBirth.value && employee.cv.countryOfBirth && employee.cv.nationality && (employee.images[0]?.file || employee.images[0]?.location) && employee.address.country
 
     onMount(async () => {
-        if(employee.images.length < 1){
-            employee.images = [{documentNumber: '', imageTag: 'id-card', file: null},{documentNumber: '', imageTag: 'id-card', file: null}]
+        if(!employee.images){
+            employee.images = []
         }
         nationalities = (await get('/hr/reference/Staatsangehoerigkeiten')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name))
         countries = (await get('/hr/reference/Staaten')).map((n) => ({...n, name: n.value})).sort((a,b) => a.name.localeCompare(b.name))
@@ -197,20 +176,24 @@
             <Heading tag="h4">Staatsangehörigkeit außerhalb EWR</Heading>
             <P class="dark:text-white">Die Bearbeitung geht schneller, wenn du erforderliche Dokumente (Aufenthaltserlaubnis, Arbeitserlaubnis, etc) schon bereit stellst. Aber keine Sorge, du kannst diese Nachweise auch später nachreichen.</P>
             <div class="mt-2">
-                <Label class="pb-2" for="multiple_files">Datei(en) hochladen</Label>
-                <Fileupload accept="image/*,application/pdf" id="multiple_files" multiple bind:files />
-                <Listgroup items={files} let:item class="mt-2">
-                    {#if item}
-                        {item.name}
-                    {:else}
-                        <ListgroupItem>Keine Dateien</ListgroupItem>
-                    {/if}
-                </Listgroup>
+                <Label class="pb-2" for="non_eea_upload">Datei hochladen</Label>
+                <DocumentUpload bind:employee kind="non-eea" />
             </div>
         </Alert>
     {/if}
     {#if employee.cv.nationality}
-        <div class="grid md:grid-cols-2 gap-3 mt-2">
+        <div class="md:col-span-2">
+            <DocumentUpload bind:employee kind="id" bind:blocked={idBlocked}/>
+        </div>
+        {#if idBlocked}
+            <Alert class="mt-3" border color="red">
+                <div class="flex gap-3">
+                    <ArrowUpOutline /> Bitte Dokument hochladen
+                </div>
+            </Alert>
+        {/if}
+
+        <!--<div class="grid md:grid-cols-2 gap-3 mt-2">
 
             <div>
                 <Tesseract value={employee.images.find((n) => (n.imageTag === 'id-card' || n.imageTag === 'passport') && n.documentNumber)} options={idOptions} on:ocr={ev => idReader(ev.detail, idIndex > -1 ? idIndex : 0)}/>
@@ -234,14 +217,7 @@
                 </Helper>
             </div>
             {/if}
-        </div>
-        {#if $blocked && (!(employee.images[0]?.file || employee.images[0]?.location) || !(employee.images[1]?.file || employee.images[1]?.location))}
-            <Alert class="mt-3" border color="red">
-                <div class="flex gap-3">
-                    <ArrowUpOutline /> Bitte Dokument hochladen
-                </div>
-            </Alert>
-        {/if}
+        </div>-->
     {/if}
 
 
