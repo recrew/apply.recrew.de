@@ -34,6 +34,7 @@
     import { formComplete } from "$lib/stores/formComplete";
     import Typeahead from "$lib/components/Typeahead.svelte";
     import { isEu } from "$lib/utils/isEu";
+    import { compressImage } from "$lib/utils/imageCompression";
 
     export let employee: any;
 
@@ -42,7 +43,8 @@
     let nationalities: any[] = [];
     let countries: any[] = [];
     let loading = false;
-    let nonEuFiles: File[] = [];
+    let nonEuFiles: FileList | undefined;
+    const NON_EU_UPLOAD_TARGET_SIZE = 1.8 * 1024 * 1024;
 
     let idOption: string = "id-card";
     let documentNumber: string;
@@ -264,14 +266,23 @@
             // Upload Non-EU files if any
             if (nonEuFiles && nonEuFiles.length > 0) {
                 loading = true;
-                for (const file of nonEuFiles) {
+                for (const file of Array.from(nonEuFiles)) {
                     if (file) {
                         try {
+                            const compressedFile = await compressImage(
+                                file,
+                                NON_EU_UPLOAD_TARGET_SIZE,
+                            );
                             const image = {
                                 employeeUuid: employee.uuid,
                                 imageTag: "work-permit",
-                                file: file,
-                                name: fileNameGenerator(file, employee, "work-permit", ""),
+                                file: compressedFile,
+                                name: fileNameGenerator(
+                                    compressedFile,
+                                    employee,
+                                    "work-permit",
+                                    "",
+                                ),
                             };
                             const res = await formDataPost(
                                 "/hr/application/" + $page.url.searchParams.get("sheet") + "/image",
@@ -280,10 +291,15 @@
                             employee.images = [...employee.images, res];
                         } catch (e) {
                             console.error("Error uploading non-eu file", e);
+                            alert(
+                                "Ein Dokument konnte nicht hochgeladen werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+                            );
+                            loading = false;
+                            return;
                         }
                     }
                 }
-                nonEuFiles = []; // clear after upload
+                nonEuFiles = undefined; // clear after upload
                 loading = false;
             }
             await updateCall(employee);
@@ -447,13 +463,17 @@
                             multiple
                             bind:files={nonEuFiles}
                         />
-                        <Listgroup items={nonEuFiles} let:item class="mt-2">
-                            {#if item}
-                                {item.name}
-                            {:else}
+                        {#if nonEuFiles && nonEuFiles.length > 0}
+                            <Listgroup class="mt-2">
+                                {#each Array.from(nonEuFiles) as item}
+                                    <ListgroupItem>{item.name}</ListgroupItem>
+                                {/each}
+                            </Listgroup>
+                        {:else}
+                            <Listgroup class="mt-2">
                                 <ListgroupItem>Keine neuen Dateien ausgewählt</ListgroupItem>
-                            {/if}
-                        </Listgroup>
+                            </Listgroup>
+                        {/if}
                     </div>
                 </Alert>
             {/if}
