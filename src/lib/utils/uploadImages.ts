@@ -1,36 +1,25 @@
-import {formDataPost} from "$lib/api";
-import {page} from "$app/stores";
+import { formDataPost } from "$lib/api";
 import { compressImage } from "$lib/utils/imageCompression";
 
+// Sicherheitsabstand zum 2-MB-Limit der Upload-API
+const UPLOAD_TARGET_SIZE = 1.8 * 1024 * 1024;
+
 export default async function uploadImages(employee: any, uuid: string) {
-    return new Promise(async (resolve, reject) => {
-        for (let i = 0; i < employee.images.length; i++) {
-            if(!employee.images[i].file) {
-                continue
-            }
-            try{
-                const imgEntry = employee.images[i];
-                const originalFile = imgEntry.file as File;
-
-                // Compress once per file and mark to avoid re-compression loops
-                if (originalFile && !(originalFile as any).__compressed) {
-                    try {
-                        const compressed = await compressImage(originalFile);
-                        (compressed as any).__compressed = true;
-                        imgEntry.file = compressed;
-                    } catch (e) {
-                        // Fallback to original file on compression failure
-                        imgEntry.file = originalFile;
-                    }
-                }
-
-                await formDataPost('/hr/application/' + uuid + '/image', imgEntry)
-            } catch (e) {
-                reject(employee.images[i])
-            }
-
+    for (const image of employee.images) {
+        if (!image.file) {
+            continue;
         }
-        resolve('uploaded')
-    })
 
+        try {
+            // Letzter Choke-Point vor dem Upload: greift auch fuer Dateien,
+            // die nicht ueber den ImageCropper hereinkommen (z.B. Arbeitserlaubnis).
+            // compressImage ist idempotent, bereits verkleinerte Bilder bleiben unveraendert.
+            image.file = await compressImage(image.file, UPLOAD_TARGET_SIZE);
+        } catch (error) {
+            // Original hochladen statt den Bewerbungsflow abzubrechen
+            console.error("Image compression failed", error);
+        }
+
+        await formDataPost(`/hr/application/${uuid}/image`, image);
+    }
 }

@@ -1,122 +1,249 @@
 <script lang="ts">
-import Box from "$lib/components/Box.svelte";
-import {Button, Input, Label, Modal, Select, Toggle, Alert} from "flowbite-svelte";
-import {onMount} from "svelte";
-import {get} from "$lib/api";
-import DocumentUpload from "$lib/components/DocumentUpload.svelte";
-import {reactToBoxInteraction} from "$lib/utils/openStep";
-import {currentStep} from "$lib/stores/currentStep";
-import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-svelte-icons";
-    import {blocked} from "$lib/stores/blocked";
+    import Box from "$lib/components/Box.svelte";
+    import {
+        Button,
+        Input,
+        Label,
+        Modal,
+        Select,
+        Toggle,
+    } from "flowbite-svelte";
+    import { onMount } from "svelte";
+    import { get } from "$lib/api";
+    import DocumentUpload from "$lib/components/DocumentUpload.svelte";
+    import { reactToBoxInteraction } from "$lib/utils/openStep";
+    import { currentStep } from "$lib/stores/currentStep";
+    import { BellRingOutline, CheckCircleOutline } from "flowbite-svelte-icons";
+    import { blocked } from "$lib/stores/blocked";
     import markEmptyFields from "$lib/utils/markEmptyFields";
     import uploadImages from "$lib/utils/uploadImages";
     import updateCall from "$lib/utils/updateCall";
     export let employee: any;
 
-
-    let graduations : any[] = [];
-    let loading = false;
+    let graduations: any[] = [];
     let licenseBlocked = false;
     let studentBlocked = false;
+    let loading = false;
 
     let degrees = [
-        'Ohne beruflichen Ausbildungsabschluss', 'Abschluss einer anerkannten Berufsausbildung',
-        'Meister-/Techniker- oder gleichwertiger Fachschulabschluss', 'Bachelor', 'Diplom/Magister/Master/Staatsexamen',
-        'Promotion', 'Abschluss unbekannt'
-    ].map((n) => ({name: n, value: n}));
+        "Ohne beruflichen Ausbildungsabschluss",
+        "Abschluss einer anerkannten Berufsausbildung",
+        "Meister-/Techniker- oder gleichwertiger Fachschulabschluss",
+        "Bachelor",
+        "Diplom/Magister/Master/Staatsexamen",
+        "Promotion",
+        "Abschluss unbekannt",
+    ].map((n) => ({ name: n, value: n }));
 
     let stati = [
-        'Umschüler(in)', 'Schüler(in)', 'Schulentlassen mit Studienabsicht', 'Student(in)',
-        'abgeschl. Studium mit Masterplan', 'Praktikant(in)', 'Auszubildende(r)', 'Freiwilliger Wehrdienst',
-        'Hausfrau/-mann', 'beschäftigungslos', 'arbeitslos bei Agentur für Arbeit gemeldet', 'sozialversichert hauptbeschäftigt',
-        'selbständig', 'Sonstiges', 'Wiederaufnahme Studium geplant'
-    ].map((n) => ({name: n, value: n}));
+        "Umschüler(in)",
+        "Schüler(in)",
+        "Schulentlassen mit Studienabsicht",
+        "Student(in)",
+        "abgeschl. Studium mit Masterplan",
+        "Praktikant(in)",
+        "Auszubildende(r)",
+        "Freiwilliger Wehrdienst",
+        "Hausfrau/-mann",
+        "beschäftigungslos",
+        "arbeitslos bei Agentur für Arbeit gemeldet",
+        "sozialversichert hauptbeschäftigt",
+        "selbständig",
+        "Sonstiges",
+        "Wiederaufnahme Studium geplant",
+    ].map((n) => ({ name: n, value: n }));
 
     let experiences = [
-        'Promoter', 'Kundenservice', 'Rezeption', 'sonstiger Job', 'Servicekraft',
-        'Barkeeper', 'Koch', 'Barista', 'Model', 'Messehost/ess',
-        'Eventhelfer', 'Verkäufer', 'keine Erfahrung', 'Logistik', 'Einzelhandel'
-    ].sort().map((n) => ({name: n, value: n}));
+        "Promoter",
+        "Kundenservice",
+        "Rezeption",
+        "sonstiger Job",
+        "Servicekraft",
+        "Barkeeper",
+        "Koch",
+        "Barista",
+        "Model",
+        "Messehost/ess",
+        "Eventhelfer",
+        "Verkäufer",
+        "keine Erfahrung",
+        "Logistik",
+        "Einzelhandel",
+    ]
+        .sort()
+        .map((n) => ({ name: n, value: n }));
 
-    let shirtSizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'].map((n) => ({name: n, value: n}));
-    let pantSizesWoman = [32, 34, 36, 38, 40, 42, 44, 46, 48].map((n) => ({name: n, value: "" + n}));
-    let pantSizesMan = [46, 48, 50, 52, 54, 56].map((n) => ({name: n, value: "" + n}));
+    let shirtSizes = ["XXS", "XS", "S", "M", "L", "XL", "XXL"].map((n) => ({
+        name: n,
+        value: n,
+    }));
+    let pantSizesWoman = [32, 34, 36, 38, 40, 42, 44, 46, 48].map((n) => ({
+        name: n,
+        value: "" + n,
+    }));
+    let pantSizesMan = [46, 48, 50, 52, 54, 56].map((n) => ({
+        name: n,
+        value: "" + n,
+    }));
 
-    // Upload bindings handled by DocumentUpload
-    $: hasHealthCertUploaded = employee.images.some(i => i.imageTag === 'health-certificate' && (i.file || i.location));
+    $: dataComplete =
+        employee.status &&
+        employee.cv.graduation &&
+        employee.cv.degree &&
+        employee.cv.workExperiences &&
+        employee.cv.shirtSize &&
+        employee.cv.pantsSize &&
+        employee.cv.shoeSize &&
+        employee.cv.height &&
+        employee.cv.hairColor;
 
-    $: dataComplete = employee.status && employee.cv.graduation && employee.cv.degree && employee.cv.workExperiences && employee.cv.shirtSize && employee.cv.pantsSize && employee.cv.shoeSize && employee.cv.height && employee.cv.hairColor;
-    $: $blocked = !dataComplete;
+    $: documentsComplete =
+        (!employee.cv.motorVehicleLicense || !licenseBlocked) &&
+        (employee.status !== "Student" || !studentBlocked);
+
+    $: stepComplete = !!dataComplete && documentsComplete;
+
+    $: if ($currentStep === 3) {
+        $blocked = !stepComplete;
+    }
+
     const proceed = async () => {
-        if(!markEmptyFields()){
+        if (!stepComplete || !markEmptyFields()) {
             return;
         }
         loading = true;
-        try{
-            await uploadImages(employee, employee.uuid)
-            await updateCall(employee)
-            currentStep.update((n) => n + 1)
-        } catch (e) {
-            alert('Fehler beim Hochladen der Bilder. Bitte prüfen Sie Ihren Browser, ob alle Dateien nicht zu groß sind. ')
-        } finally {
-            loading = false
+        try {
+            await uploadImages(employee, employee.uuid);
+        } catch (error) {
+            console.error("Image upload failed", error);
+            alert(
+                "Ein Dokument konnte nicht hochgeladen werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+            );
+            loading = false;
+            return;
         }
-    }
 
-    onMount(async() => {
+        try {
+            await updateCall(employee);
+            currentStep.update((n) => n + 1);
+        } catch (error) {
+            console.error("Employee data update failed", error);
+            alert(
+                "Die Stammdaten konnten nicht gespeichert werden. Bitte prüfe deine Eingaben und versuche es erneut.",
+            );
+        } finally {
+            loading = false;
+        }
+    };
+
+    onMount(async () => {
         //markEmptyFields();
-
 
         if (!employee.healthCertificates) {
             employee.healthCertificates = [];
         }
-        graduations = (await get('/hr/reference/Schulabschluss')).map((n) => ({...n, name: n.value}));
-        stati = (await get('/hr/references/stati')).map((n) => ({name: n, value: n}));
-    })
-
-
+        graduations = (await get("/hr/reference/Schulabschluss")).map((n) => ({
+            ...n,
+            name: n.value,
+        }));
+        stati = (await get("/hr/references/stati")).map((n) => ({
+            name: n,
+            value: n,
+        }));
+    });
 </script>
+
 <Modal open={loading} title="Upload">
     <p>Bitte warten...</p>
 </Modal>
-<Box disabled={$blocked} title="Qualifikationen" open={$currentStep === 2} on:open={ev => reactToBoxInteraction(ev, 2)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box
+    disabled={$blocked || $currentStep < 3}
+    title="Qualifikationen"
+    open={$currentStep === 3}
+    on:open={(ev) => reactToBoxInteraction(ev, 3)}
+    icon={stepComplete ? CheckCircleOutline : BellRingOutline}
+>
     <div class="grid md:grid-cols-2 gap-y-3 gap-x-4 mt-2">
         <div>
             <Label class="mb-2" for="graduation">Schulabschluss *</Label>
-            <Select id="graduation" bind:value={employee.cv.graduation} items={graduations} required/>
+            <Select
+                id="graduation"
+                bind:value={employee.cv.graduation}
+                items={graduations}
+                required
+            />
         </div>
         <div>
             <Label class="mb-2" for="edu">Ausbildung *</Label>
-            <Select id="edu" bind:value={employee.cv.degree} items={degrees} required/>
+            <Select
+                id="edu"
+                bind:value={employee.cv.degree}
+                items={degrees}
+                required
+            />
         </div>
         <div>
             <Label class="mb-2" for="status">Aktueller Status *</Label>
-            <Select id="status" bind:value={employee.status} items={stati} required/>
+            <Select
+                id="status"
+                bind:value={employee.status}
+                items={stati}
+                required
+            />
         </div>
-        {#if employee.status === 'Student'}
+        {#if employee.status === "Student"}
             <div class="md:col-span-1">
-                <DocumentUpload kind="student-verification" bind:employee bind:blocked={studentBlocked} />
+                <DocumentUpload
+                    kind="student-verification"
+                    bind:employee
+                    bind:blocked={studentBlocked}
+                />
             </div>
         {/if}
         <div>
             <Label class="mb-2" for="experience">Erfahrung *</Label>
-            <Select id="experience" bind:value={employee.cv.workExperiences} items={experiences} required/>
+            <Select
+                id="experience"
+                bind:value={employee.cv.workExperiences}
+                items={experiences}
+                required
+            />
         </div>
         <div>
             <Label class="mb-2" for="shirt">Hemdgröße *</Label>
-            <Select id="shirt" bind:value={employee.cv.shirtSize} items={shirtSizes} required/>
+            <Select
+                id="shirt"
+                bind:value={employee.cv.shirtSize}
+                items={shirtSizes}
+                required
+            />
         </div>
-        <div class="mt-8">
-            <Toggle bind:checked={employee.cv.motorVehicleLicense} >Führerschein</Toggle>
+        <div>
+            <div class="mt-8">
+                <Toggle bind:checked={employee.cv.motorVehicleLicense}
+                    >Führerschein</Toggle
+                >
+            </div>
         </div>
         {#if employee.cv.motorVehicleLicense}
             <div class="md:col-span-2">
-                <DocumentUpload kind="license" bind:employee bind:blocked={licenseBlocked} />
+                <DocumentUpload
+                    kind="license"
+                    bind:employee
+                    bind:blocked={licenseBlocked}
+                />
             </div>
         {/if}
         <div>
             <Label class="mb-2" for="pants">Hosengröße *</Label>
-            <Select id="pants" bind:value={employee.cv.pantsSize} items={employee.gender === 'male' ? pantSizesMan : pantSizesWoman} required/>
+            <Select
+                id="pants"
+                bind:value={employee.cv.pantsSize}
+                items={employee.gender === "male"
+                    ? pantSizesMan
+                    : pantSizesWoman}
+                required
+            />
         </div>
         <div>
             <Label class="mb-2" for="shoe">Schuhgröße (EU) *</Label>
@@ -128,20 +255,26 @@ import {BellRingOutline, CheckCircleOutline, InfoCircleSolid} from "flowbite-sve
         </div>
         <div>
             <Label class="mb-2" for="graduation">Körpergröße (cm) *</Label>
-            <Input type="number" id="graduation" bind:value={employee.cv.height} required/>
+            <Input
+                type="number"
+                id="graduation"
+                bind:value={employee.cv.height}
+                required
+            />
         </div>
         <div>
             <Label class="mb-2" for="graduation">Haarfarbe *</Label>
-            <Input id="graduation" bind:value={employee.cv.hairColor} required/>
+            <Input
+                id="graduation"
+                bind:value={employee.cv.hairColor}
+                required
+            />
         </div>
     </div>
 
     <!-- Gesundheitszeugnis Upload -->
     <div class="mt-6">
-        <DocumentUpload
-            kind="health-certificate"
-            bind:employee
-        />
+        <DocumentUpload kind="health-certificate" bind:employee />
     </div>
 
     <Button on:click={() => proceed()} class="mt-5 w-full">Weiter</Button>

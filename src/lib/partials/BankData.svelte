@@ -27,7 +27,7 @@
 
         })
     }
-    $: dataComplete = employee.bankAccount && employee.bankAccount.iban && employee.bankAccount.accountName
+    $: dataComplete = employee.bankAccount && employee.bankAccount.iban && employee.bankAccount.bicSwift && employee.bankAccount.accountName
     onMount(() => {
         getBankDetails()
     })
@@ -43,7 +43,7 @@
     }
 </script>
 
-<Box disabled={$blocked} title="Bankdaten" open={$currentStep === 4} on:open={ev => reactToBoxInteraction(ev, 4)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={$blocked || $currentStep < 5} title="Bankdaten" open={$currentStep === 5} on:open={ev => reactToBoxInteraction(ev, 5)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     {#if employee.bankAccount}
     <div class="grid md:grid-cols-2 gap-3 mt-2">
         <div>
