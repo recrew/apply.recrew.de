@@ -353,7 +353,8 @@ export const readIdBackCard = (parsedText: string, ocrLines: { LineText: string 
         } else if (lastLine.includes("Größe/Height/Taille")) {
             const numberMatch = line.match(STANDALONE_NUMBER);
             if (numberMatch) {
-                address.number = numberMatch[1];
+                const value = parseInt(numberMatch[1]);
+                if (value >= 100 && value <= 250) height = value;
             }
         } else if (lastLine.includes("Place of birth")) {
             placeOfBirth = capitalize(line.trim());

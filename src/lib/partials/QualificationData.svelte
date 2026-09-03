@@ -97,8 +97,18 @@
         employee.cv.height &&
         employee.cv.hairColor;
 
+    $: documentsComplete =
+        (!employee.cv.motorVehicleLicense || !licenseBlocked) &&
+        (employee.status !== "Student" || !studentBlocked);
+
+    $: stepComplete = !!dataComplete && documentsComplete;
+
+    $: if ($currentStep === 3) {
+        $blocked = !stepComplete;
+    }
+
     const proceed = async () => {
-        if (!markEmptyFields()) {
+        if (!stepComplete || !markEmptyFields()) {
             return;
         }
         loading = true;
@@ -151,7 +161,7 @@
     title="Qualifikationen"
     open={$currentStep === 3}
     on:open={(ev) => reactToBoxInteraction(ev, 3)}
-    icon={dataComplete ? CheckCircleOutline : BellRingOutline}
+    icon={stepComplete ? CheckCircleOutline : BellRingOutline}
 >
     <div class="grid md:grid-cols-2 gap-y-3 gap-x-4 mt-2">
         <div>

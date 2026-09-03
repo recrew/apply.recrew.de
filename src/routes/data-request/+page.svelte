@@ -34,6 +34,10 @@
     };
 
     const update = async () => {
+        if ($currentStep < steps.length || $blocked) {
+            return;
+        }
+
         loading = true;
         let updateObject = {
             healthInsurance: employee.healthInsurance || { isPublic: true },
@@ -155,8 +159,11 @@
                 {#if loading}
                     <Spinner class="place-self-center" />
                 {:else}
-                    <Button disabled={$blocked} type="submit">Speichern</Button>
-                    {#if $blocked}
+                    <Button
+                        disabled={$blocked || $currentStep < steps.length}
+                        type="submit">Speichern</Button
+                    >
+                    {#if $blocked || $currentStep < steps.length}
                         <Tooltip>Bitte markierte Felder ausfüllen</Tooltip>
                     {/if}
                 {/if}

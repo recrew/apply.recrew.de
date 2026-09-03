@@ -46,6 +46,14 @@
     let nonEuFiles: FileList | undefined;
     const NON_EU_UPLOAD_TARGET_SIZE = 1.8 * 1024 * 1024;
 
+    const createFileList = (files: File[]): FileList | undefined => {
+        if (files.length === 0) return undefined;
+
+        const dataTransfer = new DataTransfer();
+        files.forEach((file) => dataTransfer.items.add(file));
+        return dataTransfer.files;
+    };
+
     let idOption: string = "id-card";
     let documentNumber: string;
     let currentFile: File;
@@ -266,7 +274,9 @@
             // Upload Non-EU files if any
             if (nonEuFiles && nonEuFiles.length > 0) {
                 loading = true;
-                for (const file of Array.from(nonEuFiles)) {
+                const filesToUpload = Array.from(nonEuFiles);
+                for (let fileIndex = 0; fileIndex < filesToUpload.length; fileIndex += 1) {
+                    const file = filesToUpload[fileIndex];
                     if (file) {
                         try {
                             const compressedFile = await compressImage(
@@ -294,6 +304,7 @@
                             alert(
                                 "Ein Dokument konnte nicht hochgeladen werden. Bitte prüfe deine Verbindung und versuche es erneut.",
                             );
+                            nonEuFiles = createFileList(filesToUpload.slice(fileIndex));
                             loading = false;
                             return;
                         }
