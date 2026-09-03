@@ -1,45 +1,72 @@
 const DEFAULT_TARGET_SIZE = 1024 * 1024;
 const MAX_IMAGE_DIMENSION = 3000;
+const JPEG_QUALITY = 0.82;
+const MAX_ATTEMPTS = 6;
 
-export async function compressImage(
-    blob: Blob,
-    targetSize = DEFAULT_TARGET_SIZE,
-): Promise<Blob> {
-    if (blob.size <= targetSize && blob.type === "image/jpeg") {
-        return blob;
-    }
+const toJpegFile = (blob: Blob, originalName: string): File =>
+    new File([blob], originalName.replace(/\.[^.]+$/, "") + ".jpg", {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+    });
 
-    const image = await createImageBitmap(blob);
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("Canvas wird von diesem Browser nicht unterstützt.");
-
-    let scale = Math.min(
-        1,
-        MAX_IMAGE_DIMENSION / Math.max(image.width, image.height),
+const canvasToJpeg = (canvas: HTMLCanvasElement): Promise<Blob> =>
+    new Promise((resolve, reject) =>
+        canvas.toBlob(
+            (result) =>
+                result
+                    ? resolve(result)
+                    : reject(new Error("Bild konnte nicht verarbeitet werden.")),
+            "image/jpeg",
+            JPEG_QUALITY,
+        ),
     );
 
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-        canvas.width = Math.max(1, Math.round(image.width * scale));
-        canvas.height = Math.max(1, Math.round(image.height * scale));
-        context.fillStyle = "#fff";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-        const compressed = await new Promise<Blob>((resolve, reject) =>
-            canvas.toBlob(
-                (result) =>
-                    result
-                        ? resolve(result)
-                        : reject(new Error("Bild konnte nicht verarbeitet werden.")),
-                "image/jpeg",
-                0.82,
-            ),
-        );
-        if (compressed.size <= targetSize) return compressed;
-
-        scale *= Math.min(0.85, Math.sqrt(targetSize / compressed.size) * 0.95);
+export async function compressImage(
+    file: File,
+    targetSize = DEFAULT_TARGET_SIZE,
+): Promise<File> {
+    // PDFs und andere Nicht-Bilder unveraendert durchreichen - createImageBitmap wuerde werfen
+    if (!file.type.startsWith("image/")) {
+        return file;
+    }
+    // Idempotent: bereits komprimierte Bilder gehen unveraendert zurueck
+    if (file.size <= targetSize && file.type === "image/jpeg") {
+        return file;
     }
 
-    throw new Error("Das Bild konnte nicht unter 1 MB komprimiert werden.");
+    const image = await createImageBitmap(file);
+    try {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (!context) {
+            throw new Error("Canvas wird von diesem Browser nicht unterstützt.");
+        }
+
+        let scale = Math.min(
+            1,
+            MAX_IMAGE_DIMENSION / Math.max(image.width, image.height),
+        );
+        let compressed!: Blob;
+
+        for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+            canvas.width = Math.max(1, Math.round(image.width * scale));
+            canvas.height = Math.max(1, Math.round(image.height * scale));
+            // JPEG kennt keine Transparenz - ohne weissen Grund werden PNG-Alphabereiche schwarz
+            context.fillStyle = "#fff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+            compressed = await canvasToJpeg(canvas);
+            if (compressed.size <= targetSize) {
+                break;
+            }
+            scale *= Math.min(0.85, Math.sqrt(targetSize / compressed.size) * 0.95);
+        }
+
+        // ponytail: bestes Ergebnis statt Abbruch - ein zu grosses Bild ist besser
+        // als ein Bewerber, der im Formular haengen bleibt
+        return toJpegFile(compressed, file.name);
+    } finally {
+        image.close();
+    }
 }

@@ -115,14 +115,13 @@
             if (!ctx) throw new Error("Canvas wird von diesem Browser nicht unterstützt.");
             ctx.drawImage(videoElement, 0, 0);
             const captured = await canvasToBlob(canvas, "image/jpeg", 0.9);
-            const compressed = await compressImage(captured);
-            const file = new File(
-                [compressed],
-                `capture-${Date.now()}.jpg`,
-                { type: "image/jpeg" },
+            const file = await compressImage(
+                new File([captured], `capture-${Date.now()}.jpg`, {
+                    type: "image/jpeg",
+                }),
             );
             replaceFiles(file);
-            croppedImage = previewOnly ? compressed : null;
+            croppedImage = previewOnly ? file : null;
             image = canvas.toDataURL("image/jpeg", 0.9);
             preview = previewOnly ? URL.createObjectURL(file) : image;
             stopCamera();
@@ -173,15 +172,9 @@
             return;
         }
 
-        if (previewOnly && file.type.startsWith("image/")) {
+        if (previewOnly) {
             try {
-                const compressed = await compressImage(file);
-                if (compressed !== file) {
-                    const fileName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
-                    file = new File([compressed], fileName, {
-                        type: compressed.type,
-                    });
-                }
+                file = await compressImage(file);
             } catch (error) {
                 console.error("Image compression failed", error);
                 alert("Das Bild konnte nicht komprimiert werden.");
@@ -222,20 +215,28 @@
             pixels: { x: number; y: number; width: number; height: number };
         }>,
     ) {
-        let tempCroppedImage = await getCroppedImg(image, e.detail.pixels, 0);
-        if (tempCroppedImage) {
-            croppedImage = await compressImage(tempCroppedImage, true);
-            preview = URL.createObjectURL(croppedImage);
-            // Convert Blob into File
-            const fileNameParts = files[0].name.split(".");
-            const fileName =
-                (fileNameParts[0].includes("-cropped")
-                    ? fileNameParts[0]
-                    : fileNameParts[0] + "-cropped") + ".jpg";
-            const file = new File([croppedImage], fileName, {
-                type: croppedImage.type,
-            });
+        const tempCroppedImage = await getCroppedImg(image, e.detail.pixels, 0);
+        if (!tempCroppedImage) {
+            return;
+        }
+
+        const baseName = files[0].name.split(".")[0];
+        const fileName =
+            (baseName.includes("-cropped") ? baseName : baseName + "-cropped") +
+            ".jpg";
+
+        try {
+            const file = await compressImage(
+                new File([tempCroppedImage], fileName, {
+                    type: tempCroppedImage.type,
+                }),
+            );
+            croppedImage = file;
+            preview = URL.createObjectURL(file);
             replaceFiles(file);
+        } catch (error) {
+            console.error("Cropped image processing failed", error);
+            alert("Der Zuschnitt konnte nicht verarbeitet werden.");
         }
     }
     function zoomIn() {
