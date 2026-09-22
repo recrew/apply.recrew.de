@@ -30,6 +30,7 @@
     let cropperModalBack = false;
     let frontPreview: string | null = null;
     let backPreview: string | null = null;
+    let unknownFrontDetail: any = null;
     const latestIdCardBySide = (side: "Vorderseite" | "Rückseite") =>
         latestImageByTagAndSide(images, "id-card", side);
 
@@ -146,33 +147,49 @@
         return file;
     }
 
-    const handleFrontOCR = async (detail: any) => {
-        const resolved = await resolvePreview(detail.file);
-        setPreview(resolved, "front");
+    const processFrontAs = (detail: any, docType: "id-card" | "passport" | "other") => {
+        selectedType = docType;
+        unknownFrontDetail = null;
 
-        if (selectedType === "other") {
+        if (docType === "other") {
             dispatch("ocrRead", { file: detail.file, docType: "other" });
             state = "complete";
             dispatch("formCompleted");
             return;
         }
 
-        const docType = detectDocumentType(detail.text);
-
         if (docType === "passport") {
-            selectedType = "passport";
             const parsed = readPassport(detail.text);
             dispatch("ocrRead", { ...parsed, file: detail.file, docType: "passport" });
             state = "complete";
             dispatch("formCompleted");
-        } else if (docType === "id-card") {
-            selectedType = "id-card";
+        } else {
             const parsed = readIdFrontCard(detail.text);
             dispatch("ocrFrontRead", { ...parsed, file: detail.file, docType: "id-card" });
             state = "needs-back";
-        } else {
-            state = "unknown-type";
         }
+    };
+
+    const handleFrontOCR = async (detail: any) => {
+        const resolved = await resolvePreview(detail.file);
+        setPreview(resolved, "front");
+
+        if (selectedType === "other") {
+            processFrontAs(detail, "other");
+            return;
+        }
+
+        const docType = detectDocumentType(detail.text);
+        if (docType === "unknown") {
+            unknownFrontDetail = detail;
+            state = "unknown-type";
+        } else {
+            processFrontAs(detail, docType);
+        }
+    };
+
+    const chooseUnknownType = (type: "id-card" | "passport" | "other") => {
+        if (unknownFrontDetail) processFrontAs(unknownFrontDetail, type);
     };
 
     const handleBackOCR = async (detail: any) => {
@@ -186,7 +203,13 @@
     };
 
     const onManualTypeChange = () => {
+        if (state === "unknown-type" && unknownFrontDetail) {
+            chooseUnknownType(selectedType);
+            return;
+        }
+
         // Cleanup existing blob previews before switching
+        unknownFrontDetail = null;
         setPreview(null, "front");
         setPreview(null, "back");
         syncStateFromImages(selectedType);
@@ -214,7 +237,12 @@
                 <div class="mt-3">
                     <Alert color="yellow">
                         <ExclamationCircleOutline slot="icon" class="w-5 h-5" />
-                        Dokumenttyp nicht erkannt — bitte oben manuell wählen (z.B. bei ausländischen ID-Karten)
+                        Dokumenttyp nicht erkannt — bitte manuell auswählen (z.B. bei ausländischen ID-Karten).
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <Button size="sm" on:click={() => chooseUnknownType("id-card")}>Ausweis / Aufenthaltstitel</Button>
+                            <Button size="sm" on:click={() => chooseUnknownType("passport")}>Reisepass</Button>
+                            <Button size="sm" on:click={() => chooseUnknownType("other")}>Sonstiges</Button>
+                        </div>
                     </Alert>
                 </div>
             {:else if state === "needs-back"}

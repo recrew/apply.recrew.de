@@ -169,6 +169,7 @@
             if (payload.detail.country) employee.cv.countryOfBirth = payload.detail.country;
             if (payload.detail.height) employee.cv.height = payload.detail.height;
             employee.address = {
+                ...(employee.address ?? {}),
                 country: payload.detail.address?.country || employee.address?.country || "Deutschland",
                 place: payload.detail.address?.place || employee.address?.place || null,
                 street: payload.detail.address?.street || employee.address?.street || null,
