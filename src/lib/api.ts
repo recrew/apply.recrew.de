@@ -79,29 +79,27 @@ const DATE_REGEX = /^\d{2}\.\d{2}\.\d{4}$/;
 const parseGermanDate = (value: string): string =>
     dayjs(value.split(".").reverse().join("-")).format("YYYY-MM-DD");
 
+const isLenkradDate = (value: any): boolean =>
+    typeof value === "object" && value !== null && "value" in value && "stamp" in value;
+
+const normalizeValue = (value: any): any => {
+    if (typeof value === "string" && DATE_REGEX.test(value)) {
+        return parseGermanDate(value);
+    }
+    return isLenkradDate(value) ? value.value : value;
+};
+
 const formConverter = (data: any, form: FormData): FormData => {
     Object.keys(data).forEach((key) => {
-        let value = data[key];
-        if (typeof value === "string" && DATE_REGEX.test(value)) {
-            value = parseGermanDate(value);
-        }
+        const value = normalizeValue(data[key]);
         if (value instanceof File) {
             form.append(key, value);
         } else if (typeof value === "object" && value !== null) {
             Object.keys(value).forEach((subKey) => {
-                let subValue = value[subKey];
-                if (typeof subValue === "string" && DATE_REGEX.test(subValue)) {
-                    subValue = parseGermanDate(subValue);
-                }
+                const subValue = normalizeValue(value[subKey]);
                 if (typeof subValue === "object" && subValue !== null) {
                     Object.keys(subValue).forEach((subSubKey) => {
-                        let subSubValue = subValue[subSubKey];
-                        if (
-                            typeof subSubValue === "string" &&
-                            DATE_REGEX.test(subSubValue)
-                        ) {
-                            subSubValue = parseGermanDate(subSubValue);
-                        }
+                        const subSubValue = normalizeValue(subValue[subSubKey]);
                         if (typeof subSubValue !== "undefined" && subSubValue !== null) {
                             form.append(`${key}[${subKey}][${subSubKey}]`, subSubValue);
                         }
