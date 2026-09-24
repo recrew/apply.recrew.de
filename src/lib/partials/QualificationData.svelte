@@ -9,7 +9,7 @@
         Toggle,
     } from "flowbite-svelte";
     import { onMount } from "svelte";
-    import { get } from "$lib/api";
+    import { get, uploadErrorMessage } from "$lib/api";
     import DocumentUpload from "$lib/components/DocumentUpload.svelte";
     import { reactToBoxInteraction } from "$lib/utils/openStep";
     import { currentStep } from "$lib/stores/currentStep";
@@ -117,7 +117,10 @@
         } catch (error) {
             console.error("Image upload failed", error);
             alert(
-                "Ein Dokument konnte nicht hochgeladen werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+                uploadErrorMessage(
+                    error,
+                    "Ein Dokument konnte nicht hochgeladen werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+                ),
             );
             loading = false;
             return;

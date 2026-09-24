@@ -12,7 +12,7 @@
         ListgroupItem,
         P
     } from "flowbite-svelte";
-    import { formDataPost, get } from "$lib/api";
+    import { formDataPost, get, uploadErrorMessage } from "$lib/api";
     import { onMount } from "svelte";
     import Box from "$lib/components/Box.svelte";
     import {
@@ -303,7 +303,10 @@
                         } catch (e) {
                             console.error("Error uploading non-eu file", e);
                             alert(
-                                "Ein Dokument konnte nicht hochgeladen werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+                                uploadErrorMessage(
+                                    e,
+                                    "Ein Dokument konnte nicht hochgeladen werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+                                ),
                             );
                             nonEuFiles = createFileList(filesToUpload.slice(fileIndex));
                             loading = false;

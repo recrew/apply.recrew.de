@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { get, formDataPost } from "$lib/api";
+    import { get, formDataPost, uploadErrorMessage } from "$lib/api";
     import { page } from "$app/stores";
     import {
         Alert,
@@ -72,7 +72,7 @@
         } catch (e) {
             console.error(e);
             $modalStore.registerConfig({
-                content: "Ein Fehler ist aufgetreten.",
+                content: uploadErrorMessage(e, "Ein Fehler ist aufgetreten."),
                 title: "Ups...",
             });
         }

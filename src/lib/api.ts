@@ -57,7 +57,22 @@ export const retire = async (url: string) => call("delete", url);
 export const put = async (url: string, postData = {}) =>
     call("put", url, postData);
 
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+
+export class FileTooLargeError extends Error {}
+
+export const uploadErrorMessage = (error: unknown, fallback: string): string =>
+    error instanceof FileTooLargeError ? error.message : fallback;
+
 export const formDataPost = async (url: string, postData: any) => {
+    const tooLarge = Object.values(postData).find(
+        (value) => value instanceof File && value.size > MAX_UPLOAD_BYTES,
+    ) as File | undefined;
+    if (tooLarge) {
+        throw new FileTooLargeError(
+            `Die Datei „${tooLarge.name}“ ist zu groß (max. 8 MB). Bitte fotografiere das Dokument oder lade eine kleinere Datei hoch.`,
+        );
+    }
     const options = getOptions("post");
     delete options.headers["Content-Type"];
     const data = new FormData();
