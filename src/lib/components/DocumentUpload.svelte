@@ -41,8 +41,8 @@
     export let blocked: boolean = false;
 
     // Local UI state for non-EEA uploads (keeps UI like before)
-    let nonEeaFiles: File[] = [];
-    let lastNonEeaFiles: File[] | null = null;
+    let nonEeaFiles: FileList | undefined;
+    let lastNonEeaFiles: FileList | undefined;
 
     const dispatch = createEventDispatcher<{ change: { employee: Employee } }>();
 
@@ -270,7 +270,7 @@
 
         ensureImagesArray();
 
-        const filesArray = nonEeaFiles ? Array.from(nonEeaFiles as any) as File[] : [];
+        const filesArray = nonEeaFiles ? Array.from(nonEeaFiles) : [];
 
         if (filesArray.length === 0) {
             // remove all dynamically added "other" files
@@ -320,8 +320,10 @@
 
     // React when Fileupload changes its bound files
     $: if (kind === "non-eea" && nonEeaFiles !== lastNonEeaFiles) {
+        const isInitialEmptyState =
+            lastNonEeaFiles === undefined && (!nonEeaFiles || nonEeaFiles.length === 0);
         lastNonEeaFiles = nonEeaFiles;
-        syncNonEeaFiles();
+        if (!isInitialEmptyState) syncNonEeaFiles();
     }
 
     function handleUpload(detail: any, docType: string, side: Side = "front") {
@@ -351,8 +353,7 @@
     }
 
     function handleClear(docType: string, side: Side = "front") {
-        updateDocumentNumber("");
-        updateIssueDate("");
+        // Remove before changing fields; side detection uses documentNumber.
         removeDocument(docType, side);
     }
 
@@ -368,6 +369,10 @@
 
     function updateIssueDate(value: string) {
         updateFrontField("issueDate", value);
+    }
+
+    function inputValue(event: Event): string {
+        return (event.currentTarget as HTMLInputElement).value;
     }
 
     function getBackLabel(): string {
@@ -447,13 +452,17 @@
                 multiple
                 bind:files={nonEeaFiles}
         />
-        <Listgroup items={nonEeaFiles} let:item class="mt-2">
-            {#if item}
-                {item.name}
-            {:else}
+        {#if nonEeaFiles && nonEeaFiles.length > 0}
+            <Listgroup class="mt-2">
+                {#each Array.from(nonEeaFiles) as item}
+                    <ListgroupItem>{item.name}</ListgroupItem>
+                {/each}
+            </Listgroup>
+        {:else}
+            <Listgroup class="mt-2">
                 <ListgroupItem>Keine Dateien</ListgroupItem>
-            {/if}
-        </Listgroup>
+            </Listgroup>
+        {/if}
     </div>
 {:else}
     <div class="grid md:grid-cols-2 gap-3 mt-2">
@@ -497,7 +506,7 @@
                         id="docNumber"
                         placeholder={config.placeholder?.(activeTag)}
                         value={normalizeToString(front?.documentNumber)}
-                        on:input={(e) => updateDocumentNumber(e.target.value)}
+                        on:input={(e) => updateDocumentNumber(inputValue(e))}
                         required
                 />
                 <Helper class="mt-2" color="green">
@@ -514,7 +523,7 @@
                         id="issueDate"
                         placeholder="DD.MM.YYYY"
                         value={normalizeToString(front?.issueDate)}
-                        on:input={(e) => updateIssueDate(e.target.value)}
+                        on:input={(e) => updateIssueDate(inputValue(e))}
                 />
                 <Helper class="mt-2" color="green">
                     Bitte maschinell gescanntes Ergebnis überprüfen!
@@ -528,7 +537,14 @@
         <Alert color="red" class="mt-3">
             <p class="text-sm">
                 Das Ausstellungsdatum des Gesundheitszeugnisses darf maximal 3 Monate zurück
-                liegen.
+                liegen.<br>
+                Falls du ein neues benötigst,
+                <a
+                        href="https://www.google.com/search?q=gesundheitszeugnis+online"
+                        class="text-primary-900 hover:text-primary-800 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                >klicke hier!</a>
             </p>
         </Alert>
     {/if}

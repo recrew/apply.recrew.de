@@ -25,6 +25,7 @@
     let filteredItems = [];
     let showResults = false;
     let valid = false;
+    let selectionError = false;
 
     $: filteredItems = !value || value.length === 0 ? [] : data
         .filter(x => typeof x[displayProperty] === 'string' ? x[displayProperty].toLowerCase().includes(value.toLowerCase()) : x[displayProperty].toString().toLowerCase().includes(value.toLowerCase()))
@@ -33,11 +34,30 @@
     /*if(value && data){
         value = data.find(x => x.value === value)[displayProperty] || value
     }*/
+    const exactMatch = () => data.find(item =>
+        item[displayProperty].toString().trim().toLowerCase() === value.trim().toLowerCase()
+    )
+    const validateSelection = () => {
+        if (!required || !value) return;
+        const match = exactMatch();
+        if (match) {
+            value = match[displayProperty];
+            valid = true;
+            selectionError = false;
+        } else {
+            value = '';
+            valid = false;
+            selectionError = true;
+        }
+    }
     const select = () => {
-        value = filteredItems[selectedIndex][displayProperty]
-        extract(filteredItems[selectedIndex])
+        const item = filteredItems[selectedIndex ?? 0];
+        if (!item) return;
+        value = item[displayProperty]
+        extract(item)
         showResults = false
         valid = true
+        selectionError = false
     }
     const navigate = pos => {
         if (filteredItems.length < 1) {
@@ -64,6 +84,7 @@
     }
 
     let onBlur = () => {
+        validateSelection();
         setTimeout(() => {
             showResults = false;
             selectedIndex = null;
@@ -71,13 +92,10 @@
     }
 
     let onKeydown = (e) => {
-        if (filteredItems.length === 0) return;
-
         switch (e.key) {
             case "Enter":
-                // if(searchRef.)
                 e.preventDefault();
-                select();
+                filteredItems.length > 0 ? select() : validateSelection();
                 break;
             case "ArrowDown":
                 e.preventDefault();
@@ -91,7 +109,7 @@
                 e.preventDefault();
                 value = "";
                 searchRef?.focus();
-                close();
+                showResults = false;
                 break;
         }
     }
@@ -112,7 +130,7 @@
                 class={inputClass}
                 on:focus={onFocus}
                 on:blur={onBlur}
-                on:input={() => {showResults = true; selectedIndex = null; valid = false; dispatch('input', value);}}
+                on:input={() => {showResults = true; selectedIndex = null; valid = false; selectionError = false; dispatch('input', value);}}
                 on:keydown={onKeydown}
                 bind:value
                 id={id}
@@ -140,6 +158,9 @@
 
     </Label>
 
+    {#if selectionError}
+        <p class="mt-1 text-sm text-red-600">Bitte einen Wert aus der Liste auswählen.</p>
+    {/if}
 
 
 
@@ -148,8 +169,9 @@
             {#each filteredItems.sort((a, b) => a[displayProperty] < b[displayProperty] ? -1 : 1) as item, index}
                 <div
                     class:font-medium={selectedIndex === index} class:ring-1={selectedIndex === index} class="p-2 bg-white m-0.5 text-sm border rounded-md ring-1 ring-inset hover:ring-primary-500"
+                    on:mousedown|preventDefault={() => {selectedIndex=index; select()}}
                     on:keydown={() => {selectedIndex=index; select()}}
-                    on:click={() => {selectedIndex=index; select()}}>
+                    on:click={() => {if (!valid || value !== item[displayProperty]) {selectedIndex=index; select()}}}>
                     <slot {item} {index} {value}>
                         {@html item[displayProperty]}
                     </slot>

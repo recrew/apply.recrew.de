@@ -14,7 +14,6 @@
     } from "flowbite-svelte";
     import { page } from "$app/stores";
     import { base } from "$app/paths";
-    import { GithubSolid } from "flowbite-svelte-icons";
     import ReusableModal from "$lib/components/ReusableModal.svelte";
     import { onMount } from "svelte";
     import { token } from "$lib/stores/auth";
@@ -32,12 +31,11 @@
                 );
                 token.set(jwt.token);
                 const decoded = decodeJwt(jwt.token);
-                console.log(decoded);
                 sessionStorage.token = jwt.token;
                 user.set(decoded);
                 sessionStorage.user = JSON.stringify(decoded);
             } catch (e) {
-                console.log("Token invalid or expired");
+                console.error("Token invalid or expired");
                 token.set(null);
             } finally {
                 $page.url.searchParams.delete("token");
@@ -105,7 +103,9 @@
             <FooterLink href="https://www.recrew.info/kopie-von-dsgvo"
                 >Privacy Policy</FooterLink
             >
-            <FooterLink href="https://www.recrew.info/kontakt">Contact</FooterLink>
+            <FooterLink href="https://www.recrew.info/kontakt"
+                >Contact</FooterLink
+            >
         </FooterLinkGroup>
     </Footer>
     <ReusableModal />

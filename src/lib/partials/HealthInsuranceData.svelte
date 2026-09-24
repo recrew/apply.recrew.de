@@ -12,7 +12,7 @@
 
     export let employee: any
     let insurances: any[] = []
-    $: dataComplete = employee.healthInsurance && employee.healthInsurance.insuranceName && employee.healthInsurance.insuranceNumber
+    $: dataComplete = employee.healthInsurance && employee.healthInsurance.insuranceName
         onMount(async() => {
         if(!employee.healthInsurance){
             employee.healthInsurance = {}
@@ -21,13 +21,14 @@
     })
 
     $:{
-        if($currentStep === 5) {
+        if($currentStep === 6) {
+            $blocked = !dataComplete;
             markEmptyFields();
         }
     }
 </script>
 
-<Box disabled={$blocked} title="Krankenversicherung" open={$currentStep === 5} on:open={ev => reactToBoxInteraction(ev, 5)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
+<Box disabled={$blocked || $currentStep < 6} title="Krankenversicherung" open={$currentStep === 6} on:open={ev => reactToBoxInteraction(ev, 6)} icon={dataComplete ? CheckCircleOutline : BellRingOutline}>
     {#if employee.healthInsurance}
         <div class="my-2">
             <Toggle bind:checked={employee.healthInsurance.isPublic}>Gesetzlich versichert?</Toggle>
